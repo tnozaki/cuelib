@@ -108,11 +108,21 @@ public class CueSheet
     
   }
   
+  /**
+   * Add an error message to this cue sheet.
+   * @param lineOfInput The line of input that caused the error.
+   * @param message A message describing the error.
+   */
   public void addError(LineOfInput lineOfInput, String message)
   {
     this.messages.add(new Error(lineOfInput, message));
   }
-
+  
+  /**
+   * Add a warning message to this cue sheet.
+   * @param lineOfInput The line of input that caused the warning.
+   * @param message A message describing the warning.
+   */
   public void addWarning(LineOfInput lineOfInput, String message)
   {
     this.messages.add(new Warning(lineOfInput, message));
@@ -203,6 +213,10 @@ public class CueSheet
     return messages;
   }
   
+  /**
+   * Get all track data described in this cue sheet.
+   * @return All track data associated described in this cue sheet.
+   */
   public List<TrackData> getAllTrackData()
   {
     List<TrackData> allTrackData = new ArrayList<TrackData>();
