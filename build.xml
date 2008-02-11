@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="cuelib" default="makeDist" basedir=".">
+	<property name="src" value="src"/>
+	<property name="bin" value="bin"/>
+	<property name="dist" value="dist"/>
+	<target name="compile" depends="binDir">
+		<javac srcdir="${src}" destdir="${bin}"/>
+	</target>
+	<target name="binDir">
+		<mkdir dir="${bin}"/>
+	</target>
+	<target name="distDir">
+		<mkdir dir="${bin}"/>
+	</target>
+	<target name ="makeDist" depends="distDir, compile">
+		<mkdir dir="${dist}"/>
+		<jar jarfile="${dist}/cuelib.jar" includes="**/*.class" basedir="${bin}" index="true">
+			<metainf includes="lgpl-2.1.txt" dir="${basedir}"/>
+		</jar>
+	</target>
+</project>
