@@ -82,32 +82,32 @@ public class CueParser
   private final static Pattern PATTERN_POSITION               = Pattern.compile("^(\\d*):(\\d*):(\\d*)$");
   private final static Pattern PATTERN_CATALOG_NUMBER         = Pattern.compile("^\\d{13}$");
   private final static Pattern PATTERN_FILE                   = Pattern.compile
-    ("^FILE\\s+((?:\"[^\"]+\")|\\S+)\\s+(\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
+    ("^FILE\\s+((?:\"[^\"]*\")|\\S+)\\s+(\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_CDTEXTFILE             = Pattern.compile
-    ("^CDTEXTFILE\\s+((?:\"[^\"]+\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
+    ("^CDTEXTFILE\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_FLAGS                  = Pattern.compile
     ("^FLAGS(\\s+\\w+)*\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_INDEX                  = Pattern.compile
     ("^INDEX\\s+(\\d+)\\s+(\\d*:\\d*:\\d*)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_ISRC_CODE              = Pattern.compile("^\\w{5}\\d{7}$");
   private final static Pattern PATTERN_PERFORMER              = Pattern.compile
-    ("^PERFORMER\\s+((?:\"[^\"]+\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
+    ("^PERFORMER\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_POSTGAP                = Pattern.compile
     ("^POSTGAP\\s+(\\d*:\\d*:\\d*)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_PREGAP                 = Pattern.compile
     ("^PREGAP\\s+(\\d*:\\d*:\\d*)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_REM_COMMENT            = Pattern.compile
-    ("^(REM\\s+COMMENT)\\s+((?:\"[^\"]+\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
+    ("^(REM\\s+COMMENT)\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_REM_DATE               = Pattern.compile
     ("^(REM\\s+DATE)\\s+(\\d+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_REM_DISCID             = Pattern.compile
-    ("^(REM\\s+DISCID)\\s+((?:\"[^\"]+\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
+    ("^(REM\\s+DISCID)\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_REM_GENRE              = Pattern.compile
-    ("^(REM\\s+GENRE)\\s+((?:\"[^\"]+\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
+    ("^(REM\\s+GENRE)\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_SONGWRITER             = Pattern.compile
-    ("^SONGWRITER\\s+((?:\"[^\"]+\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
+    ("^SONGWRITER\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_TITLE                  = Pattern.compile
-    ("^TITLE\\s+((?:\"[^\"]+\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
+    ("^TITLE\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_TRACK                  = Pattern.compile
     ("TRACK\\s+(\\d+)\\s+(\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
 
@@ -369,7 +369,6 @@ public class CueParser
       return false;
     }
   }
-
   
   /**
    * Parse the CATALOG command.
@@ -428,8 +427,8 @@ public class CueParser
       /*
        *  This is a silly rule that is very commonly broken. Hence, we don't enforce it.
        *  
-       *  Check to see if FILE is the first command in the sheet. (Technically, we should also check
-       *  for REM commands, but we don't keep track of all of those.)
+       *  Check to see if FILE is the first command in the sheet, except for CATALOG. (Technically, we should
+       *  also check for REM commands, but we don't keep track of all of those.)
        *  
       if (  input.getAssociatedSheet().getFileData().size()==0
          && (  input.getAssociatedSheet().getCdTextFile() != null
@@ -447,7 +446,14 @@ public class CueParser
       }
        */
       
-      input.getAssociatedSheet().getFileData().add(new FileData(fileMatcher.group(1), fileMatcher.group(2)));
+      // If the file name is enclosed in quotes, remove those. 
+      String file = fileMatcher.group(1);
+      if (file.length() > 0 && file.charAt(0)=='"' && file.charAt(file.length()-1)=='"')
+      {
+        file = file.substring(1, file.length()-1);
+      }
+      
+      input.getAssociatedSheet().getFileData().add(new FileData(file, fileMatcher.group(2)));
     }
     else
     {
@@ -474,7 +480,14 @@ public class CueParser
         input.getAssociatedSheet().addWarning(input, WARNING_DATUM_APPEARS_TOO_OFTEN);
       }
       
-      input.getAssociatedSheet().setCdTextFile(cdTextFileMatcher.group(1));
+      // If the file name is enclosed in quotes, remove those. 
+      String file = cdTextFileMatcher.group(1);
+      if (file.length() > 0 && file.charAt(0)=='"' && file.charAt(file.length()-1)=='"')
+      {
+        file = file.substring(1, file.length()-1);
+      }
+      
+      input.getAssociatedSheet().setCdTextFile(file);
     }
     else
     {
@@ -1208,7 +1221,8 @@ public class CueParser
         {
           public boolean accept(File file)
           {
-            return file.getName().substring(file.getName().length() - 4).equalsIgnoreCase(".cue");
+            return file.getName().length() >= 4
+              && file.getName().substring(file.getName().length() - 4).equalsIgnoreCase(".cue");
           }
         };
       
@@ -1231,6 +1245,8 @@ public class CueParser
         {
           System.out.println(message);
         }
+        
+        System.out.println((new CueSheetSerializer()).serializeCueSheet(sheet));
       }
     }
     catch(Exception e)
