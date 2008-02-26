@@ -1217,6 +1217,8 @@ public class CueParser
     
     try
     {
+      CueSheetToXmlSerializer xmlSerializer = new CueSheetToXmlSerializer();
+      
       FileFilter cueFilter = new FileFilter()
         {
           public boolean accept(File file)
@@ -1247,6 +1249,7 @@ public class CueParser
         }
         
         System.out.println((new CueSheetSerializer()).serializeCueSheet(sheet));
+        xmlSerializer.serializeCueSheet(sheet, System.out);
       }
     }
     catch(Exception e)
