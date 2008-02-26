@@ -49,7 +49,7 @@ public class CueSheetSerializer
    * of this method is not necessarily identical to the parsed sheet, though it will contain the
    * same data. Fields may appear in a different order, whitespace may change, comments may be
    * gone, etc.
-   * @param cueSheet The CueSheet to serialize.
+   * @param cueSheet
    * @return A textual representation of the cue sheet. 
    */
   public String serializeCueSheet(CueSheet cueSheet)
