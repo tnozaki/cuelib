@@ -1,6 +1,6 @@
 /*
  * Cuelib library for manipulating cue sheets.
- * Copyright (C) 2007 Jan-Willem van den Broek
+ * Copyright (C) 2007-2008 Jan-Willem van den Broek
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -421,7 +421,15 @@ public class CueParser
     {
       if (!COMPLIANT_FILE_TYPES.contains(fileMatcher.group(2)))
       {
-        input.getAssociatedSheet().addWarning(input, WARNING_NONCOMPLIANT_FILE_TYPE);
+        if (COMPLIANT_FILE_TYPES.contains(fileMatcher.group(2).toUpperCase()))
+        {
+          input.getAssociatedSheet().addWarning(input, WARNING_TOKEN_NOT_UPPERCASE);
+        }
+        else
+        {
+          input.getAssociatedSheet().addWarning(input, WARNING_NONCOMPLIANT_FILE_TYPE);
+        }
+          
       }
       
       /*
@@ -453,7 +461,11 @@ public class CueParser
         file = file.substring(1, file.length()-1);
       }
       
-      input.getAssociatedSheet().getFileData().add(new FileData(file, fileMatcher.group(2)));
+      input.getAssociatedSheet().getFileData().add  ( new FileData  ( input.getAssociatedSheet()
+                                                                    , file
+                                                                    , fileMatcher.group(2).toUpperCase()
+                                                                    )
+                                                    );
     }
     else
     {
@@ -1110,7 +1122,8 @@ public class CueParser
         input.getAssociatedSheet().addWarning(input, WARNING_INVALID_TRACK_NUMBER);
       }
       
-      getLastFileData(input).getTrackData().add(new TrackData(trackNumber, dataType));
+      FileData lastFileData = getLastFileData(input);
+      lastFileData.getTrackData().add(new TrackData(lastFileData, trackNumber, dataType));
     }
     else
     {
@@ -1178,11 +1191,12 @@ public class CueParser
    */
   private static TrackData getLastTrackData(LineOfInput input)
   {
-    List<TrackData> trackDataList = getLastFileData(input).getTrackData();
+    FileData lastFileData = getLastFileData(input);
+    List<TrackData> trackDataList = lastFileData.getTrackData();
 
     if (trackDataList.size()==0)
     {
-      trackDataList.add(new TrackData());
+      trackDataList.add(new TrackData(lastFileData));
       input.getAssociatedSheet().addWarning(input, WARNING_NO_TRACK_SPECIFIED);
     }
 
@@ -1200,7 +1214,7 @@ public class CueParser
     
     if (fileDataList.size()==0)
     {
-      fileDataList.add(new FileData());
+      fileDataList.add(new FileData(input.getAssociatedSheet()));
       input.getAssociatedSheet().addWarning(input, WARNING_NO_FILE_SPECIFIED);
     }
 
