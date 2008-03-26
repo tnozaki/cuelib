@@ -1,6 +1,6 @@
 /*
  * Cuelib library for manipulating cue sheets.
- * Copyright (C) 2007 Jan-Willem van den Broek
+ * Copyright (C) 2007-2008 Jan-Willem van den Broek
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,13 +30,16 @@ public class FileData
   private List<TrackData> trackData = new ArrayList<TrackData>();
   private String file = null;
   private String fileType = null;
+  private CueSheet parent;
   
-  public FileData()
+  public FileData(CueSheet parent)
   {
+    this.parent = parent;
   }
   
-  public FileData(String file, String fileType)
+  public FileData(CueSheet parent, String file, String fileType)
   {
+    this.parent = parent;
     this.file = file;
     this.fileType = fileType;
   }
@@ -87,5 +90,21 @@ public class FileData
     }
     
     return allIndices;
+  }
+
+  /**
+   * @return the parent
+   */
+  public CueSheet getParent()
+  {
+    return parent;
+  }
+
+  /**
+   * @param parent the parent to set
+   */
+  public void setParent(CueSheet parent)
+  {
+    this.parent = parent;
   }
 }

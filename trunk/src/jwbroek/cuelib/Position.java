@@ -1,6 +1,6 @@
 /*
  * Cuelib library for manipulating cue sheets.
- * Copyright (C) 2007 Jan-Willem van den Broek
+ * Copyright (C) 2007-2008 Jan-Willem van den Broek
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,6 +37,16 @@ public class Position
     this.minutes = minutes;
     this.seconds = seconds;
     this.frames = frames;
+  }
+  
+  /**
+   * Get the total number of frames represented by this position. This is equal to
+   * frames + (75 * (seconds + 60 * minutes)).
+   * @return The total number of frames represented by this position.
+   */
+  public int getTotalFrames()
+  {
+    return frames + (75 * (seconds + 60 * minutes));
   }
   
   /**

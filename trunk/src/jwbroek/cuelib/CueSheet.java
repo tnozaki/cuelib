@@ -1,6 +1,6 @@
 /*
  * Cuelib library for manipulating cue sheets.
- * Copyright (C) 2007 Jan-Willem van den Broek
+ * Copyright (C) 2007-2008 Jan-Willem van den Broek
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,27 @@ import java.util.List;
  */
 public class CueSheet
 {
+  public enum MetaDataField
+  {
+    ALBUMPERFORMER,
+    ALBUMSONGWRITER,
+    ALBUMTITLE,
+    CATALOG,
+    CDTEXTFILE,
+    COMMENT,
+    DISCID,
+    GENRE,
+    ISRCCODE,
+    PERFORMER,
+    SONGWRITER,
+    TITLE,
+    TRACKNUMBER,
+    TRACKPERFORMER,
+    TRACKSONGWRITER,
+    TRACKTITLE,
+    YEAR
+  }
+  
   private List<Message> messages = new ArrayList<Message>();
   private List<FileData> fileData = new ArrayList<FileData>();
   private String catalog = null;
@@ -38,6 +59,44 @@ public class CueSheet
   private int year = -1;
   private String discid = null;
   private String genre = null;
+  
+  /**
+   * Convenience method for getting metadata from the cue sheet. If a certain metadata field is not set, the method
+   * will return the empty string. When a field is ambiguous (such as the track number on a cue sheet instead of on a
+   * specific track), an IllegalArgumentException will be thrown. Otherwise, this method will attempt to give a sensible
+   * answer, possibly by searching through the cue sheet.
+   * @param metaDataField
+   * @return The specified metadata.
+   */
+  public String getMetaData(MetaDataField metaDataField) throws IllegalArgumentException
+  {
+    switch (metaDataField)
+    {
+      case CATALOG:
+        return this.getCatalog()==null?"":this.getCatalog();
+      case CDTEXTFILE:
+        return this.getCdTextFile()==null?"":this.getCdTextFile();
+      case COMMENT:
+        return this.getComment()==null?"":this.getComment();
+      case DISCID:
+        return this.getDiscid()==null?"":this.getDiscid();
+      case GENRE:
+        return this.getGenre()==null?"":this.getGenre();
+      case PERFORMER:
+      case ALBUMPERFORMER:
+        return this.getPerformer()==null?"":this.getPerformer();
+      case SONGWRITER:
+      case ALBUMSONGWRITER:
+        return this.getSongwriter()==null?"":this.getSongwriter();
+      case TITLE:
+      case ALBUMTITLE:
+        return this.getTitle()==null?"":this.getTitle();
+      case YEAR:
+        return this.getYear()==-1?"":""+this.getYear();
+      default:
+        throw new IllegalArgumentException();
+    }
+  }
   
   /**
    * @return the discid
@@ -105,7 +164,7 @@ public class CueSheet
 
   public CueSheet()
   {
-    
+    // Intentionally empty.
   }
   
   /**

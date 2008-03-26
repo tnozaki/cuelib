@@ -1,6 +1,6 @@
 /*
  * Cuelib library for manipulating cue sheets.
- * Copyright (C) 2007 Jan-Willem van den Broek
+ * Copyright (C) 2007-2008 Jan-Willem van den Broek
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import jwbroek.cuelib.CueSheet.MetaDataField;
+
 /**
  * Simple representation of a TRACK block of a cue sheet.
  * @author jwbroek
@@ -39,17 +41,53 @@ public class TrackData
   private Position pregap = null;
   private Position postgap = null;
   private String songwriter = null;
+  private FileData parent = null;
   
-  public TrackData()
+  public TrackData(FileData parent)
   {
+    this.parent = parent;
   }
   
-  public TrackData(int number, String dataType)
+  public TrackData(FileData parent, int number, String dataType)
   {
+    this.parent = parent;
     this.number = number;
     this.dataType = dataType;
   }
   
+  /**
+   * Convenience method for getting metadata from the cue sheet. If a certain metadata field is not set, the method
+   * will return the empty string. When a field is ambiguous (such as the track number on a cue sheet instead of on a
+   * specific track), an IllegalArgumentException will be thrown. Otherwise, this method will attempt to give a sensible
+   * answer, possibly by searching through the cue sheet.
+   * @param metaDataField
+   * @return The specified metadata.
+   */
+  public String getMetaData(MetaDataField metaDataField) throws IllegalArgumentException
+  {
+    switch (metaDataField)
+    {
+      case ISRCCODE:
+        return this.getIsrcCode()==null?"":this.getIsrcCode();
+      case PERFORMER:
+        return this.getPerformer()==null?this.getParent().getParent().getPerformer():this.getPerformer();
+      case TRACKPERFORMER:
+        return this.getPerformer()==null?"":this.getPerformer();
+      case SONGWRITER:
+        return this.getSongwriter()==null?this.getParent().getParent().getSongwriter():this.getSongwriter();
+      case TRACKSONGWRITER:
+        return this.getSongwriter();
+      case TITLE:
+        return this.getTitle()==null?this.getParent().getParent().getTitle():this.getTitle();
+      case TRACKTITLE:
+        return this.getTitle();
+      case TRACKNUMBER:
+        return "" + this.getNumber();
+      default:
+        return this.getParent().getParent().getMetaData(metaDataField);
+    }
+  }
+
   /**
    * @return the dataType
    */
@@ -162,6 +200,25 @@ public class TrackData
   {
     this.title = title;
   }
+  
+  /**
+   * Get the index with the specified number, or null if there is no such index. The current implementation is
+   * unnecessarily inefficient if the indices are ordered. Currently, this is not enforced.
+   * @param number
+   * @return The index with the specified number, or null if there is no such index.
+   */
+  public Index getIndex(int number)
+  {
+    for (Index index : this.indices)
+    {
+      if (index.getNumber()==number)
+      {
+        return index;
+      }
+    }
+    return null;
+  }
+  
   /**
    * @return the indices
    */
@@ -175,5 +232,21 @@ public class TrackData
   public Set<String> getFlags()
   {
     return flags;
+  }
+
+  /**
+   * @return the parent
+   */
+  public FileData getParent()
+  {
+    return parent;
+  }
+
+  /**
+   * @param parent the parent to set
+   */
+  public void setParent(FileData parent)
+  {
+    this.parent = parent;
   }
 }
