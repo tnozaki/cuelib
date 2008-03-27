@@ -31,6 +31,7 @@ public class StreamPiper implements Runnable
 {
   private InputStream from;
   private OutputStream to;
+  private boolean closeOutput;
   
   /**
    * Pipe all input from the InputStream to the OutputStream. The OutputStream is explicitly allowed to be null.
@@ -41,8 +42,22 @@ public class StreamPiper implements Runnable
    */
   public StreamPiper(InputStream from, OutputStream to)
   {
+    this(from, to, false);
+  }
+  
+  /**
+   * Pipe all input from the InputStream to the OutputStream. The OutputStream is explicitly allowed to be null.
+   * In such a case, all input will be discarded. In any case, the OutputStream will only be closed by StreamPiper if
+   * this is requested, while the InputStream will always be, once its end is reached.
+   * @param from
+   * @param to
+   * @param closeOutput
+   */
+  public StreamPiper(InputStream from, OutputStream to, boolean closeOutput)
+  {
     this.from = from;
     this.to = to;
+    this.closeOutput = closeOutput;
   }
   
   /**
@@ -75,6 +90,17 @@ public class StreamPiper implements Runnable
       catch (IOException e)
       {
         // Nothing we can do.
+      }
+      if (this.closeOutput && this.to != null)
+      {
+        try
+        {
+          this.to.close();
+        }
+        catch (IOException e)
+        {
+          // Nothing we can do.
+        }
       }
     }
   }
