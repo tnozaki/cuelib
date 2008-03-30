@@ -541,12 +541,17 @@ public class TrackCutter
       {
         switch (currentChar)
         {
-          // No slashes or backslashes.
+          // These characters are likely to be troublesome in file names.
           case '/':
           case '\\':
+          case ':':
+          case '*':
+          case '?':
+          case '"':
+          case '|':
             builder.append('_');
             break;
-          // Everything else should be okay.
+          // Everything else should be okay on modern file system.
           default:
             builder.append(currentChar);
             break;
