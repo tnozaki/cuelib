@@ -37,6 +37,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import jwbroek.cuelib.CueParser;
 import jwbroek.cuelib.CueSheet;
 import jwbroek.cuelib.FileData;
+import jwbroek.cuelib.Index;
 import jwbroek.cuelib.Position;
 import jwbroek.cuelib.TrackData;
 import jwbroek.io.StreamPiper;
@@ -72,6 +73,7 @@ public class TrackCutter
     // Set defaults and control variables.
     String targetFileNameTemplate = DEFAULT_FILENAME;
     String processTemplate = DEFAULT_POSTPROCESSOR_COMMAND;
+    String processPregapTemplate = null;
     String pregapFileNameTemplate = null;
     boolean pregapInSameFile = false;
     boolean redirectErr = false;
@@ -121,9 +123,11 @@ public class TrackCutter
       else if ("-pgs".equals(args[index]))
       {
         // Pregap comes in a separate file.
-        if (++index < maxParam)
+        index += 2;
+        if (index < maxParam)
         {
-          pregapFileNameTemplate = args[index];
+          pregapFileNameTemplate = args[index-1];
+          processPregapTemplate = args[index];
           pregapInSameFile = false;
         }
         else
@@ -155,6 +159,7 @@ public class TrackCutter
                               , targetFileNameTemplate
                               , processTemplate
                               , pregapFileNameTemplate
+                              , processPregapTemplate
                               , redirectErr
                               , redirectStdOut
                               );
@@ -170,6 +175,7 @@ public class TrackCutter
     , String targetFileNameTemplate
     , String processTemplate
     , String pregapFileNameTemplate
+    , String processPregapTemplate
     , boolean redirectErr
     , boolean redirectStdOut
     ) throws IOException
@@ -196,6 +202,7 @@ public class TrackCutter
                         , targetFileNameTemplate
                         , processTemplate
                         , pregapFileNameTemplate
+                        , processPregapTemplate
                         , redirectErr
                         , redirectStdOut
                         );
@@ -217,6 +224,7 @@ public class TrackCutter
                                       , String targetFileNameTemplate
                                       , String processTemplate
                                       , String pregapFileNameTemplate
+                                      , String processPregapTemplate
                                       , boolean redirectErr
                                       , boolean redirectStdOut
                                       ) throws IOException, UnsupportedAudioFileException
@@ -237,9 +245,6 @@ public class TrackCutter
       // Sadly, we can't do much with the file type information from the cue sheet, as javax.sound.sampled
       // needs more information before it can process a specific type of sound file. Best then to let it
       // determine all aspects of the audio type by itself.
-      AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(audioFile);
-      AudioFormat audioFormat = audioFileFormat.getFormat();
-  
       audioInputStream = AudioSystem.getAudioInputStream(audioFile);
       
       // Process all tracks in turn.
@@ -249,26 +254,101 @@ public class TrackCutter
       {
         TrackData currentTrack = trackList.get(trackIndex);
         
-        long fromFramePos = getAudioFormatFrames(currentTrack.getIndex(1).getPosition(), audioFormat);
-        long toFramePos = audioInputStream.getFrameLength();
-  
-        if (trackIndex + 1 < trackList.size())
+        if (currentTrack.getIndex(0)==null || pregapFileNameTemplate==null)
         {
-          toFramePos = getAudioFormatFrames(trackList.get(trackIndex + 1).getIndex(1).getPosition(), audioFormat);
+          // No pregap track, or we're not interested in it.
+          Position nextPosition = null;
+          if (trackIndex + 1 < trackList.size())
+          {
+            Index nextIndex = trackList.get(trackIndex + 1).getIndex(0);
+            if (nextIndex==null)
+            {
+              nextIndex = trackList.get(trackIndex + 1).getIndex(1);
+            }
+            nextPosition = nextIndex.getPosition();
+          }
+          currentFramePos = createFileFromPartialAudioStream  ( currentTrack
+                                                              , audioInputStream
+                                                              , currentFramePos
+                                                              , currentTrack.getIndex(1).getPosition()
+                                                              , nextPosition
+                                                              , targetFileNameTemplate
+                                                              , cueFile.getParentFile()
+                                                              , processTemplate
+                                                              , redirectStdOut
+                                                              , redirectErr
+                                                              );
         }
-        
-        audioInputStream.skip((fromFramePos - currentFramePos) * audioFormat.getFrameSize());
-        currentFramePos = toFramePos;
-        AudioInputStream partialAudioInputStream = new AudioInputStream(audioInputStream, audioFormat, toFramePos - fromFramePos);
-        
-        createFile  ( currentTrack
-                    , partialAudioInputStream
-                    , targetFileNameTemplate
-                    , cueFile.getParentFile()
-                    , processTemplate
-                    , redirectStdOut
-                    , redirectErr
-                    );
+        else
+        {
+          // We have a pregap track.
+          if (targetFileNameTemplate.equals(pregapFileNameTemplate))
+          {
+            // Prepend pregap.
+            
+            Position nextPosition = null;
+            if (trackIndex + 1 < trackList.size())
+            {
+              Index nextIndex = trackList.get(trackIndex + 1).getIndex(0);
+              if (nextIndex==null)
+              {
+                nextIndex = trackList.get(trackIndex + 1).getIndex(1);
+              }
+              nextPosition = nextIndex.getPosition();
+            }
+            currentFramePos = createFileFromPartialAudioStream  ( currentTrack
+                                                                , audioInputStream
+                                                                , currentFramePos
+                                                                , currentTrack.getIndex(0).getPosition()
+                                                                , nextPosition
+                                                                , pregapFileNameTemplate
+                                                                , cueFile.getParentFile()
+                                                                , processPregapTemplate
+                                                                , redirectStdOut
+                                                                , redirectErr
+                                                                );
+          }
+          else
+          {
+            // Pregap in separate file.
+            
+            // Handle pregap.
+            currentFramePos = createFileFromPartialAudioStream  ( currentTrack
+                                                                , audioInputStream
+                                                                , currentFramePos
+                                                                , currentTrack.getIndex(0).getPosition()
+                                                                , currentTrack.getIndex(1).getPosition()
+                                                                , pregapFileNameTemplate
+                                                                , cueFile.getParentFile()
+                                                                , processPregapTemplate
+                                                                , redirectStdOut
+                                                                , redirectErr
+                                                                );
+            
+            // Handle regular file.
+            Position nextPosition = null;
+            if (trackIndex + 1 < trackList.size())
+            {
+              Index nextIndex = trackList.get(trackIndex + 1).getIndex(0);
+              if (nextIndex==null)
+              {
+                nextIndex = trackList.get(trackIndex + 1).getIndex(1);
+              }
+              nextPosition = nextIndex.getPosition();
+            }
+            currentFramePos = createFileFromPartialAudioStream  ( currentTrack
+                                                                , audioInputStream
+                                                                , currentFramePos
+                                                                , currentTrack.getIndex(1).getPosition()
+                                                                , nextPosition
+                                                                , targetFileNameTemplate
+                                                                , cueFile.getParentFile()
+                                                                , processTemplate
+                                                                , redirectStdOut
+                                                                , redirectErr
+                                                                );
+          }
+        }
       }
     }
     finally
@@ -285,6 +365,40 @@ public class TrackCutter
         }
       }
     }
+  }
+  
+  private static long createFileFromPartialAudioStream  ( TrackData trackData
+                                                        , AudioInputStream audioInputStream
+                                                        , long currentFramePos
+                                                        , Position currentPosition
+                                                        , Position nextPosition
+                                                        , String targetFileNameTemplate
+                                                        , File parentDir
+                                                        , String processTemplate
+                                                        , boolean redirectStdOut
+                                                        , boolean redirectErr 
+                                                        ) throws IOException
+  {
+    long fromFramePos = getAudioFormatFrames(currentPosition, audioInputStream.getFormat());
+    long toFramePos = audioInputStream.getFrameLength();
+
+    if (nextPosition != null)
+    {
+      toFramePos = getAudioFormatFrames(nextPosition, audioInputStream.getFormat());
+    }
+    
+    audioInputStream.skip((fromFramePos - currentFramePos) * audioInputStream.getFormat().getFrameSize());
+    
+    createFile  ( trackData
+                , new AudioInputStream(audioInputStream, audioInputStream.getFormat(), toFramePos - fromFramePos)
+                , targetFileNameTemplate
+                , parentDir
+                , processTemplate
+                , redirectStdOut
+                , redirectErr
+                );
+    
+    return toFramePos;
   }
   
   private static void createFile  ( TrackData trackData
@@ -385,25 +499,15 @@ public class TrackCutter
   private static void pipeStream(InputStream in, String fileName) throws IOException
   {
     OutputStream out = null;
-    try
+    if (fileName!=null)
     {
-      if (fileName!=null)
-      {
-        out = new FileOutputStream(fileName + ".out");
-      }
-      new Thread(new StreamPiper(in, out, true)).start();
+      out = new FileOutputStream(fileName);
     }
-    finally
-    {
-      if (out!=null)
-      {
-        out.close();
-      }
-    }
+    new Thread(new StreamPiper(in, out, true)).start();
   }
   
   /**
-   * Get the number of AudioFormat frames represented by the specified Position. Not an AudioFormat frame may
+   * Get the number of AudioFormat frames represented by the specified Position. Note that an AudioFormat frame may
    * represent a longer or shorter time than a cue sheet frame. 
    * @param position
    * @param audioFileFormat
