@@ -18,17 +18,14 @@
  */
 package jwbroek.cuelib.tools;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -37,150 +34,35 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import jwbroek.cuelib.CueParser;
 import jwbroek.cuelib.CueSheet;
 import jwbroek.cuelib.FileData;
-import jwbroek.cuelib.Index;
 import jwbroek.cuelib.Position;
 import jwbroek.cuelib.TrackData;
 import jwbroek.io.StreamPiper;
-import jwbroek.util.StringReplacer;
 
 public class TrackCutter
 {
-  public static final StringReplacer templateReplacer =
-    new StringReplacer(getHumanReadableToFormatStringReplacements());
-
-  public static final String DEFAULT_FILENAME = "<artist>_<album>_<track>_<title>.mp3";
-  public static final String DEFAULT_POSTPROCESSOR_COMMAND =
-    "c:\\lame\\lame.exe --vbr-new -V 0 -t --tt \"<title>\" --ta \"<artist>\" --tl \"<album>\" --ty \"<year>\" --tc \"<comment>\" --tn \"<track>\" --tg \"<genre>\" - \"<targetFile>\""; 
-  
-  private static void printHelp()
+  public enum PregapHandling
   {
-    // TODO
+    PREPEND,
+    DISCARD,
+    SEPARATE
+  };
+  
+  public TrackCutterConfiguration configuration;
+  
+  public TrackCutter(TrackCutterConfiguration configuration)
+  {
+    this.configuration = configuration;
   }
   
-  /**
-   * @param args
-   */
-  public static void main(String[] args)
-  {
-    // Make sure we have arguments.
-    if (args.length == 0)
-    {
-      // TODO!
-      printHelp();
-      System.exit(1);
-    }
-    
-    // Set defaults and control variables.
-    String targetFileNameTemplate = DEFAULT_FILENAME;
-    String processTemplate = DEFAULT_POSTPROCESSOR_COMMAND;
-    String processPregapTemplate = null;
-    String pregapFileNameTemplate = null;
-    boolean pregapInSameFile = false;
-    boolean redirectErr = false;
-    boolean redirectStdOut = false;
-    
-    // Last argument must be a cue file.
-    File cueFile = new File(args[args.length - 1]);
-    
-    // Parse remaining arguments.
-    int maxParam = args.length - 1;
-    for (int index = 0; index < maxParam; index++)
-    {
-      if ("-f".equals(args[index]))
-      {
-        if (++index < maxParam)
-        {
-          targetFileNameTemplate = args[index];
-        }
-        else
-        {
-          printHelp();
-        }
-      }
-      else if ("-p".equals(args[index]))
-      {
-        if (++index < maxParam)
-        {
-          processTemplate = args[index];
-        }
-        else
-        {
-          printHelp();
-        }
-      }
-      else if ("-pgd".equals(args[index]))
-      {
-        // Discard pregap
-        pregapFileNameTemplate = null;
-        pregapInSameFile = false;
-      }
-      else if ("-pgk".equals(args[index]))
-      {
-        // Keep pregap
-        pregapFileNameTemplate = null;
-        pregapInSameFile = true;
-      }
-      else if ("-pgs".equals(args[index]))
-      {
-        // Pregap comes in a separate file.
-        index += 2;
-        if (index < maxParam)
-        {
-          pregapFileNameTemplate = args[index-1];
-          processPregapTemplate = args[index];
-          pregapInSameFile = false;
-        }
-        else
-        {
-          printHelp();
-        }
-      }
-      else if ("-re".equals(args[index]))
-      {
-        // Redirect errors.
-        redirectErr = true;
-      }
-      else if ("-ro".equals(args[index]))
-      {
-        // Redirect standard out.
-        redirectStdOut = true;
-      }
-    }
-    
-    // If pregap should come in the same file, then pregapFileNameTemplate should be equal to targetFileNameTemplate.
-    if (pregapInSameFile)
-    {
-      pregapFileNameTemplate = targetFileNameTemplate;
-    }
-    
-    try
-    {
-      processFilesInCueSheet  ( cueFile
-                              , targetFileNameTemplate
-                              , processTemplate
-                              , pregapFileNameTemplate
-                              , processPregapTemplate
-                              , redirectErr
-                              , redirectStdOut
-                              );
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-    }
-  }
-  
-  public static void processFilesInCueSheet
-    ( File cueFile
-    , String targetFileNameTemplate
-    , String processTemplate
-    , String pregapFileNameTemplate
-    , String processPregapTemplate
-    , boolean redirectErr
-    , boolean redirectStdOut
-    ) throws IOException
+  public void cutTracksInCueSheet(File cueFile) throws IOException
   {
     CueSheet cueSheet = null;
+    
+    // If no parent directory specified, then set the parent directory of the cue file.
+    if (this.configuration.getParentDirectory()==null)
+    {
+      this.configuration.setParentDirectory(cueFile.getParentFile());
+    }
     
     try
     {
@@ -196,16 +78,7 @@ public class TrackCutter
     {
       try
       {
-        processFileData ( fileData
-                        , cueSheet
-                        , cueFile
-                        , targetFileNameTemplate
-                        , processTemplate
-                        , pregapFileNameTemplate
-                        , processPregapTemplate
-                        , redirectErr
-                        , redirectStdOut
-                        );
+        cutTracksInFileData(fileData);
       }
       catch (UnsupportedAudioFileException e)
       {
@@ -218,290 +91,200 @@ public class TrackCutter
     }
   }
   
-  private static void processFileData ( FileData fileData
-                                      , CueSheet cueSheet
-                                      , File cueFile
-                                      , String targetFileNameTemplate
-                                      , String processTemplate
-                                      , String pregapFileNameTemplate
-                                      , String processPregapTemplate
-                                      , boolean redirectErr
-                                      , boolean redirectStdOut
-                                      ) throws IOException, UnsupportedAudioFileException
+  private void addProcessActions(TrackData trackData, Position nextPosition, List<TrackCutterProcessingAction> processActions)
+  {
+    if (trackData.getIndex(0) == null)
+    {
+      // No pregap to handle. Just process this track.
+      processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, this.configuration));
+    }
+    else
+    {
+      switch (configuration.getPregapHandling())
+      {
+        case DISCARD:
+          // Discard the pregap, process the track.
+          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, this.configuration));
+          break;
+        case PREPEND:
+          // Prepend the pregap.
+          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), nextPosition, trackData, false, this.configuration));
+          break;
+        case SEPARATE:
+          // Add pregap and track as separate tracks.
+          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), trackData.getIndex(1).getPosition(), trackData, true, this.configuration));
+          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, this.configuration));
+          break;
+      }
+    }
+  }
+  
+  private List<TrackCutterProcessingAction> getProcessActionList(FileData fileData)
+  {
+    List<TrackCutterProcessingAction> result = new ArrayList<TrackCutterProcessingAction>();
+    TrackData previousTrackData = null;
+    
+    // Process all tracks in turn.
+    for (TrackData currentTrackData : fileData.getTrackData())
+    {
+      if (previousTrackData != null)
+      {
+        if (currentTrackData.getIndex(0) != null)
+        {
+          addProcessActions(previousTrackData, currentTrackData.getIndex(0).getPosition(), result);
+        }
+        else
+        {
+          addProcessActions(previousTrackData, currentTrackData.getIndex(1).getPosition(), result);
+        }
+      }
+      previousTrackData = currentTrackData;
+    }
+    
+    // Handle last track, if any.
+    if (previousTrackData != null)
+    {
+      addProcessActions(previousTrackData, null, result);
+    }
+    
+    return result;
+  }
+  
+  private void cutTracksInFileData(FileData fileData)
+    throws IOException, UnsupportedAudioFileException
   {
     AudioInputStream audioInputStream = null;
     
     try
     {
       // Determine the complete path to the audio file.
-      File audioFile = new File(fileData.getFile());
-      if (audioFile.getParent()==null)
-      {
-        // Use the directory of the cue file as the directory of the audio file.
-        audioFile = new File(cueFile.getParent(), fileData.getFile());
-      }
+      File audioFile = this.configuration.getAudioFile(fileData);
       
-      // Determine the properties of the audio file.
+      // Open the audio file.
       // Sadly, we can't do much with the file type information from the cue sheet, as javax.sound.sampled
       // needs more information before it can process a specific type of sound file. Best then to let it
       // determine all aspects of the audio type by itself.
       audioInputStream = AudioSystem.getAudioInputStream(audioFile);
       
-      // Process all tracks in turn.
-      List<TrackData> trackList = fileData.getTrackData();
-      long currentFramePos = 0;
-      for (int trackIndex = 0; trackIndex < trackList.size(); trackIndex++)
+      // Current position in terms of the frames as per audioInputStream.getFrameLength().
+      // Note that these frames need not be equal to cue sheet frames.
+      long currentAudioFramePos = 0;
+      
+      // Process tracks.
+      for (TrackCutterProcessingAction processAction : getProcessActionList(fileData))
       {
-        TrackData currentTrack = trackList.get(trackIndex);
-        
-        if (currentTrack.getIndex(0)==null || pregapFileNameTemplate==null)
-        {
-          // No pregap track, or we're not interested in it.
-          Position nextPosition = null;
-          if (trackIndex + 1 < trackList.size())
-          {
-            Index nextIndex = trackList.get(trackIndex + 1).getIndex(0);
-            if (nextIndex==null)
-            {
-              nextIndex = trackList.get(trackIndex + 1).getIndex(1);
-            }
-            nextPosition = nextIndex.getPosition();
-          }
-          currentFramePos = createFileFromPartialAudioStream  ( currentTrack
-                                                              , audioInputStream
-                                                              , currentFramePos
-                                                              , currentTrack.getIndex(1).getPosition()
-                                                              , nextPosition
-                                                              , targetFileNameTemplate
-                                                              , cueFile.getParentFile()
-                                                              , processTemplate
-                                                              , redirectStdOut
-                                                              , redirectErr
-                                                              );
-        }
-        else
-        {
-          // We have a pregap track.
-          if (targetFileNameTemplate.equals(pregapFileNameTemplate))
-          {
-            // Prepend pregap.
-            
-            Position nextPosition = null;
-            if (trackIndex + 1 < trackList.size())
-            {
-              Index nextIndex = trackList.get(trackIndex + 1).getIndex(0);
-              if (nextIndex==null)
-              {
-                nextIndex = trackList.get(trackIndex + 1).getIndex(1);
-              }
-              nextPosition = nextIndex.getPosition();
-            }
-            currentFramePos = createFileFromPartialAudioStream  ( currentTrack
-                                                                , audioInputStream
-                                                                , currentFramePos
-                                                                , currentTrack.getIndex(0).getPosition()
-                                                                , nextPosition
-                                                                , pregapFileNameTemplate
-                                                                , cueFile.getParentFile()
-                                                                , processPregapTemplate
-                                                                , redirectStdOut
-                                                                , redirectErr
-                                                                );
-          }
-          else
-          {
-            // Pregap in separate file.
-            
-            // Handle pregap.
-            currentFramePos = createFileFromPartialAudioStream  ( currentTrack
-                                                                , audioInputStream
-                                                                , currentFramePos
-                                                                , currentTrack.getIndex(0).getPosition()
-                                                                , currentTrack.getIndex(1).getPosition()
-                                                                , pregapFileNameTemplate
-                                                                , cueFile.getParentFile()
-                                                                , processPregapTemplate
-                                                                , redirectStdOut
-                                                                , redirectErr
-                                                                );
-            
-            // Handle regular file.
-            Position nextPosition = null;
-            if (trackIndex + 1 < trackList.size())
-            {
-              Index nextIndex = trackList.get(trackIndex + 1).getIndex(0);
-              if (nextIndex==null)
-              {
-                nextIndex = trackList.get(trackIndex + 1).getIndex(1);
-              }
-              nextPosition = nextIndex.getPosition();
-            }
-            currentFramePos = createFileFromPartialAudioStream  ( currentTrack
-                                                                , audioInputStream
-                                                                , currentFramePos
-                                                                , currentTrack.getIndex(1).getPosition()
-                                                                , nextPosition
-                                                                , targetFileNameTemplate
-                                                                , cueFile.getParentFile()
-                                                                , processTemplate
-                                                                , redirectStdOut
-                                                                , redirectErr
-                                                                );
-          }
-        }
+        currentAudioFramePos = performProcessAction
+          ( processAction
+          , audioInputStream
+          , currentAudioFramePos
+          );
       }
     }
     finally
     {
       if (audioInputStream!=null)
       {
-        try
-        {
-          audioInputStream.close();
-        }
-        catch (IOException e)
-        {
-          // Nothing we can do about this.
-        }
+        // Don't handle exceptions, as there's really nothing we can do about them.
+        audioInputStream.close();
       }
     }
   }
   
-  private static long createFileFromPartialAudioStream  ( TrackData trackData
-                                                        , AudioInputStream audioInputStream
-                                                        , long currentFramePos
-                                                        , Position currentPosition
-                                                        , Position nextPosition
-                                                        , String targetFileNameTemplate
-                                                        , File parentDir
-                                                        , String processTemplate
-                                                        , boolean redirectStdOut
-                                                        , boolean redirectErr 
-                                                        ) throws IOException
+  private long skipToPosition ( Position toPosition
+                              , AudioInputStream audioInputStream
+                              , long currentAudioFramePos
+                              ) throws IOException
   {
-    long fromFramePos = getAudioFormatFrames(currentPosition, audioInputStream.getFormat());
-    long toFramePos = audioInputStream.getFrameLength();
-
-    if (nextPosition != null)
-    {
-      toFramePos = getAudioFormatFrames(nextPosition, audioInputStream.getFormat());
-    }
-    
-    audioInputStream.skip((fromFramePos - currentFramePos) * audioInputStream.getFormat().getFrameSize());
-    
-    createFile  ( trackData
-                , new AudioInputStream(audioInputStream, audioInputStream.getFormat(), toFramePos - fromFramePos)
-                , targetFileNameTemplate
-                , parentDir
-                , processTemplate
-                , redirectStdOut
-                , redirectErr
-                );
-    
-    return toFramePos;
+    long toAudioFramePos = getAudioFormatFrames(toPosition, audioInputStream.getFormat());
+    audioInputStream.skip((toAudioFramePos - currentAudioFramePos)  * audioInputStream.getFormat().getFrameSize());
+    return toAudioFramePos;
   }
   
-  private static void createFile  ( TrackData trackData
-                                  , AudioInputStream audioInputStream
-                                  , String targetFileNameTemplate
-                                  , File parentDir
-                                  , String processTemplate
-                                  , boolean redirectStdOut
-                                  , boolean redirectErr
-                                  ) throws IOException
+  private long performProcessAction ( TrackCutterProcessingAction processAction
+                                    , AudioInputStream audioInputStream
+                                    , long currentAudioFramePos
+                                    ) throws IOException
   {
-    // Get metadata.
-    String title = trackData.getMetaData(CueSheet.MetaDataField.TITLE);
-    String artist = trackData.getMetaData(CueSheet.MetaDataField.PERFORMER);
-    String album = trackData.getMetaData(CueSheet.MetaDataField.ALBUMTITLE);
-    String year = trackData.getMetaData(CueSheet.MetaDataField.YEAR);
-    String comment = trackData.getMetaData(CueSheet.MetaDataField.COMMENT);
-    String track = trackData.getMetaData(CueSheet.MetaDataField.TRACKNUMBER);
-    String genre = trackData.getMetaData(CueSheet.MetaDataField.GENRE);
-
-    String targetFileName = String.format ( templateReplacer.replace(targetFileNameTemplate)
-                                          , normalizeFileName(title)
-                                          , normalizeFileName(artist)
-                                          , normalizeFileName(album)
-                                          , normalizeFileName(year)
-                                          , normalizeFileName(comment)
-                                          , normalizeFileName(track)
-                                          , normalizeFileName(genre)
-                                          );
+    // Skip positions in the audioInputStream until we are at out starting position.
+    long fromAudioFramePos = skipToPosition (processAction.getStartPosition(), audioInputStream, currentAudioFramePos);
     
-    File targetFile = new File(targetFileName);
-    if (!targetFile.isAbsolute())
+    // Determine the position to which we should read from the input.
+    long toAudioFramePos = audioInputStream.getFrameLength();
+    if (processAction.getEndPosition() != null)
     {
-      targetFile = new File(parentDir, targetFileName);
+      toAudioFramePos = getAudioFormatFrames(processAction.getEndPosition(), audioInputStream.getFormat());
     }
-    targetFile.getParentFile().mkdirs();
     
-    String processCommand = String.format ( templateReplacer.replace(processTemplate)
-                                          , title
-                                          , artist
-                                          , album
-                                          , year
-                                          , comment
-                                          , track
-                                          , genre
-                                          , targetFile
-                                          );
+    createFile
+      ( processAction
+      , new AudioInputStream(audioInputStream, audioInputStream.getFormat(), toAudioFramePos - fromAudioFramePos)
+      );
     
-    createFile  ( audioInputStream
-                , processCommand
-                , redirectStdOut?targetFile + ".out":null
-                , redirectErr?targetFile + ".err":null
-                );
+    return toAudioFramePos;
   }
   
-  private static void createFile  ( AudioInputStream audioInputStream
-                                  , String processCommand
-                                  , String redirectStdOutFileName
-                                  , String redirectErrFileName
-                                  ) throws IOException
+  private void createFile ( TrackCutterProcessingAction processAction
+                          , AudioInputStream audioInputStream
+                          ) throws IOException
   {
-    OutputStream audioOutputStream = null;
-    
-    try
+    if (!this.configuration.getRedirectToPostprocessing())
     {
-      Process process = Runtime.getRuntime().exec(processCommand);
-      
-      pipeStream(process.getInputStream(), redirectStdOutFileName);
-      pipeStream(process.getErrorStream(), redirectErrFileName);
-      
-      audioOutputStream = new BufferedOutputStream(process.getOutputStream());
-      
-      AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, audioOutputStream);
-      audioOutputStream.flush();
+      // We're going to create target files, so make sure there's a directory for them.
+      processAction.getTargetFile().getParentFile().mkdirs();
     }
-    finally
+    
+    if (configuration.getDoPostProcessing() && configuration.getRedirectToPostprocessing())
     {
+      OutputStream audioOutputStream = null;
+      
       try
+      {
+        audioOutputStream = this.createProcess(processAction).getOutputStream();
+        AudioSystem.write(audioInputStream, configuration.getTargetType(), audioOutputStream);
+      }
+      finally
       {
         if (audioOutputStream!=null)
         {
+          // We can't do anything about any exceptions here, so we don't catch them.
           audioOutputStream.close();
         }
       }
-      catch (IOException e)
+    }
+    else
+    {
+      AudioSystem.write(audioInputStream, configuration.getTargetType(), processAction.getTargetFile());
+      
+      if (configuration.getDoPostProcessing())
       {
-        // Nothing we can do.
+        this.createProcess(processAction);
       }
     }
+  }
+  
+  private Process createProcess(TrackCutterProcessingAction processAction) throws IOException
+  {
+    processAction.getPostProcessFile().getParentFile().mkdirs();
+    Process process = Runtime.getRuntime().exec(processAction.getPostProcessCommand());
+    
+    pipeStream(process.getInputStream(), processAction.getStdOutRedirectFile());
+    pipeStream(process.getErrorStream(), processAction.getErrRedirectFile());
+    
+    return process;
   }
   
   /**
    * 
    * @param in
-   * @param fileName
+   * @param file
    * @throws IOException
    */
-  private static void pipeStream(InputStream in, String fileName) throws IOException
+  private static void pipeStream(InputStream in, File file) throws IOException
   {
     OutputStream out = null;
-    if (fileName!=null)
+    if (file!=null)
     {
-      out = new FileOutputStream(fileName);
+      out = new FileOutputStream(file);
     }
     new Thread(new StreamPiper(in, out, true)).start();
   }
@@ -517,65 +300,5 @@ public class TrackCutter
   {
     // Determine closest frame number.
     return (long) Math.round(((double) audioFormat.getFrameRate())/75 * position.getTotalFrames());
-  }
-
-  /**
-   * Normalize the specified file name (without path component) so that it will be likely to be valid on modern
-   * file systems and operating systems.
-   * @param fileName The file name to normalize. Must not contain a path component.
-   * @return The input file name, normalized to be likely to be valid on modern file systems and operating systems.
-   */
-  private static String normalizeFileName(String fileName)
-  {
-    StringBuilder builder = new StringBuilder(fileName.length());
-    int length = fileName.length();
-    for (int index = 0; index < length; index++)
-    {
-      char currentChar = fileName.charAt(index);
-      if (currentChar < 32)
-      {
-        // No control characters in file name.
-        builder.append('_');
-      }
-      else
-      {
-        switch (currentChar)
-        {
-          // These characters are likely to be troublesome in file names.
-          case '/':
-          case '\\':
-          case ':':
-          case '*':
-          case '?':
-          case '"':
-          case '|':
-            builder.append('_');
-            break;
-          // Everything else should be okay on modern file system.
-          default:
-            builder.append(currentChar);
-            break;
-        }
-      }
-    }
-    return builder.toString();
-  }
-  
-  /**
-   * Get a replacements map for human readable fields to formatting string fields.
-   * @return A replacements map for human readable fields to formatting string fields.
-   */
-  private static Map<String, String> getHumanReadableToFormatStringReplacements()
-  {
-    HashMap<String, String> replacements = new HashMap<String, String>();
-    replacements.put("<title>", "%1$s");
-    replacements.put("<artist>", "%2$s");
-    replacements.put("<album>", "%3$s");
-    replacements.put("<year>", "%4$s");
-    replacements.put("<comment>", "%5$s");
-    replacements.put("<track>", "%6$s");
-    replacements.put("<genre>", "%7$s");
-    replacements.put("<targetFile>", "%8$s");
-    return replacements;
   }
 }
