@@ -88,9 +88,12 @@ public class TrackCutterProcessingAction
    *          The TrackCutterConfiguration of the TrackCutter for which this
    *          action is intended.
    */
-  public TrackCutterProcessingAction(Position startPosition,
-      Position endPosition, TrackData trackData, boolean isPregap,
-      TrackCutterConfiguration configuration)
+  public TrackCutterProcessingAction
+    ( final Position startPosition
+    , final Position endPosition
+    , final TrackData trackData
+    , final boolean isPregap
+    , final TrackCutterConfiguration configuration)
   {
     this.startPosition = startPosition;
     this.endPosition = endPosition;
