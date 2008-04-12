@@ -40,13 +40,6 @@ import jwbroek.io.StreamPiper;
 
 public class TrackCutter
 {
-  public enum PregapHandling
-  {
-    PREPEND,
-    DISCARD,
-    SEPARATE
-  };
-  
   public TrackCutterConfiguration configuration;
   
   public TrackCutter(TrackCutterConfiguration configuration)

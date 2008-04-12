@@ -27,37 +27,91 @@ import javax.sound.sampled.AudioFileFormat;
 import jwbroek.cuelib.CueSheet;
 import jwbroek.cuelib.FileData;
 import jwbroek.cuelib.TrackData;
-import jwbroek.cuelib.tools.trackcutter.TrackCutter.PregapHandling;
 import jwbroek.util.StringReplacer;
 
 /**
  * This class represents a configuration for a TrackCutter instance. It takes care of much of the bookkeeping,
- * allowing TrackCutter to focus on his real tasks.
+ * allowing TrackCutter to focus on his core task.
  * @author jwbroek
  */
 public class TrackCutterConfiguration
 {
+  /**
+   * Allowed moded for pregap handling.
+   */
+  public enum PregapHandling
+  {
+    PREPEND,
+    DISCARD,
+    SEPARATE
+  };
+  
+  /**
+   * Parent directory for relative paths.
+   */
   private File parentDirectory = null;
+  /**
+   * How to handle pregaps.
+   */
   private PregapHandling pregapHandling = PregapHandling.DISCARD;
+  /**
+   * Audio type to convert to.
+   */
   private AudioFileFormat.Type targetType = AudioFileFormat.Type.WAVE;
+  /**
+   * Whether or not error output from post-processing should be redirected.
+   */
   private boolean redirectErr = false;
+  /**
+   * Whether or not standard output from post-processing should be redirected.
+   */
   private boolean redirectStdOut = false;
+  /**
+   * Whether or not we should do post-processing.
+   */
   private boolean doPostProcessing = false;
+  /**
+   * Whether or not we should redirect output directly to post-processing.
+   */
   private boolean redirectToPostprocessing = false;
+  /**
+   * Template for the file name of the cut tracks.
+   */
   private String cutFileNameTemplate = "<artist>_<album>_<track>_<title>.wav";
+  /**
+   * Template for the file name of the post-processed tracks.
+   */
   private String postProcessFileNameTemplate = "<artist>/<album>/<track>_<title>.mp3";
+  /**
+   * Template for the post-processing command.
+   */
   private String postProcessCommandTemplate =
     "C:\\lame\\lame.exe --vbr-new -V 0 -t --tt \"<title>\" --ta \"<artist>\" --tl \"<album>\" --ty \"<year>\""
     + " --tc \"<comment>\" --tn \"<track>\" --tg \"<genre>\" \"<targetFile>\" \"<postProcessFile>\"";
+  /**
+   * Template for the file name of the cut pregaps.
+   */
   private String pregapCutFileNameTemplate = "<artist>_<album>_<track>__pre_<title>.wav";
+  /**
+   * Template for the file name of the post-processed pregaps.
+   */
   private String pregapPostProcessFileNameTemplate = "<artist>/<album>/<track>__pre_<title>.mp3";
+  /**
+   * Template for the post-processing command for the pregaps.
+   */
   private String pregapPostProcessCommandTemplate =
     "C:\\lame\\lame.exe --vbr-new -V 0 -t --tt \"Pregap of <title>\" --ta \"<artist>\" --tl \"<album>\" --ty \"<year>\""
     + " --tc \"Pregap of <title>\" --tn \"<track>\" --tg \"<genre>\" \"<targetFile>\" \"<postProcessFile>\"";
   
+  /**
+   * Replacer for the template values.
+   */
   public static final StringReplacer templateReplacer =
     new StringReplacer(getHumanReadableToFormatStringReplacements());
   
+  /**
+   * Create a new TrackCutterConfiguration instance, with default values.
+   */
   public TrackCutterConfiguration()
   {
     // Intentionally empty.
@@ -83,11 +137,11 @@ public class TrackCutterConfiguration
   }
   
   /**
-   * 
+   * Get a file instance representing the audio file specified in the FileData.
    * @param fileData
-   * @return
+   * @return A file instance representing the audio file specified in the FileData.
    */
-  public File getAudioFile(FileData fileData)
+  public File getAudioFile(final FileData fileData)
   {
     File audioFile = new File(fileData.getFile());
     if (audioFile.getParent()==null)
@@ -98,12 +152,12 @@ public class TrackCutterConfiguration
   }
   
   /**
-   * Normalize the specified file name (without path component) so that it will be likely to be valid on modern
-   * file systems and operating systems.
+   * Normalize the specified file name (without path component) so that it will likely be valid on modern
+   * file and operating systems.
    * @param fileName The file name to normalize. Must not contain a path component.
-   * @return The input file name, normalized to be likely to be valid on modern file systems and operating systems.
+   * @return The input file name, normalized to be likely to be valid on modern file and operating systems.
    */
-  private static String normalizeFileName(String fileName)
+  private static String normalizeFileName(final String fileName)
   {
     StringBuilder builder = new StringBuilder(fileName.length());
     int length = fileName.length();
@@ -139,7 +193,32 @@ public class TrackCutterConfiguration
     return builder.toString();
   }
   
-  private String getExpandedFileName(TrackData trackData, String fileNameTemplate)
+  /**
+   * Get the expanded file from a template and track data.
+   * @param trackData TrackData to use for expanding the file name template.
+   * @param fileNameTemplate The template for the file name.
+   * @return The expanded file.
+   */
+  public File getFileFromTemplate(final TrackData trackData, final String fileNameTemplate)
+  {
+    String targetFileName = getExpandedFileName(trackData, fileNameTemplate);
+    
+    File targetFile = new File(targetFileName);
+    if (!targetFile.isAbsolute())
+    {
+      targetFile = new File(this.getParentDirectory(), targetFileName);
+    }
+    
+    return targetFile;
+  }
+  
+  /**
+   * Get the expanded file name from a template and track data.
+   * @param trackData TrackData to use for expanding the file name template.
+   * @param fileNameTemplate The template for the file name.
+   * @return The expanded file name.
+   */
+  private String getExpandedFileName(final TrackData trackData, final String fileNameTemplate)
   {
     return String.format
       ( this.getTemplateReplacer().replace(fileNameTemplate)
@@ -153,11 +232,19 @@ public class TrackCutterConfiguration
       );
   }
 
+  /**
+   * Get the expanded post-processing command.
+   * @param trackData TrackData to use in expanding the template.
+   * @param processCommandTemplate Template for the post-processing command
+   * @param cutFileName The name of the file of the track that was cut.
+   * @param processFileName The file name for after the post-processing step.
+   * @return The expanded post-processing command.
+   */
   private String getExpandedProcessCommand
-    ( TrackData trackData
-    , String processCommandTemplate
-    , String intermediateFileName
-    , String processFileName
+    ( final TrackData trackData
+    , final String processCommandTemplate
+    , final String cutFileName
+    , final String processFileName
     )
   {
     return String.format
@@ -169,25 +256,17 @@ public class TrackCutterConfiguration
       , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.COMMENT))
       , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.TRACKNUMBER))
       , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.GENRE))
-      , intermediateFileName
+      , cutFileName
       , processFileName
       );
   }
   
-  public File getFileFromTemplate(TrackData trackData, String fileNameTemplate)
-  {
-    String targetFileName = getExpandedFileName(trackData, fileNameTemplate);
-    
-    File targetFile = new File(targetFileName);
-    if (!targetFile.isAbsolute())
-    {
-      targetFile = new File(this.getParentDirectory(), targetFileName);
-    }
-    
-    return targetFile;
-  }
-
-  public File getCutFile(TrackCutterProcessingAction processAction)
+  /**
+   * Get a File instance representing the file after cutting the track.
+   * @param processAction The associated processing action.
+   * @return A File instance representing the file after cutting the track.
+   */
+  public File getCutFile(final TrackCutterProcessingAction processAction)
   {
     TrackData trackData = processAction.getTrackData();
     
@@ -197,7 +276,12 @@ public class TrackCutterConfiguration
     return getFileFromTemplate(trackData, fileNameTemplate);
   }
   
-  public File getPostProcessFile(TrackCutterProcessingAction processAction)
+  /**
+   * Get a File instance representing the file after post-processing.
+   * @param processAction The associated processing action.
+   * @return A File instance representing the file after post-processing.
+   */
+  public File getPostProcessFile(final TrackCutterProcessingAction processAction)
   {
     TrackData trackData = processAction.getTrackData();
     
@@ -207,7 +291,12 @@ public class TrackCutterConfiguration
     return getFileFromTemplate(trackData, fileNameTemplate);
   }
 
-  public String getPostProcessCommand(TrackCutterProcessingAction processAction)
+  /**
+   * Get the command to use for post-processing.
+   * @param processAction The associated processing action.
+   * @return The command to use for post-processing.
+   */
+  public String getPostProcessCommand(final TrackCutterProcessingAction processAction)
   {
     TrackData trackData = processAction.getTrackData();
     String commandTemplate =
@@ -223,15 +312,17 @@ public class TrackCutterConfiguration
   }
   
   /**
-   * @return the templateReplacer
+   * Get the replacer for the template values.
+   * @return The replacer for the template values.
    */
-  public StringReplacer getTemplateReplacer()
+  private StringReplacer getTemplateReplacer()
   {
     return TrackCutterConfiguration.templateReplacer;
   }
 
   /**
-   * @return the parentDirectory
+   * Get the parent directory for relative paths.
+   * @return The parent directory for relative paths.
    */
   public File getParentDirectory()
   {
@@ -239,95 +330,17 @@ public class TrackCutterConfiguration
   }
 
   /**
-   * @param parentDirectory the parentDirectory to set
+   * Set the parent directory for relative paths.
+   * @param parentDirectory The parent directory for relative paths.
    */
-  public void setParentDirectory(File parentDirectory)
+  public void setParentDirectory(final File parentDirectory)
   {
     this.parentDirectory = parentDirectory;
   }
 
   /**
-   * @return the postProcessCommandTemplate
-   */
-  public String getPostProcessCommandTemplate()
-  {
-    return postProcessCommandTemplate;
-  }
-
-  /**
-   * @param processCommandTemplate the postProcessCommandTemplate to set
-   */
-  public void setPostProcessCommandTemplate(String postProcessCommandTemplate)
-  {
-    this.postProcessCommandTemplate = postProcessCommandTemplate;
-  }
-
-  /**
-   * @return the postProcessFileNameTemplate
-   */
-  public String getPostProcessFileNameTemplate()
-  {
-    return postProcessFileNameTemplate;
-  }
-
-  /**
-   * @param postProcessFileNameTemplate the postProcessFileNameTemplate to set
-   */
-  public void setPostProcessFileNameTemplate(String postProcessFileNameTemplate)
-  {
-    this.postProcessFileNameTemplate = postProcessFileNameTemplate;
-  }
-
-  /**
-   * @return the pregapHandling
-   */
-  public PregapHandling getPregapHandling()
-  {
-    return pregapHandling;
-  }
-
-  /**
-   * @param pregapHandling the pregapHandling to set
-   */
-  public void setPregapHandling(PregapHandling pregapHandling)
-  {
-    this.pregapHandling = pregapHandling;
-  }
-
-  /**
-   * @return the redirectErr
-   */
-  public boolean getRedirectErr()
-  {
-    return redirectErr;
-  }
-
-  /**
-   * @param redirectErr the redirectErr to set
-   */
-  public void setRedirectErr(boolean redirectErr)
-  {
-    this.redirectErr = redirectErr;
-  }
-
-  /**
-   * @return the redirectStdOut
-   */
-  public boolean getRedirectStdOut()
-  {
-    return redirectStdOut;
-  }
-
-  /**
-   * @param redirectStdOut the redirectStdOut to set
-   */
-  public void setRedirectStdOut(boolean redirectStdOut)
-  {
-    this.redirectStdOut = redirectStdOut;
-  }
-
-  /**
-   * @return the cutFileNameTemplate
+   * Get the template for the file name of the tracks after cutting.
+   * @return The template for the file name of the tracks after cutting.
    */
   public String getCutFileNameTemplate()
   {
@@ -335,15 +348,107 @@ public class TrackCutterConfiguration
   }
 
   /**
-   * @param cutFileNameTemplate the cutFileNameTemplate to set
+   * Set the template for the file name of the tracks after cutting.
+   * @param cutFileNameTemplate The template for the file name of the tracks after cutting.
    */
-  public void setCutFileNameTemplate(String targetFileNameTemplate)
+  public void setCutFileNameTemplate(final String targetFileNameTemplate)
   {
     this.cutFileNameTemplate = targetFileNameTemplate;
   }
 
   /**
-   * @return the targetType
+   * Get the template for the file name of the post-processed tracks.
+   * @return The template for the file name of the post-processed tracks.
+   */
+  public String getPostProcessFileNameTemplate()
+  {
+    return postProcessFileNameTemplate;
+  }
+
+  /**
+   * Set the template for the file name of the post-processed tracks.
+   * @param processCommandTemplate The template for the file name of the post-processed tracks.
+   */
+  public void setPostProcessFileNameTemplate(String postProcessFileNameTemplate)
+  {
+    this.postProcessFileNameTemplate = postProcessFileNameTemplate;
+  }
+  
+  /**
+   * Get the template for the command for post-processing tracks.
+   * @return The template for the command for post-processing tracks.
+   */
+  public String getPostProcessCommandTemplate()
+  {
+    return postProcessCommandTemplate;
+  }
+
+  /**
+   * Set the template for the command for post-processing tracks.
+   * @param processCommandTemplate The template for the command for post-processing tracks.
+   */
+  public void setPostProcessCommandTemplate(final String postProcessCommandTemplate)
+  {
+    this.postProcessCommandTemplate = postProcessCommandTemplate;
+  }
+  
+  /**
+   * Get the mode for pregap handling.
+   * @return The mode for pregap handling.
+   */
+  public PregapHandling getPregapHandling()
+  {
+    return pregapHandling;
+  }
+
+  /**
+   * Set the mode for pregap handling.
+   * @param pregapHandling The mode for pregap handling.
+   */
+  public void setPregapHandling(final PregapHandling pregapHandling)
+  {
+    this.pregapHandling = pregapHandling;
+  }
+
+  /**
+   * Get whether or not error output from post-processing should be redirected. 
+   * @return the redirectErr Whether or not error output from post-processing should be redirected.
+   */
+  public boolean getRedirectErr()
+  {
+    return redirectErr;
+  }
+
+  /**
+   * Set whether or not error output from post-processing should be redirected. 
+   * @param redirectErr Whether or not error output from post-processing should be redirected.
+   */
+  public void setRedirectErr(final boolean redirectErr)
+  {
+    this.redirectErr = redirectErr;
+  }
+
+  /**
+   * Get whether or not standard output from post-processing should be redirected. 
+   * @return the redirectErr Whether or not standard output from post-processing should be redirected.
+   */
+  public boolean getRedirectStdOut()
+  {
+    return redirectStdOut;
+  }
+
+  /**
+   * Set whether or not standard output from post-processing should be redirected. 
+   * @param redirectErr Whether or not standard output from post-processing should be redirected.
+   */
+  public void setRedirectStdOut(final boolean redirectStdOut)
+  {
+    this.redirectStdOut = redirectStdOut;
+  }
+
+  /**
+   * Get the audio type to convert to.
+   * @return The audio type to convert to.
    */
   public AudioFileFormat.Type getTargetType()
   {
@@ -351,15 +456,17 @@ public class TrackCutterConfiguration
   }
 
   /**
-   * @param targetType the targetType to set
+   * Set the audio type to convert to.
+   * @param targetType The audio type to convert to.
    */
-  public void setTargetType(AudioFileFormat.Type targetType)
+  public void setTargetType(final AudioFileFormat.Type targetType)
   {
     this.targetType = targetType;
   }
 
   /**
-   * @return the doPostProcessing
+   * Get whether or not to do post-processing.
+   * @return Whether or not to do post-processing.
    */
   public boolean getDoPostProcessing()
   {
@@ -367,15 +474,17 @@ public class TrackCutterConfiguration
   }
 
   /**
-   * @param doPostProcessing the doPostProcessing to set
+   * Set whether or not to do post-processing.
+   * @param doPostProcessing Whether or not to do post-processing.
    */
-  public void setDoPostProcessing(boolean doPostProcessing)
+  public void setDoPostProcessing(final boolean doPostProcessing)
   {
     this.doPostProcessing = doPostProcessing;
   }
 
   /**
-   * @return the redirectToPostprocessing
+   * Get whether or not to redirect the cut track directly to post-processing.
+   * @return Whether or not to redirect the cut track directly to post-processing.
    */
   public boolean getRedirectToPostprocessing()
   {
@@ -383,50 +492,18 @@ public class TrackCutterConfiguration
   }
 
   /**
-   * @param redirectToPostprocessing the redirectToPostprocessing to set
+   * Set whether or not to redirect the cut track directly to post-processing.
+   * @param redirectToPostprocessing Whether or not to redirect the cut track directly to post-processing.
    */
-  public void setRedirectToPostprocessing(boolean redirectToPostprocessing)
+  public void setRedirectToPostprocessing(final boolean redirectToPostprocessing)
   {
     this.redirectToPostprocessing = redirectToPostprocessing;
   }
 
 
   /**
-   * @return the pregapPostProcessCommandTemplate
-   */
-  public String getPregapPostProcessCommandTemplate()
-  {
-    return pregapPostProcessCommandTemplate;
-  }
-
-  /**
-   * @param pregapPostProcessCommandTemplate the pregapPostProcessCommandTemplate to set
-   */
-  public void setPregapPostProcessCommandTemplate(
-      String pregapPostProcessCommandTemplate)
-  {
-    this.pregapPostProcessCommandTemplate = pregapPostProcessCommandTemplate;
-  }
-
-  /**
-   * @return the pregapPostProcessFileNameTemplate
-   */
-  public String getPregapPostProcessFileNameTemplate()
-  {
-    return pregapPostProcessFileNameTemplate;
-  }
-
-  /**
-   * @param pregapPostProcessFileNameTemplate the pregapPostProcessFileNameTemplate to set
-   */
-  public void setPregapPostProcessFileNameTemplate(
-      String pregapPostProcessFileNameTemplate)
-  {
-    this.pregapPostProcessFileNameTemplate = pregapPostProcessFileNameTemplate;
-  }
-
-  /**
-   * @return the pregapCutFileNameTemplate
+   * Get the template for the file name of the pregap tracks after cutting.
+   * @return The template for the file name of the tracks after cutting.
    */
   public String getPregapCutFileNameTemplate()
   {
@@ -434,10 +511,47 @@ public class TrackCutterConfiguration
   }
 
   /**
-   * @param pregapCutFileNameTemplate the pregapCutFileNameTemplate to set
+   * Set the template for the file name of the pregap tracks after cutting.
+   * @param pregapCutFileNameTemplate The template for the file name of the pregap tracks after cutting.
    */
-  public void setPregapCutFileNameTemplate(String pregapTargetFileNameTemplate)
+  public void setPregapCutFileNameTemplate(final String pregapTargetFileNameTemplate)
   {
     this.pregapCutFileNameTemplate = pregapTargetFileNameTemplate;
+  }
+
+  /**
+   * Get the template for the file name of the post-processed tracks.
+   * @return The template for the file name of the post-processed tracks.
+   */
+  public String getPregapPostProcessFileNameTemplate()
+  {
+    return pregapPostProcessFileNameTemplate;
+  }
+
+  /**
+   * Set the template for the file name of the post-processed tracks.
+   * @param pregapPostProcessFileNameTemplate The template for the file name of the post-processed tracks.
+   */
+  public void setPregapPostProcessFileNameTemplate(final String pregapPostProcessFileNameTemplate)
+  {
+    this.pregapPostProcessFileNameTemplate = pregapPostProcessFileNameTemplate;
+  }
+  
+  /**
+   * Get the template for the command for post-processing tracks.
+   * @return The template for the command for post-processing tracks.
+   */
+  public String getPregapPostProcessCommandTemplate()
+  {
+    return pregapPostProcessCommandTemplate;
+  }
+
+  /**
+   * Set the template for the command for post-processing tracks.
+   * @param pregapPostProcessCommandTemplate The template for the command for post-processing tracks.
+   */
+  public void setPregapPostProcessCommandTemplate(final String pregapPostProcessCommandTemplate)
+  {
+    this.pregapPostProcessCommandTemplate = pregapPostProcessCommandTemplate;
   }
 }

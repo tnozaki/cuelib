@@ -22,7 +22,7 @@ import java.io.File;
 
 import javax.sound.sampled.AudioFileFormat;
 
-import jwbroek.cuelib.tools.trackcutter.TrackCutter.PregapHandling;
+import jwbroek.cuelib.tools.trackcutter.TrackCutterConfiguration.PregapHandling;
 import jwbroek.util.SimpleOptionsParser;
 
 /**
@@ -243,7 +243,7 @@ public class TrackCutterCommand
    * Process based on the provided command line arguments.
    * @param args The command line arguments.
    */
-  public void performProcessing(String [] args)
+  public void performProcessing(final String [] args)
   {
     TrackCutter cutter = new TrackCutter(this.getConfiguration());
     SimpleOptionsParser argumentsParser = getArgumentsParser();
@@ -277,7 +277,7 @@ public class TrackCutterCommand
    * Entry-point.
    * @param args Command line arguments.
    */
-  public static void main(String[] args)
+  public static void main(final String[] args)
   {
     new TrackCutterCommand().performProcessing(args);
   }
