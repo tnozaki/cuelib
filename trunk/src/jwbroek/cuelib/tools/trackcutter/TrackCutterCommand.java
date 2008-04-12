@@ -25,15 +25,28 @@ import javax.sound.sampled.AudioFileFormat;
 import jwbroek.cuelib.tools.trackcutter.TrackCutter.PregapHandling;
 import jwbroek.util.SimpleOptionsParser;
 
+/**
+ * Command line interface for TrackCutter.
+ * @author jwbroek
+ */
 public class TrackCutterCommand
 {
+  /**
+   * The configuration for the TrackCutter. Will be modified based on the command line arguments.
+   */
   private TrackCutterConfiguration configuration= new TrackCutterConfiguration();
   
+  /**
+   * Create a new TrackCutterCommand instance. 
+   */
   private TrackCutterCommand()
   {
     // No need to instantiate from outside this class.
   }
   
+  /**
+   * Print a help message.
+   */
   private static void printHelp()
   {
     System.out.println("Syntax: [options] cuefiles");
@@ -49,9 +62,43 @@ public class TrackCutterCommand
     System.out.println(" -s                  Redirect audio to post-processing step.");
     System.out.println(" -ro                 Redirect output of post-processing step to log file.");
     System.out.println(" -re                 Redirect error output of post-processing step to log file.");
-    System.out.println("Templates: ");
+    System.out.println("Templates:");
+    System.out.println(" <title>             Title of the track.");
+    System.out.println(" <artist>            Artist of the track, or artist of the album, if unknown.");
+    System.out.println(" <album>             Title of the album");
+    System.out.println(" <year>              Year of the track, or year of the album, if unknown.");
+    System.out.println(" <comment>           Comment of the album.");
+    System.out.println(" <track>             Track number");
+    System.out.println(" <genre>             Genre of the album.");
+    System.out.println(" <cutFile>           Name of the file after cutting. Can only be used in the post-");
+    System.out.println("                     processing command template.");
+    System.out.println(" <postProcessFile>   Name of the file after post-processing. Can only be used in");
+    System.out.println("                     the post-processing command template.");
+    System.out.println("Examples:");
+    System.out.println(" Cut the tracks in a cue sheet:");
+    System.out.println("  \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
+    System.out.println(" Cut the tracks in a cue sheet and append the pregaps:");
+    System.out.println("  -p append \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
+    System.out.println(" Cut the tracks in a cue sheet and give them names based on the data in the sheet:");
+    System.out.println("  -f \"<artist>\\<album>\\<track>_<title>.wav\" \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
+    System.out.println(" Cut the tracks with separate pregaps, convert to WAV format, and redirect to lame while");
+    System.out.println(" setting the appropriate ID3 tags, and creating log files:");
+    System.out.println("  -f \"waves\\<artist>\\<album>\\<track>_<title>.wav\"");
+    System.out.println("  -p \"mp3\\<artist>\\<album>\\<track>_<title>.mp3\"");
+    System.out.println("  \"C:\\lame\\lame.exe --vbr-new -V 0 -t --tt \\\"<title>\\\" --ta \\\"<artist>\\\" --tl \\\"<album>\\\"");
+    System.out.println("  --ty \\\"<year>\\\" --tc \\\"<comment>\\\" --tn \\\"<track>\\\" --tg \\\"<genre>\\\" - ");
+    System.out.println("  \\\"<postProcessFile>\\\"\"");
+    System.out.println("  -g separate \"mp3\\<artist>\\<album>\\<track>_0_<title>.mp3\"");
+    System.out.println("  \"C:\\lame\\lame.exe --vbr-new -V 0 -t --tt \\\"00 Pregap of <title>\\\" --ta \\\"<artist>\\\"");
+    System.out.println("  --tl \\\"<album>\\\" --ty \\\"<year>\\\" --tc \\\"Pregap of <title>\\\" --tn \\\"<track>\\\" --tg");
+    System.out.println("  \\\"<genre>\\\" - \\\"<postProcessFile>\\\"\"");
+    System.out.println("  -s -ro -re -t WAVE \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
   }
   
+  /**
+   * Get a configurated parser for the command line arguments.
+   * @return A configurated parser for the command line arguments.
+   */
   private SimpleOptionsParser getArgumentsParser()
   {
     SimpleOptionsParser argumentsParser = new SimpleOptionsParser();
@@ -92,7 +139,7 @@ public class TrackCutterCommand
             {
               audioType = AudioFileFormat.Type.SND;
             }
-            else if ("WAV".equalsIgnoreCase(type))
+            else if ("WAVE".equalsIgnoreCase(type))
             {
               audioType = AudioFileFormat.Type.WAVE;
             }
@@ -192,7 +239,11 @@ public class TrackCutterCommand
     return argumentsParser;
   }
   
-  public void processCommand(String [] args)
+  /**
+   * Process based on the provided command line arguments.
+   * @param args The command line arguments.
+   */
+  public void performProcessing(String [] args)
   {
     TrackCutter cutter = new TrackCutter(this.getConfiguration());
     SimpleOptionsParser argumentsParser = getArgumentsParser();
@@ -223,15 +274,17 @@ public class TrackCutterCommand
   }
 
   /**
-   * @param args
+   * Entry-point.
+   * @param args Command line arguments.
    */
   public static void main(String[] args)
   {
-    new TrackCutterCommand().processCommand(args);
+    new TrackCutterCommand().performProcessing(args);
   }
 
   /**
-   * @return the configuration
+   * Get the configuration for the TrackCutter.
+   * @return The configuration for the TrackCutter.
    */
   private TrackCutterConfiguration getConfiguration()
   {
