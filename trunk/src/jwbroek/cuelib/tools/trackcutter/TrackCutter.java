@@ -38,16 +38,35 @@ import jwbroek.cuelib.Position;
 import jwbroek.cuelib.TrackData;
 import jwbroek.io.StreamPiper;
 
+/**
+ * <p>Class that can cut up files into tracks, based on the information provided by a cue sheet.</p>
+ * <p>It can do some audio type conversions, file naming based on information in the cue sheet, and
+ * offers the option of having the tracks post-processed by a another application based on information
+ * in the cue sheet.</p>
+ * @author jwbroek
+ */
 public class TrackCutter
 {
+  /**
+   * Configuation for the TrackCutter.
+   */
   public TrackCutterConfiguration configuration;
   
+  /**
+   * Create a new TrackCutter instance, based on the configuration provided.
+   * @param configuration
+   */
   public TrackCutter(TrackCutterConfiguration configuration)
   {
     this.configuration = configuration;
   }
   
-  public void cutTracksInCueSheet(File cueFile) throws IOException
+  /**
+   * Cut the the files specified in the cue sheet into tracks.
+   * @param cueFile
+   * @throws IOException
+   */
+  public void cutTracksInCueSheet(final File cueFile) throws IOException
   {
     CueSheet cueSheet = null;
     
@@ -65,8 +84,18 @@ public class TrackCutter
     {
       throw new IOException("Problem parsing cue file.", e);
     }
-
-    // We can process each file in the cuesheet independently.
+    
+    cutTracksInCueSheet(cueSheet);
+  }
+  
+  /**
+   * Cut the the files specified in the cue sheet into tracks.
+   * @param cueSheet
+   * @throws IOException
+   */
+  public void cutTracksInCueSheet(final CueSheet cueSheet) throws IOException
+  {
+    // We can process each file in the cue sheet independently.
     for (FileData fileData : cueSheet.getFileData())
     {
       try
@@ -84,66 +113,13 @@ public class TrackCutter
     }
   }
   
-  private void addProcessActions(TrackData trackData, Position nextPosition, List<TrackCutterProcessingAction> processActions)
-  {
-    if (trackData.getIndex(0) == null)
-    {
-      // No pregap to handle. Just process this track.
-      processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, this.configuration));
-    }
-    else
-    {
-      switch (configuration.getPregapHandling())
-      {
-        case DISCARD:
-          // Discard the pregap, process the track.
-          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, this.configuration));
-          break;
-        case PREPEND:
-          // Prepend the pregap.
-          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), nextPosition, trackData, false, this.configuration));
-          break;
-        case SEPARATE:
-          // Add pregap and track as separate tracks.
-          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), trackData.getIndex(1).getPosition(), trackData, true, this.configuration));
-          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, this.configuration));
-          break;
-      }
-    }
-  }
-  
-  private List<TrackCutterProcessingAction> getProcessActionList(FileData fileData)
-  {
-    List<TrackCutterProcessingAction> result = new ArrayList<TrackCutterProcessingAction>();
-    TrackData previousTrackData = null;
-    
-    // Process all tracks in turn.
-    for (TrackData currentTrackData : fileData.getTrackData())
-    {
-      if (previousTrackData != null)
-      {
-        if (currentTrackData.getIndex(0) != null)
-        {
-          addProcessActions(previousTrackData, currentTrackData.getIndex(0).getPosition(), result);
-        }
-        else
-        {
-          addProcessActions(previousTrackData, currentTrackData.getIndex(1).getPosition(), result);
-        }
-      }
-      previousTrackData = currentTrackData;
-    }
-    
-    // Handle last track, if any.
-    if (previousTrackData != null)
-    {
-      addProcessActions(previousTrackData, null, result);
-    }
-    
-    return result;
-  }
-  
-  private void cutTracksInFileData(FileData fileData)
+  /**
+   * Cut the the files specified in the FileData into tracks.
+   * @param fileData
+   * @throws IOException
+   * @throws UnsupportedAudioFileException
+   */
+  private void cutTracksInFileData(final FileData fileData)
     throws IOException, UnsupportedAudioFileException
   {
     AudioInputStream audioInputStream = null;
@@ -183,19 +159,93 @@ public class TrackCutter
     }
   }
   
-  private long skipToPosition ( Position toPosition
-                              , AudioInputStream audioInputStream
-                              , long currentAudioFramePos
-                              ) throws IOException
+  /**
+   * Get a list of ProcessActions based on the specified FileData.
+   * @param fileData
+   * @return A list of ProcessActions based on the specified FileData.
+   */
+  private List<TrackCutterProcessingAction> getProcessActionList(final FileData fileData)
   {
-    long toAudioFramePos = getAudioFormatFrames(toPosition, audioInputStream.getFormat());
-    audioInputStream.skip((toAudioFramePos - currentAudioFramePos)  * audioInputStream.getFormat().getFrameSize());
-    return toAudioFramePos;
+    List<TrackCutterProcessingAction> result = new ArrayList<TrackCutterProcessingAction>();
+    TrackData previousTrackData = null;
+    
+    // Process all tracks in turn.
+    for (TrackData currentTrackData : fileData.getTrackData())
+    {
+      if (previousTrackData != null)
+      {
+        if (currentTrackData.getIndex(0) != null)
+        {
+          addProcessActions(previousTrackData, currentTrackData.getIndex(0).getPosition(), result);
+        }
+        else
+        {
+          addProcessActions(previousTrackData, currentTrackData.getIndex(1).getPosition(), result);
+        }
+      }
+      previousTrackData = currentTrackData;
+    }
+    
+    // Handle last track, if any.
+    if (previousTrackData != null)
+    {
+      addProcessActions(previousTrackData, null, result);
+    }
+    
+    return result;
   }
   
-  private long performProcessAction ( TrackCutterProcessingAction processAction
-                                    , AudioInputStream audioInputStream
-                                    , long currentAudioFramePos
+  /**
+   * Add ProcesAction instances for the specified TrackData.
+   * @param trackData
+   * @param nextPosition The first position after the current track, or null if there is no next position.
+   * (Track continues until the end of data.) 
+   * @param processActions A list of ProcessAction instances to which the actions for this TrackData
+   * will be added.
+   */
+  private void addProcessActions
+    ( final TrackData trackData
+    , final Position nextPosition
+    , final List<TrackCutterProcessingAction> processActions
+    )
+  {
+    if (trackData.getIndex(0) == null)
+    {
+      // No pregap to handle. Just process this track.
+      processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, this.configuration));
+    }
+    else
+    {
+      switch (configuration.getPregapHandling())
+      {
+        case DISCARD:
+          // Discard the pregap, process the track.
+          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, this.configuration));
+          break;
+        case PREPEND:
+          // Prepend the pregap.
+          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), nextPosition, trackData, false, this.configuration));
+          break;
+        case SEPARATE:
+          // Add pregap and track as separate tracks.
+          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), trackData.getIndex(1).getPosition(), trackData, true, this.configuration));
+          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, this.configuration));
+          break;
+      }
+    }
+  }
+  
+  /**
+   * Perform the specified ProcessAction.
+   * @param processAction
+   * @param audioInputStream The audio stream from which to read.
+   * @param currentAudioFramePos The current frame position in the audio stream.
+   * @return The current frame position after processing.
+   * @throws IOException
+   */
+  private long performProcessAction ( final TrackCutterProcessingAction processAction
+                                    , final AudioInputStream audioInputStream
+                                    , final long currentAudioFramePos
                                     ) throws IOException
   {
     // Skip positions in the audioInputStream until we are at out starting position.
@@ -208,7 +258,7 @@ public class TrackCutter
       toAudioFramePos = getAudioFormatFrames(processAction.getEndPosition(), audioInputStream.getFormat());
     }
     
-    createFile
+    performProcessAction
       ( processAction
       , new AudioInputStream(audioInputStream, audioInputStream.getFormat(), toAudioFramePos - fromAudioFramePos)
       );
@@ -216,9 +266,15 @@ public class TrackCutter
     return toAudioFramePos;
   }
   
-  private void createFile ( TrackCutterProcessingAction processAction
-                          , AudioInputStream audioInputStream
-                          ) throws IOException
+  /**
+   * Perform the specified ProcessAction.
+   * @param processAction
+   * @param audioInputStream The audio stream from which to read. This stream will be closed afterward.
+   * @throws IOException
+   */
+  private void performProcessAction ( final TrackCutterProcessingAction processAction
+                                    , final AudioInputStream audioInputStream
+                                    ) throws IOException
   {
     if (!this.configuration.getRedirectToPostprocessing())
     {
@@ -232,7 +288,7 @@ public class TrackCutter
       
       try
       {
-        audioOutputStream = this.createProcess(processAction).getOutputStream();
+        audioOutputStream = this.createPostProcessingProcess(processAction).getOutputStream();
         AudioSystem.write(audioInputStream, configuration.getTargetType(), audioOutputStream);
       }
       finally
@@ -250,12 +306,20 @@ public class TrackCutter
       
       if (configuration.getDoPostProcessing())
       {
-        this.createProcess(processAction);
+        this.createPostProcessingProcess(processAction);
       }
     }
   }
   
-  private Process createProcess(TrackCutterProcessingAction processAction) throws IOException
+  /**
+   * Create the specified post-processing process.
+   * @param processAction
+   * @return The specified post-processing process.
+   * @throws IOException
+   */
+  private Process createPostProcessingProcess
+    ( final TrackCutterProcessingAction processAction
+    ) throws IOException
   {
     processAction.getPostProcessFile().getParentFile().mkdirs();
     Process process = Runtime.getRuntime().exec(processAction.getPostProcessCommand());
@@ -267,12 +331,13 @@ public class TrackCutter
   }
   
   /**
-   * 
+   * Pipe the contents of the specified input stream to the specified file, or throw it away if the file is
+   * null.
    * @param in
-   * @param file
+   * @param file The file to pipe input to, or null if the input should be thrown away.
    * @throws IOException
    */
-  private static void pipeStream(InputStream in, File file) throws IOException
+  private static void pipeStream(final InputStream in, final File file) throws IOException
   {
     OutputStream out = null;
     if (file!=null)
@@ -283,15 +348,27 @@ public class TrackCutter
   }
   
   /**
-   * Get the number of AudioFormat frames represented by the specified Position. Note that an AudioFormat frame may
-   * represent a longer or shorter time than a cue sheet frame. 
+   * Get the number of AudioFormat frames represented by the specified Position. Note that an AudioFormat
+   * frame may represent a longer or shorter time than a cue sheet frame. 
    * @param position
    * @param audioFileFormat
-   * @return
+   * @return The number of AudioFormat frames represented by the specified Position. Note that an AudioFormat
+   * frame may represent a longer or shorter time than a cue sheet frame.
    */
-  private static long getAudioFormatFrames(Position position, AudioFormat audioFormat)
+  private static long getAudioFormatFrames(final Position position, final AudioFormat audioFormat)
   {
     // Determine closest frame number.
     return (long) Math.round(((double) audioFormat.getFrameRate())/75 * position.getTotalFrames());
+  }
+  
+  private long skipToPosition
+    ( Position toPosition
+    , AudioInputStream audioInputStream
+    , long currentAudioFramePos
+    ) throws IOException
+  {
+    long toAudioFramePos = getAudioFormatFrames(toPosition, audioInputStream.getFormat());
+    audioInputStream.skip((toAudioFramePos - currentAudioFramePos)  * audioInputStream.getFormat().getFrameSize());
+    return toAudioFramePos;
   }
 }
