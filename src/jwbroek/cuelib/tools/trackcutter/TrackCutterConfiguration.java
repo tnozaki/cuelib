@@ -349,7 +349,7 @@ public class TrackCutterConfiguration
 
   /**
    * Set the template for the file name of the tracks after cutting.
-   * @param cutFileNameTemplate The template for the file name of the tracks after cutting.
+   * @param targetFileNameTemplate The template for the file name of the tracks after cutting.
    */
   public void setCutFileNameTemplate(final String targetFileNameTemplate)
   {
@@ -367,7 +367,7 @@ public class TrackCutterConfiguration
 
   /**
    * Set the template for the file name of the post-processed tracks.
-   * @param processCommandTemplate The template for the file name of the post-processed tracks.
+   * @param postProcessFileNameTemplate The template for the file name of the post-processed tracks.
    */
   public void setPostProcessFileNameTemplate(String postProcessFileNameTemplate)
   {
@@ -385,7 +385,7 @@ public class TrackCutterConfiguration
 
   /**
    * Set the template for the command for post-processing tracks.
-   * @param processCommandTemplate The template for the command for post-processing tracks.
+   * @param postProcessCommandTemplate The template for the command for post-processing tracks.
    */
   public void setPostProcessCommandTemplate(final String postProcessCommandTemplate)
   {
@@ -439,7 +439,7 @@ public class TrackCutterConfiguration
 
   /**
    * Set whether or not standard output from post-processing should be redirected. 
-   * @param redirectErr Whether or not standard output from post-processing should be redirected.
+   * @param redirectStdOut Whether or not standard output from post-processing should be redirected.
    */
   public void setRedirectStdOut(final boolean redirectStdOut)
   {
@@ -512,7 +512,7 @@ public class TrackCutterConfiguration
 
   /**
    * Set the template for the file name of the pregap tracks after cutting.
-   * @param pregapCutFileNameTemplate The template for the file name of the pregap tracks after cutting.
+   * @param pregapTargetFileNameTemplate The template for the file name of the pregap tracks after cutting.
    */
   public void setPregapCutFileNameTemplate(final String pregapTargetFileNameTemplate)
   {
