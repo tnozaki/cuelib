@@ -50,7 +50,7 @@ public class TrackCutter
   /**
    * Configuation for the TrackCutter.
    */
-  public TrackCutterConfiguration configuration;
+  private TrackCutterConfiguration configuration;
   
   /**
    * Create a new TrackCutter instance, based on the configuration provided.
@@ -71,9 +71,9 @@ public class TrackCutter
     CueSheet cueSheet = null;
     
     // If no parent directory specified, then set the parent directory of the cue file.
-    if (this.configuration.getParentDirectory()==null)
+    if (getConfiguration().getParentDirectory()==null)
     {
-      this.configuration.setParentDirectory(cueFile.getParentFile());
+      getConfiguration().setParentDirectory(cueFile.getParentFile());
     }
     
     try
@@ -127,7 +127,7 @@ public class TrackCutter
     try
     {
       // Determine the complete path to the audio file.
-      File audioFile = this.configuration.getAudioFile(fileData);
+      File audioFile = getConfiguration().getAudioFile(fileData);
       
       // Open the audio file.
       // Sadly, we can't do much with the file type information from the cue sheet, as javax.sound.sampled
@@ -212,7 +212,7 @@ public class TrackCutter
     if (trackData.getIndex(0) == null)
     {
       // No pregap to handle. Just process this track.
-      processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, this.configuration));
+      processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, getConfiguration()));
     }
     else
     {
@@ -220,16 +220,16 @@ public class TrackCutter
       {
         case DISCARD:
           // Discard the pregap, process the track.
-          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, this.configuration));
+          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, getConfiguration()));
           break;
         case PREPEND:
           // Prepend the pregap.
-          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), nextPosition, trackData, false, this.configuration));
+          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), nextPosition, trackData, false, getConfiguration()));
           break;
         case SEPARATE:
           // Add pregap and track as separate tracks.
-          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), trackData.getIndex(1).getPosition(), trackData, true, this.configuration));
-          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, this.configuration));
+          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), trackData.getIndex(1).getPosition(), trackData, true, getConfiguration()));
+          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, getConfiguration()));
           break;
       }
     }
@@ -276,7 +276,7 @@ public class TrackCutter
                                     , final AudioInputStream audioInputStream
                                     ) throws IOException
   {
-    if (!this.configuration.getRedirectToPostprocessing())
+    if (!getConfiguration().getRedirectToPostprocessing())
     {
       // We're going to create target files, so make sure there's a directory for them.
       processAction.getCutFile().getParentFile().mkdirs();
@@ -370,5 +370,14 @@ public class TrackCutter
     long toAudioFramePos = getAudioFormatFrames(toPosition, audioInputStream.getFormat());
     audioInputStream.skip((toAudioFramePos - currentAudioFramePos)  * audioInputStream.getFormat().getFrameSize());
     return toAudioFramePos;
+  }
+  
+  /**
+   * Get the configuration for this TrackCutter.
+   * @return The configuration for this TrackCutter.
+   */
+  private TrackCutterConfiguration getConfiguration()
+  {
+    return this.configuration;
   }
 }
