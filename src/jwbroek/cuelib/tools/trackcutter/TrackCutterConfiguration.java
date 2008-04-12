@@ -77,7 +77,7 @@ public class TrackCutterConfiguration
     replacements.put("<comment>", "%5$s");
     replacements.put("<track>", "%6$s");
     replacements.put("<genre>", "%7$s");
-    replacements.put("<targetFile>", "%8$s");
+    replacements.put("<cutFile>", "%8$s");
     replacements.put("<postProcessFile>", "%9$s");
     return replacements;
   }
