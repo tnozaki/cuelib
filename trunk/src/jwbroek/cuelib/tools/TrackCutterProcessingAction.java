@@ -23,17 +23,54 @@ import java.io.File;
 import jwbroek.cuelib.Position;
 import jwbroek.cuelib.TrackData;
 
+/**
+ * Represents a processing action for a TrackCutter instance.
+ * @author jwbroek
+ */
 public class TrackCutterProcessingAction
 {
+  /**
+   * Starting position for the track.
+   */
   private Position startPosition;
+  /**
+   * Ending position for the track.
+   */
   private Position endPosition;
+  /**
+   * The corresponding TrackData instance.
+   */
   private TrackData trackData;
+  /**
+   * Whether or not this action concerns the pregap of a track. (These may be treated as separate tracks.
+   */
   private boolean isPregap;
+  /**
+   * The configuration of the TrackCutter. Undefined behavior occurs when the configuration does not
+   * match the configuration of the TrackCutter.
+   */
   private TrackCutterConfiguration configuration;
-  private File targetFile = null;
+  /**
+   * The target file for the cutting operation.
+   */
+  private File cutFile = null;
+  /**
+   * The target file for the post-processing operation.
+   */
   private File postProcessFile = null;
+  /**
+   * The post-processing command.
+   */
   private String postProcessingCommand = null;
   
+  /**
+   * 
+   * @param startPosition
+   * @param endPosition
+   * @param trackData
+   * @param isPregap
+   * @param configuration
+   */
   public TrackCutterProcessingAction
     ( Position startPosition
     , Position endPosition
@@ -49,14 +86,14 @@ public class TrackCutterProcessingAction
     this.configuration = configuration;
   }
   
-  public File getTargetFile()
+  public File getCutFile()
   {
-    if (this.targetFile == null)
+    if (this.cutFile == null)
     {
-      this.targetFile = this.configuration.getTargetFile(this);
+      this.cutFile = this.configuration.getCutFile(this);
     }
     
-    return this.targetFile;
+    return this.cutFile;
   }
   
   public File getPostProcessFile()

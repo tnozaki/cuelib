@@ -230,7 +230,7 @@ public class TrackCutter
     if (!this.configuration.getRedirectToPostprocessing())
     {
       // We're going to create target files, so make sure there's a directory for them.
-      processAction.getTargetFile().getParentFile().mkdirs();
+      processAction.getCutFile().getParentFile().mkdirs();
     }
     
     if (configuration.getDoPostProcessing() && configuration.getRedirectToPostprocessing())
@@ -253,7 +253,7 @@ public class TrackCutter
     }
     else
     {
-      AudioSystem.write(audioInputStream, configuration.getTargetType(), processAction.getTargetFile());
+      AudioSystem.write(audioInputStream, configuration.getTargetType(), processAction.getCutFile());
       
       if (configuration.getDoPostProcessing())
       {
