@@ -63,7 +63,7 @@ public class TrackCutterCommand
           {
             // Create a target file. This implies no streaming to the postprocessor.
             TrackCutterCommand.this.getConfiguration().setRedirectToPostprocessing(false);
-            TrackCutterCommand.this.getConfiguration().setTargetFileNameTemplate(options[offset+1]);
+            TrackCutterCommand.this.getConfiguration().setCutFileNameTemplate(options[offset+1]);
             return offset+2;
           }
         }
@@ -142,7 +142,7 @@ public class TrackCutterCommand
               TrackCutterCommand.this.getConfiguration().setPregapHandling(PregapHandling.SEPARATE);
               TrackCutterCommand.this.getConfiguration().setPregapPostProcessFileNameTemplate(options[offset + 2]);
               TrackCutterCommand.this.getConfiguration().setPregapPostProcessCommandTemplate(options[offset + 3]);
-              TrackCutterCommand.this.getConfiguration().setPregapTargetFileNameTemplate(options[offset + 4]);
+              TrackCutterCommand.this.getConfiguration().setPregapCutFileNameTemplate(options[offset + 4]);
               return offset+5;
             }
             else

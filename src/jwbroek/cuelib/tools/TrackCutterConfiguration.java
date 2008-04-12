@@ -44,12 +44,12 @@ public class TrackCutterConfiguration
   private boolean redirectStdOut = false;
   private boolean doPostProcessing = false;
   private boolean redirectToPostprocessing = false;
-  private String targetFileNameTemplate = "<artist>_<album>_<track>_<title>.wav";
+  private String cutFileNameTemplate = "<artist>_<album>_<track>_<title>.wav";
   private String postProcessFileNameTemplate = "<artist>/<album>/<track>_<title>.mp3";
   private String postProcessCommandTemplate =
     "C:\\lame\\lame.exe --vbr-new -V 0 -t --tt \"<title>\" --ta \"<artist>\" --tl \"<album>\" --ty \"<year>\""
     + " --tc \"<comment>\" --tn \"<track>\" --tg \"<genre>\" \"<targetFile>\" \"<postProcessFile>\"";
-  private String pregapTargetFileNameTemplate = "<artist>_<album>_<track>__pre_<title>.wav";
+  private String pregapCutFileNameTemplate = "<artist>_<album>_<track>__pre_<title>.wav";
   private String pregapPostProcessFileNameTemplate = "<artist>/<album>/<track>__pre_<title>.mp3";
   private String pregapPostProcessCommandTemplate =
     "C:\\lame\\lame.exe --vbr-new -V 0 -t --tt \"Pregap of <title>\" --ta \"<artist>\" --tl \"<album>\" --ty \"<year>\""
@@ -187,12 +187,12 @@ public class TrackCutterConfiguration
     return targetFile;
   }
 
-  public File getTargetFile(TrackCutterProcessingAction processAction)
+  public File getCutFile(TrackCutterProcessingAction processAction)
   {
     TrackData trackData = processAction.getTrackData();
     
     String fileNameTemplate =
-      processAction.getIsPregap()?this.getPregapTargetFileNameTemplate():this.getTargetFileNameTemplate();
+      processAction.getIsPregap()?this.getPregapCutFileNameTemplate():this.getCutFileNameTemplate();
     
     return getFileFromTemplate(trackData, fileNameTemplate);
   }
@@ -215,7 +215,7 @@ public class TrackCutterConfiguration
     String processCommand = getExpandedProcessCommand
       ( trackData
       , commandTemplate
-      , processAction.getTargetFile().getPath()
+      , processAction.getCutFile().getPath()
       , processAction.getPostProcessFile().getPath()
       );
     
@@ -327,19 +327,19 @@ public class TrackCutterConfiguration
   }
 
   /**
-   * @return the targetFileNameTemplate
+   * @return the cutFileNameTemplate
    */
-  public String getTargetFileNameTemplate()
+  public String getCutFileNameTemplate()
   {
-    return targetFileNameTemplate;
+    return cutFileNameTemplate;
   }
 
   /**
-   * @param targetFileNameTemplate the targetFileNameTemplate to set
+   * @param cutFileNameTemplate the cutFileNameTemplate to set
    */
-  public void setTargetFileNameTemplate(String targetFileNameTemplate)
+  public void setCutFileNameTemplate(String targetFileNameTemplate)
   {
-    this.targetFileNameTemplate = targetFileNameTemplate;
+    this.cutFileNameTemplate = targetFileNameTemplate;
   }
 
   /**
@@ -426,18 +426,18 @@ public class TrackCutterConfiguration
   }
 
   /**
-   * @return the pregapTargetFileNameTemplate
+   * @return the pregapCutFileNameTemplate
    */
-  public String getPregapTargetFileNameTemplate()
+  public String getPregapCutFileNameTemplate()
   {
-    return pregapTargetFileNameTemplate;
+    return pregapCutFileNameTemplate;
   }
 
   /**
-   * @param pregapTargetFileNameTemplate the pregapTargetFileNameTemplate to set
+   * @param pregapCutFileNameTemplate the pregapCutFileNameTemplate to set
    */
-  public void setPregapTargetFileNameTemplate(String pregapTargetFileNameTemplate)
+  public void setPregapCutFileNameTemplate(String pregapTargetFileNameTemplate)
   {
-    this.pregapTargetFileNameTemplate = pregapTargetFileNameTemplate;
+    this.pregapCutFileNameTemplate = pregapTargetFileNameTemplate;
   }
 }
