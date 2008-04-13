@@ -55,6 +55,10 @@ public class TrackCutterConfiguration
    */
   private PregapHandling pregapHandling = PregapHandling.DISCARD;
   /**
+   * Only process pregaps with a frame length greater than this.
+   */
+  private long pregapFrameLengthThreshold = 0;
+  /**
    * Audio type to convert to.
    */
   private AudioFileFormat.Type targetType = AudioFileFormat.Type.WAVE;
@@ -553,5 +557,23 @@ public class TrackCutterConfiguration
   public void setPregapPostProcessCommandTemplate(final String pregapPostProcessCommandTemplate)
   {
     this.pregapPostProcessCommandTemplate = pregapPostProcessCommandTemplate;
+  }
+
+  /**
+   * Get the threshold on pregaps in frame length. Pregaps shorter than this will not be processed.
+   * @return The threshold on pregaps in frame length.
+   */
+  public long getPregapFrameLengthThreshold()
+  {
+    return pregapFrameLengthThreshold;
+  }
+
+  /**
+   * Set the threshold on pregaps in frame length. Pregaps shorter than this will not be processed.
+   * @param pregapFrameLengthThreshold The threshold on pregaps in frame length.
+   */
+  public void setPregapFrameLengthThreshold(final long pregapFrameLengthThreshold)
+  {
+    this.pregapFrameLengthThreshold = pregapFrameLengthThreshold;
   }
 }
