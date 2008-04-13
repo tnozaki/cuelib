@@ -54,7 +54,8 @@ public class TrackCutterCommand
     System.out.println("Syntax: [options] cuefiles");
     System.out.println("Options:");
     System.out.println(" -f file             Template for file name. Implies no redirect to post-processing.");
-    System.out.println(" -t type             Audio type.");
+    System.out.println(" -t type             Audio type to convert to. Valid types are AIFC, AIFF, AU, SND, WAVE.");
+    System.out.println("                     Not all conversions may be supported.");
     System.out.println(" -p file command     Template for post-processing file name and command.");
     System.out.println(" -g type [templates] Pregap handling. Choose from \"prepend\", \"discard\", \"separate\"");
     System.out.println("                     If \"separate\" is chosen, you must also specify templates for file");
@@ -84,7 +85,7 @@ public class TrackCutterCommand
     System.out.println(" Cut the tracks in a cue sheet and prepend the pregaps:");
     System.out.println("  -p prepend \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
     System.out.println(" Cut the tracks in a cue sheet and prepend pregaps longer than 3 seconds:");
-    System.out.println("  -p prepend -t 00:02:00 \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
+    System.out.println("  -p prepend -pt 00:02:00 \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
     System.out.println(" Cut the tracks in a cue sheet and give them names based on the data in the sheet:");
     System.out.println("  -f \"<artist>\\<album>\\<track>_<title>.wav\" \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
     System.out.println(" Cut the tracks with separate pregaps, convert to WAV format, and redirect to lame while");
