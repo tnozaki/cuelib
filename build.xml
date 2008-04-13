@@ -3,7 +3,7 @@
 	<tstamp>
 		<format property="release.date" pattern="yyyy-MM-dd"/>
 	</tstamp>
-	<property name="release.version" value="1.1.0"/>
+	<property name="release.version" value="1.1.1"/>
 	<property name="release.printname" value="Cuelib version ${release.version}"/>
 	<property name="src" value="src"/>
 	<property name="bin" value="bin"/>
