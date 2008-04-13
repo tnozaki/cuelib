@@ -37,7 +37,7 @@ import jwbroek.util.StringReplacer;
 public class TrackCutterConfiguration
 {
   /**
-   * Allowed moded for pregap handling.
+   * Allowed modes for pregap handling.
    */
   public enum PregapHandling
   {
