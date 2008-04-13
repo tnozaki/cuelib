@@ -51,11 +51,26 @@ public class SimpleOptionsParser
   /**
    * <p>Register an option with the parser. If the option is found, then the specified handler will be called.</p>
    * @param optionKey The option to be registered. For instance "-a".
-   * @param handler The handler to handle this option. 
+   * @param handler The handler to handle this option.
+   * @deprecated The prefered method is {@link #registerOption(jwbroek.util.SimpleOptionsParser.OptionHandler, String[])}.
    */
   public void registerOption(String optionKey, OptionHandler handler)
   {
     this.optionHandlers.put(optionKey, handler);
+  }
+  
+  /**
+   * <p>Register options with identical handler with the parser. When one of the the options is found,
+   * the specified handler will be called.</p>
+   * @param optionKeys The options to be registered. For instance "-a", "--alpha".
+   * @param handler The handler to handle these options. 
+   */
+  public void registerOption(OptionHandler handler, String ... optionKeys)
+  {
+    for (String optionKey : optionKeys)
+    {
+      this.optionHandlers.put(optionKey, handler);
+    }
   }
   
   /**

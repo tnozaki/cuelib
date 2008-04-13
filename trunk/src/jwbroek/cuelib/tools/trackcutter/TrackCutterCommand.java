@@ -37,6 +37,11 @@ public class TrackCutterCommand
    * The configuration for the TrackCutter. Will be modified based on the command line arguments.
    */
   private TrackCutterConfiguration configuration= new TrackCutterConfiguration();
+  /**
+   * Whether or not to do any processing. Can be set to false by options such as "-?" to indicate that
+   * no actual processing should be done. 
+   */
+  private boolean doProcessing = true;
   
   /**
    * Create a new TrackCutterCommand instance. 
@@ -67,6 +72,7 @@ public class TrackCutterCommand
     System.out.println(" -s                  Redirect audio to post-processing step.");
     System.out.println(" -ro                 Redirect output of post-processing step to log file.");
     System.out.println(" -re                 Redirect error output of post-processing step to log file.");
+    System.out.println(" -? | --help         Displays this help message and exits.");
     System.out.println("Templates:");
     System.out.println(" <title>             Title of the track.");
     System.out.println(" <artist>            Artist of the track, or artist of the album, if unknown.");
@@ -110,8 +116,7 @@ public class TrackCutterCommand
   {
     SimpleOptionsParser argumentsParser = new SimpleOptionsParser();
     argumentsParser.registerOption
-      ( "-f"
-      , new SimpleOptionsParser.OptionHandler()
+      ( new SimpleOptionsParser.OptionHandler()
         {
           public int handleOption(String [] options, int offset)
           {
@@ -121,10 +126,10 @@ public class TrackCutterCommand
             return offset+2;
           }
         }
+      , "-f"
       );
     argumentsParser.registerOption
-      ( "-t"
-      , new SimpleOptionsParser.OptionHandler()
+      ( new SimpleOptionsParser.OptionHandler()
         {
           public int handleOption(String [] options, int offset)
           {
@@ -159,10 +164,10 @@ public class TrackCutterCommand
             return offset+2;
           }
         }
+      , "-t"
       );
     argumentsParser.registerOption
-      ( "-p"
-      , new SimpleOptionsParser.OptionHandler()
+      ( new SimpleOptionsParser.OptionHandler()
         {
           public int handleOption(String [] options, int offset)
           {
@@ -173,10 +178,10 @@ public class TrackCutterCommand
             return offset+3;
           }
         }
+      , "-p"
       );
     argumentsParser.registerOption
-      ( "-g"
-      , new SimpleOptionsParser.OptionHandler()
+      ( new SimpleOptionsParser.OptionHandler()
         {
           public int handleOption(String [] options, int offset)
           {
@@ -205,10 +210,10 @@ public class TrackCutterCommand
             }
           }
         }
+      , "-g"
       );
     argumentsParser.registerOption
-      ( "-s"
-      , new SimpleOptionsParser.OptionHandler()
+      ( new SimpleOptionsParser.OptionHandler()
         {
           public int handleOption(String [] options, int offset)
           {
@@ -217,10 +222,10 @@ public class TrackCutterCommand
             return offset+1;
           }
         }
+      , "-s"
       );
     argumentsParser.registerOption
-      ( "-pt"
-      , new SimpleOptionsParser.OptionHandler()
+      ( new SimpleOptionsParser.OptionHandler()
         {
           public int handleOption(String [] options, int offset)
           {
@@ -232,10 +237,10 @@ public class TrackCutterCommand
             return offset+2;
           }
         }
+      , "-pt"
       );
     argumentsParser.registerOption
-      ( "-ro"
-      , new SimpleOptionsParser.OptionHandler()
+      ( new SimpleOptionsParser.OptionHandler()
         {
           public int handleOption(String [] options, int offset)
           {
@@ -244,10 +249,10 @@ public class TrackCutterCommand
             return offset+1;
           }
         }
+      , "-ro"
       );
     argumentsParser.registerOption
-      ( "-re"
-      , new SimpleOptionsParser.OptionHandler()
+      ( new SimpleOptionsParser.OptionHandler()
         {
           public int handleOption(String [] options, int offset)
           {
@@ -256,6 +261,21 @@ public class TrackCutterCommand
             return offset+1;
           }
         }
+      , "-re"
+      );
+    argumentsParser.registerOption
+      ( new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
+            // Display help message.
+            TrackCutterCommand.printHelp();
+            // Don't do any processing.
+            TrackCutterCommand.this.setDoProcessing(false);
+            return offset+1;
+          }
+        }
+      , "-?", "--help"
       );
     
     return argumentsParser;
@@ -275,24 +295,31 @@ public class TrackCutterCommand
     if (firstFileIndex == -1 || firstFileIndex == args.length)
     {
       // Something went wrong, or no files were specified.
+      System.err.println("A problem occurred when parsing the command line arguments. Please check for syntax.");
       printHelp();
       return;
     }
     
-    // Process all files in turn.
-    for (int fileIndex = firstFileIndex; fileIndex < args.length; fileIndex++)
+    if (this.getDoProcessing())
     {
-      File cueFile = new File(args[fileIndex]);
-      
-      try
+      // Process all files in turn.
+      for (int fileIndex = firstFileIndex; fileIndex < args.length; fileIndex++)
       {
-        cutter.cutTracksInCueSheet(cueFile);
-      }
-      catch (Exception e)
-      {
-        e.printStackTrace();
+        File cueFile = new File(args[fileIndex]);
+        
+        try
+        {
+          cutter.cutTracksInCueSheet(cueFile);
+        }
+        catch (Exception e)
+        {
+          e.printStackTrace();
+        }
       }
     }
+    
+    // Set doProcessing to true, as someone may want to reuse this instance.
+    this.setDoProcessing(true);
   }
 
   /**
@@ -311,5 +338,23 @@ public class TrackCutterCommand
   private TrackCutterConfiguration getConfiguration()
   {
     return this.configuration;
+  }
+  
+  /**
+   * Get whether or not to do any processing.
+   * @return Whether or not to do any processing.
+   */
+  private boolean getDoProcessing()
+  {
+    return this.doProcessing;
+  }
+
+  /**
+   * Set whether or not to do any processing.
+   * @param doProcessing Whether or not to do any processing.
+   */
+  private void setDoProcessing(final boolean doProcessing)
+  {
+    this.doProcessing = doProcessing;
   }
 }
