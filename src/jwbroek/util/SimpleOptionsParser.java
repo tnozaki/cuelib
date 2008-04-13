@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Simple parser for parsing options (typically command line arguments).
+ * Simple parser for options (typically command line arguments).
  * @author jwbroek
  */
 public class SimpleOptionsParser
