@@ -223,12 +223,29 @@ public class TrackCutter
           processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, getConfiguration()));
           break;
         case PREPEND:
-          // Prepend the pregap.
-          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), nextPosition, trackData, false, getConfiguration()));
+          // Prepend the pregap, if long enough.
+          if  ( trackData.getIndex(1).getPosition().getTotalFrames()
+              - trackData.getIndex(0).getPosition().getTotalFrames()
+              >= this.getConfiguration().getPregapFrameLengthThreshold()
+              )
+          {
+            processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), nextPosition, trackData, true, getConfiguration()));
+          }
+          else
+          {
+            processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, getConfiguration()));
+          }
           break;
         case SEPARATE:
           // Add pregap and track as separate tracks.
-          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), trackData.getIndex(1).getPosition(), trackData, true, getConfiguration()));
+          // Prepend the pregap, if long enough.
+          if  ( trackData.getIndex(1).getPosition().getTotalFrames()
+              - trackData.getIndex(0).getPosition().getTotalFrames()
+              >= this.getConfiguration().getPregapFrameLengthThreshold()
+              )
+          {
+            processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), trackData.getIndex(1).getPosition(), trackData, true, getConfiguration()));
+          }
           processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, getConfiguration()));
           break;
       }

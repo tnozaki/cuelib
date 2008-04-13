@@ -19,9 +19,11 @@
 package jwbroek.cuelib.tools.trackcutter;
 
 import java.io.File;
+import java.util.Scanner;
 
 import javax.sound.sampled.AudioFileFormat;
 
+import jwbroek.cuelib.Position;
 import jwbroek.cuelib.tools.trackcutter.TrackCutterConfiguration.PregapHandling;
 import jwbroek.util.SimpleOptionsParser;
 
@@ -59,6 +61,8 @@ public class TrackCutterCommand
     System.out.println("                     name, command, and name for intermediate file. The latter options will");
     System.out.println("                     not be used if redirect is enabled for post-processing. It must still be");
     System.out.println("                     specified.");
+    System.out.println(" -pt length          Threshold for pregap processing. Pregaps with length shorter than this");
+    System.out.println("                     will not be processed. Length as per the position field in cue sheets.");
     System.out.println(" -s                  Redirect audio to post-processing step.");
     System.out.println(" -ro                 Redirect output of post-processing step to log file.");
     System.out.println(" -re                 Redirect error output of post-processing step to log file.");
@@ -77,8 +81,10 @@ public class TrackCutterCommand
     System.out.println("Examples:");
     System.out.println(" Cut the tracks in a cue sheet:");
     System.out.println("  \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
-    System.out.println(" Cut the tracks in a cue sheet and append the pregaps:");
-    System.out.println("  -p append \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
+    System.out.println(" Cut the tracks in a cue sheet and prepend the pregaps:");
+    System.out.println("  -p prepend \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
+    System.out.println(" Cut the tracks in a cue sheet and prepend pregaps longer than 3 seconds:");
+    System.out.println("  -p prepend -t 00:02:00 \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
     System.out.println(" Cut the tracks in a cue sheet and give them names based on the data in the sheet:");
     System.out.println("  -f \"<artist>\\<album>\\<track>_<title>.wav\" \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
     System.out.println(" Cut the tracks with separate pregaps, convert to WAV format, and redirect to lame while");
@@ -208,6 +214,21 @@ public class TrackCutterCommand
             // Stream to postprocessor
             TrackCutterCommand.this.getConfiguration().setRedirectToPostprocessing(true);
             return offset+1;
+          }
+        }
+      );
+    argumentsParser.registerOption
+      ( "-pt"
+      , new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
+            // Set frame length threshold for pregap handling.
+            Scanner scanner = new Scanner(options[offset+1]).useDelimiter(":");
+            Position thresholdPosition = new Position(scanner.nextInt(), scanner.nextInt(), scanner.nextInt());
+            scanner.close();
+            TrackCutterCommand.this.getConfiguration().setPregapFrameLengthThreshold(thresholdPosition.getTotalFrames());
+            return offset+2;
           }
         }
       );
