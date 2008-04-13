@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="cuelib" default="makeDist" basedir=".">
+	<tstamp>
+		<format property="release.date" pattern="yyyy-MM-dd"/>
+	</tstamp>
+	<property name="release.version" value="1.1.1"/>
+	<property name="release.printname" value="Cuelib version ${release.version}"/>
+	<property name="src" value="src"/>
+	<property name="bin" value="bin"/>
+	<property name="dist" value="dist"/>
+	<property name="doc" value="doc"/>
+	<target name="compile" depends="binDir">
+		<javac srcdir="${src}" destdir="${bin}"/>
+	</target>
+	<target name="binDir">
+		<mkdir dir="${bin}"/>
+	</target>
+	<target name="distDir">
+		<mkdir dir="${dist}"/>
+	</target>
+	<target name="docDir">
+		<mkdir dir="${doc}"/>
+	</target>
+	<target name="makeDoc" depends="docDir">
+		<javadoc destDir="${doc}" Windowtitle="${elease.printname}">
+			<fileset includes="**/*.java" dir="${src}"/>
+		</javadoc>
+	</target>
+	<target name="makeJar" depends="compile, distDir">
+		<jar	jarfile="${dist}/cuelib-${release.version}-${release.date}.jar"
+				includes="**/*.class"
+				basedir="${bin}"
+				index="true"
+		>
+			<metainf includes="lgpl-2.1.txt" dir="${basedir}"/>
+		</jar>
+	</target>
+	<target name="clean">
+		<delete dir="${bin}"/>
+		<delete dir="${dist}"/>
+		<delete dir="${doc}"/>
+	</target>
+	<target name="zipDocs" depends="makeDoc, distDir">
+		<zip zipfile="${dist}/cuelib-docs-${release.version}-${release.date}.zip" includes="**/*" basedir="${doc}">
+			<fileset includes="lgpl-2.1.txt" dir="${basedir}"/>
+		</zip>
+	</target>
+	<target name="zipSources" depends="distDir">
+		<zip	zipfile="${dist}/cuelib-src-${release.version}-${release.date}.zip"
+				includes="src/**/*"
+				basedir="${basedir}"
+		>
+			<fileset includes="lgpl-2.1.txt" dir="${basedir}"/>
+			<fileset includes="build.xml" dir="${basedir}"/>
+		</zip>
+	</target>
+	<target name="makeDist" depends="clean, makeJar, zipDocs, zipSources"/>
+</project>
