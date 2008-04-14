@@ -1,0 +1,21 @@
+#labels Phase-Design
+#Cuelib changelog
+
+=Cuelib changelog=
+
+==1.1.1==
+_2008-04-13_
+  * TrackCutter tool now has an option to disregard pregaps with length below some threshold.
+  * Minor correction in TrackCutterCommand help message.
+  * TrackCutterCommand now has an explicit "help" option.
+
+==1.1.0==
+_2008-04-12_
+  * Added a TrackCutter command line tool that can create individual tracks based on the information in a cue sheet. Includes support for post-processing (for instance, by encoding with LAME), tracks hidden in pregaps, basic audio format conversions.
+  * Added a serializer that writes to XML.
+  * Added a convenient method for getting various metadata cue sheets.
+*Note: cue sheet data structure is slightly incompatible with 1.0.0, due to different constructors.*
+
+==1.0.0==
+_2008-02-11_
+  * Initial release. Includes data structures for an internal representation of cue sheets, a parser, and a serializer.
