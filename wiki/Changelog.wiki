@@ -8,6 +8,11 @@ _2008-04-13_
   * TrackCutter tool now has an option to disregard pregaps with length below some threshold.
   * Minor correction in TrackCutterCommand help message.
   * TrackCutterCommand now has an explicit "help" option.
+===Links===
+  * [Binaries http://cuelib.googlecode.com/files/cuelib-1.1.1-2008-04-13.jar]
+  * [Documentation http://cuelib.googlecode.com/files/cuelib-docs-1.1.1-2008-04-13.jar]
+  * [Source http://cuelib.googlecode.com/files/cuelib-src-1.1.1-2008-04-13.jar]
+  * [SVN http://cuelib.googlecode.com/svn/tags/1.1.1/]
 
 ==1.1.0==
 _2008-04-12_
@@ -15,7 +20,17 @@ _2008-04-12_
   * Added a serializer that writes to XML.
   * Added a convenient method for getting various metadata cue sheets.
 *Note: cue sheet data structure is slightly incompatible with 1.0.0, due to different constructors.*
+===Links===
+  * [Binaries http://cuelib.googlecode.com/files/cuelib-1.1.0-2008-04-12.jar]
+  * [Documentation http://cuelib.googlecode.com/files/cuelib-docs-1.1.0-2008-04-12.jar]
+  * [Source http://cuelib.googlecode.com/files/cuelib-src-1.1.0-2008-04-12.jar]
+  * [SVN http://cuelib.googlecode.com/svn/tags/1.1.0/]
 
 ==1.0.0==
 _2008-02-11_
   * Initial release. Includes data structures for an internal representation of cue sheets, a parser, and a serializer.
+===Links===
+  * [Binaries http://cuelib.googlecode.com/files/cuelib-1.0-2008-02-11.jar]
+  * [Documentation http://cuelib.googlecode.com/files/cuelib-docs-1.0.0-2008-02-12.zip]
+  * [Source http://cuelib.googlecode.com/files/cuelib-src-1.0.0-2008-02-12.zip]
+  * [SVN http://cuelib.googlecode.com/svn/tags/1.0.0/]
