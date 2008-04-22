@@ -5,10 +5,10 @@
 
 ==1.1.1==
 _2008-04-13_
-  * TrackCutter tool now has an option to disregard pregaps with length below some threshold.
-  * Minor correction in TrackCutterCommand help message.
+  * !TrackCutter tool now has an option to disregard pregaps with length below some threshold.
+  * Minor correction in !TrackCutterCommand help message.
   * TrackCutterCommand now has an explicit "help" option.
-_Links_
+====Links====
   * [http://cuelib.googlecode.com/files/cuelib-1.1.1-2008-04-13.jar Binaries]
   * [http://cuelib.googlecode.com/files/cuelib-docs-1.1.1-2008-04-13.zip Documentation]
   * [http://cuelib.googlecode.com/files/cuelib-src-1.1.1-2008-04-13.zip Source]
@@ -16,11 +16,11 @@ _Links_
 
 ==1.1.0==
 _2008-04-12_
-  * Added a TrackCutter command line tool that can create individual tracks based on the information in a cue sheet. Includes support for post-processing (for instance, by encoding with LAME), tracks hidden in pregaps, basic audio format conversions.
+  * Added a !TrackCutter command line tool that can create individual tracks based on the information in a cue sheet. Includes support for post-processing (for instance, by encoding with LAME), tracks hidden in pregaps, basic audio format conversions.
   * Added a serializer that writes to XML.
   * Added a convenient method for getting various metadata cue sheets.
 *Note: cue sheet data structure is slightly incompatible with 1.0.0, due to different constructors.*
-_Links_
+====Links====
   * [http://cuelib.googlecode.com/files/cuelib-1.1.0-2008-04-12.jar Binaries]
   * [http://cuelib.googlecode.com/files/cuelib-docs-1.1.0-2008-04-12.zip Documentation]
   * [http://cuelib.googlecode.com/files/cuelib-src-1.1.0-2008-04-12.zip Source]
@@ -29,7 +29,7 @@ _Links_
 ==1.0.0==
 _2008-02-11_
   * Initial release. Includes data structures for an internal representation of cue sheets, a parser, and a serializer.
-_Links_
+====Links====
   * [http://cuelib.googlecode.com/files/cuelib-1.0-2008-02-11.jar Binaries]
   * [http://cuelib.googlecode.com/files/cuelib-docs-1.0.0-2008-02-12.zip Documentation]
   * [http://cuelib.googlecode.com/files/cuelib-src-1.0.0-2008-02-12.zip Source]
