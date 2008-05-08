@@ -94,7 +94,7 @@ public class SimpleOptionsParser
     int currentOffset = offset;
     OptionHandler currentHandler = null;
     
-    while (offset < options.length)
+    while (currentOffset < options.length)
     {
       currentHandler = this.optionHandlers.get(options[currentOffset]);
       
