@@ -19,12 +19,19 @@
 package jwbroek.cuelib.tools.trackcutter;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.sound.sampled.AudioFileFormat;
 
 import jwbroek.cuelib.Position;
 import jwbroek.cuelib.tools.trackcutter.TrackCutterConfiguration.PregapHandling;
+import jwbroek.io.FileSelector;
 import jwbroek.util.SimpleOptionsParser;
 
 /**
@@ -42,6 +49,22 @@ public class TrackCutterCommand
    * no actual processing should be done. 
    */
   private boolean doProcessing = true;
+  /**
+   * Recursion depth for file selection.
+   */
+  private long recursionDepth = 1;
+  /**
+   * Pattern that paths of files must match in order for the file to be selected..
+   */
+  private Pattern pathSelectionPattern = null;
+  /**
+   * Pattern that file names must match in order for the file to be selected.
+   */
+  private Pattern fileNameSelectionPattern = null;
+  /**
+   * Base directory for file selection. Default is the directory from which the java VM was started.
+   */
+  private File selectionBaseDirectory = new File(System.getProperty("user.dir"));
   
   /**
    * Create a new TrackCutterCommand instance. 
@@ -56,8 +79,24 @@ public class TrackCutterCommand
    */
   private static void printHelp()
   {
-    System.out.println("Syntax: [options] cuefiles");
+    System.out.println("Syntax: [options] [cuefiles]");
+    System.out.println("cuefiles need not be specified if the -fp or -pp option is used.");
     System.out.println("Options:");
+    System.out.println(" -pf regex           Process files such that their names match the specified regular");
+    System.out.println("                     expression. This is in addition to files specified as parameter.");
+    System.out.println("                     The regex is evaluated case-insensitively.");
+    System.out.println(" -pp regex           Process files such that their canonical paths match the specified");
+    System.out.println("                     regular expression. This is in addition to files specified as parameter.");
+    System.out.println("                     The regex is evaluated case-insensitively.");
+    System.out.println(" -pb directory       Base directory for file selection based on pattern.");
+    System.out.println(" -r                  Process directories recursively. Only applies when the -pf or -pp");
+    System.out.println("                     options are specified. Should not be used in combination with -rd.");
+    System.out.println(" -rd depth           Process directories recursively up to the specified depth. Files in the");
+    System.out.println("                     base directory are at depth 1. Only applies when the -pf or -pp options");
+    System.out.println("                     are used. Should not be used in combination with -r.");
+    System.out.println(" -b directory        Base directory for relative file references in cue sheet, and for relative");
+    System.out.println("                     output location. If not specified, the directory of the cue sheet will be");
+    System.out.println("                     used.");
     System.out.println(" -f file             Template for file name. Implies no redirect to post-processing.");
     System.out.println(" -t type             Audio type to convert to. Valid types are AIFC, AIFF, AU, SND, WAVE.");
     System.out.println("                     Not all conversions may be supported.");
@@ -106,6 +145,10 @@ public class TrackCutterCommand
     System.out.println("  --tl \\\"<album>\\\" --ty \\\"<year>\\\" --tc \\\"Pregap of <title>\\\" --tn \\\"<track>\\\" --tg");
     System.out.println("  \\\"<genre>\\\" - \\\"<postProcessFile>\\\"\"");
     System.out.println("  -s -ro -re -t WAVE \"c:\\tmp\\Skunk Anansie - Stoosh.cue\"");
+    System.out.println("Notes:");
+    System.out.println("No guarantees are made as to the order in which files are processed. Some effort is made");
+    System.out.println("to provent files from being processed more than once per run.");
+    System.out.println("Conflicting options may result in unpredictable behaviour.");
   }
   
   /**
@@ -115,6 +158,80 @@ public class TrackCutterCommand
   private SimpleOptionsParser getArgumentsParser()
   {
     SimpleOptionsParser argumentsParser = new SimpleOptionsParser();
+    argumentsParser.registerOption
+      ( new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
+            // Set selection pattern for file name.
+            TrackCutterCommand.this.setFileNameSelectionPattern
+              (Pattern.compile(options[offset+1], Pattern.CASE_INSENSITIVE));
+            return offset+2;
+          }
+        }
+      , "-pf"
+      );
+    argumentsParser.registerOption
+      ( new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
+            // Set selection pattern for file path.
+            TrackCutterCommand.this.setPathSelectionPattern
+              (Pattern.compile(options[offset+1], Pattern.CASE_INSENSITIVE));
+            return offset+2;
+          }
+        }
+      , "-pp"
+      );
+    argumentsParser.registerOption
+      ( new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
+            // Base directory for file selection.
+            TrackCutterCommand.this.setSelectionBaseDirectory(new File(options[offset+1]));
+            return offset+2;
+          }
+        }
+      , "-pb"
+      );
+    argumentsParser.registerOption
+      ( new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
+            // Recurse into subdirectories.
+            TrackCutterCommand.this.setRecursionDepth(Long.MAX_VALUE);
+            return offset+1;
+          }
+        }
+      , "-r"
+      );
+    argumentsParser.registerOption
+      ( new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
+            // Recurse into subdirectories.
+            TrackCutterCommand.this.setRecursionDepth(Long.parseLong(options[offset+1]));
+            return offset+2;
+          }
+        }
+      , "-rd"
+      );
+    argumentsParser.registerOption
+      ( new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
+            // Base directory for cue sheet processing.
+            TrackCutterCommand.this.getConfiguration().setParentDirectory(new File(options[offset+1]));
+            return offset+2;
+          }
+        }
+      , "-b"
+      );
     argumentsParser.registerOption
       ( new SimpleOptionsParser.OptionHandler()
         {
@@ -292,7 +409,12 @@ public class TrackCutterCommand
     
     int firstFileIndex = argumentsParser.parseOptions(args);
     
-    if (firstFileIndex == -1 || firstFileIndex == args.length)
+    if  (  firstFileIndex == -1
+        || (  firstFileIndex == args.length
+           && this.getFileNameSelectionPattern() == null
+           && this.getPathSelectionPattern() == null
+           )
+        )
     {
       // Something went wrong, or no files were specified.
       System.err.println("A problem occurred when parsing the command line arguments. Please check for syntax.");
@@ -302,11 +424,46 @@ public class TrackCutterCommand
     
     if (this.getDoProcessing())
     {
-      // Process all files in turn.
+      Set<File> fileSet = new HashSet<File>();
+      
+      // Add the explicitly specified files to the set.
       for (int fileIndex = firstFileIndex; fileIndex < args.length; fileIndex++)
       {
-        File cueFile = new File(args[fileIndex]);
-        
+        fileSet.add(new File(args[fileIndex]));
+      }
+      
+      // Add the files based on the specified selection criteria, if applicable.
+      List<FileFilter> fileFilters = new ArrayList<FileFilter>();
+      // Only select files.
+      fileFilters.add(FileSelector.getFilesFilter());
+      // Add filter for selection based on path, if applicable.
+      if (this.getPathSelectionPattern()!=null)
+      {
+        fileFilters.add(FileSelector.getPathPatternFilter(this.getPathSelectionPattern()));
+      }
+      // Add filter for selection based on file name, if applicable.
+      if (this.getFileNameSelectionPattern()!=null)
+      {
+        fileFilters.add(FileSelector.getFileNamePatternFilter(this.getFileNameSelectionPattern()));
+      }
+      // Only do a select if we have a filter other than the filter that accepts only files.
+      if (fileFilters.size() > 1)
+      {
+        List<File> fileList = new ArrayList<File>();
+        FileSelector.selectFiles
+          ( this.getSelectionBaseDirectory()
+          , FileSelector.getCombinedFileFilter(fileFilters)
+          , fileList
+          , this.getRecursionDepth()
+          , false
+          , true
+          );
+        fileSet.addAll(fileList);
+      }
+      
+      // Process all specified files.
+      for (File cueFile : fileSet)
+      {
         try
         {
           cutter.cutTracksInCueSheet(cueFile);
@@ -356,5 +513,85 @@ public class TrackCutterCommand
   private void setDoProcessing(final boolean doProcessing)
   {
     this.doProcessing = doProcessing;
+  }
+
+  /**
+   * Get the pattern that file names must pass in order for the file to be selected. If null,
+   * then there is no selection based on this criterium.
+   * @return The pattern that file names must pass in order for the file to be selected.
+   */
+  private Pattern getFileNameSelectionPattern()
+  {
+    return fileNameSelectionPattern;
+  }
+
+  /**
+   * Set the pattern that file names must pass in order for the file to be selected. If null,
+   * then there is no selection based on this criterium.
+   * @param fileNameSelectionPattern The pattern that file names must pass in order for the
+   * file to be selected.
+   */
+  private void setFileNameSelectionPattern(Pattern fileNameSelectionPattern)
+  {
+    this.fileNameSelectionPattern = fileNameSelectionPattern;
+  }
+
+  /**
+   * Get the pattern that paths must pass in order for the file to be selected. If null,
+   * then there is no selection based on this criterium.
+   * @return The pattern that paths must pass in order for the file to be selected.
+   */
+  private Pattern getPathSelectionPattern()
+  {
+    return this.pathSelectionPattern;
+  }
+
+  /**
+   * Set the pattern that paths must pass in order for the file to be selected. If null,
+   * then there is no selection based on this criterium.
+   * @param pathSelectionPattern The pattern that paths must pass in order for the
+   * file to be selected.
+   */
+  private void setPathSelectionPattern(Pattern pathSelectionPattern)
+  {
+    this.pathSelectionPattern = pathSelectionPattern;
+  }
+
+  /**
+   * Get the recursion depth for file selection.
+   * @return The recursion depth for file selection.
+   */
+  private long getRecursionDepth()
+  {
+    return this.recursionDepth;
+  }
+
+  /**
+   * Set the recursion depth for file selection.
+   * @param recurseIntoSubdirectories The recursion depth for file selection.
+   * @see FileSelector#selectFiles(File, FileFilter, List, long, boolean, boolean)
+   */
+  private void setRecursionDepth(long recursionDepth)
+  {
+    this.recursionDepth = recursionDepth;
+  }
+
+  /**
+   * Get the base directory for file selection.
+   * @return The base directory for file selection.
+   * @see FileSelector#selectFiles(File, FileFilter, List, long, boolean, boolean)
+   */
+  private File getSelectionBaseDirectory()
+  {
+    return this.selectionBaseDirectory;
+  }
+
+  /**
+   * Set the base directory for file selection.
+   * @param selectionBaseDirectory The base directory for file selection.
+   */
+  private void setSelectionBaseDirectory(File selectionBaseDirectory)
+  {
+    this.selectionBaseDirectory = selectionBaseDirectory;
   }
 }
