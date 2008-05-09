@@ -18,6 +18,8 @@
  */
 package jwbroek.io;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -58,6 +60,23 @@ public class StreamPiper implements Runnable
     this.from = from;
     this.to = to;
     this.closeOutput = closeOutput;
+  }
+  
+  /**
+   * Pipe the contents of the specified input stream to the specified file, or throw it away if the file is
+   * null.
+   * @param in The input to stream to file.
+   * @param file The file to pipe input to, or null if the input should be thrown away.
+   * @throws IOException
+   */
+  public static void pipeStream(final InputStream in, final File file) throws IOException
+  {
+    OutputStream out = null;
+    if (file!=null)
+    {
+      out = new FileOutputStream(file);
+    }
+    new Thread(new StreamPiper(in, out, true)).start();
   }
   
   /**

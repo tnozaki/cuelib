@@ -19,10 +19,10 @@
 package jwbroek.cuelib.tools.trackcutter;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,20 +68,27 @@ public class TrackCutter
    */
   public void cutTracksInCueSheet(final File cueFile) throws IOException
   {
+    this.getConfiguration().getLogger().info("Cutting tracks in cue sheet from file '" + cueFile.toString() + "'.");
+    
     CueSheet cueSheet = null;
     
     // If no parent directory specified, then set the parent directory of the cue file.
     if (getConfiguration().getParentDirectory()==null)
     {
       getConfiguration().setParentDirectory(cueFile.getParentFile());
+      this.getConfiguration().getLogger().fine
+        ("Have set base directory to directory of File  '" + cueFile.toString() + "'.");
     }
     
     try
     {
+      this.getConfiguration().getLogger().fine("Parsing cue sheet.");
       cueSheet = CueParser.parse(cueFile);
     }
     catch (IOException e)
     {
+      this.getConfiguration().getLogger().severe
+        ("Was unable to parse the cue sheet in file '" + cueFile.toString() + "'.");
       throw new IOException("Problem parsing cue file.", e);
     }
     
@@ -95,6 +102,8 @@ public class TrackCutter
    */
   public void cutTracksInCueSheet(final CueSheet cueSheet) throws IOException
   {
+    this.getConfiguration().getLogger().info("Cutting tracks in cue sheet.");
+    
     // We can process each file in the cue sheet independently.
     for (FileData fileData : cueSheet.getFileData())
     {
@@ -104,13 +113,14 @@ public class TrackCutter
       }
       catch (UnsupportedAudioFileException e)
       {
-        e.printStackTrace();
+        logCaughtException(e);
       }
       catch (IOException e)
       {
-        e.printStackTrace();
+        logCaughtException(e);
       }
     }
+    this.getConfiguration().getLogger().info("Done cutting tracks in cue sheet.");
   }
   
   /**
@@ -122,17 +132,20 @@ public class TrackCutter
   private void cutTracksInFileData(final FileData fileData)
     throws IOException, UnsupportedAudioFileException
   {
+    this.getConfiguration().getLogger().info("Cutting tracks from file: '" + fileData.getFile() + "'.");
     AudioInputStream audioInputStream = null;
     
     try
     {
       // Determine the complete path to the audio file.
+      this.getConfiguration().getLogger().fine("Determining complete path to audio file.");
       File audioFile = getConfiguration().getAudioFile(fileData);
       
       // Open the audio file.
       // Sadly, we can't do much with the file type information from the cue sheet, as javax.sound.sampled
       // needs more information before it can process a specific type of sound file. Best then to let it
       // determine all aspects of the audio type by itself.
+      this.getConfiguration().getLogger().fine("Opening audio stream.");
       audioInputStream = AudioSystem.getAudioInputStream(audioFile);
       
       // Current position in terms of the frames as per audioInputStream.getFrameLength().
@@ -154,6 +167,7 @@ public class TrackCutter
       if (audioInputStream!=null)
       {
         // Don't handle exceptions, as there's really nothing we can do about them.
+        this.getConfiguration().getLogger().fine("Closing audio stream.");
         audioInputStream.close();
       }
     }
@@ -166,6 +180,8 @@ public class TrackCutter
    */
   private List<TrackCutterProcessingAction> getProcessActionList(final FileData fileData)
   {
+    this.getConfiguration().getLogger().fine
+      ("Determining processing actions for file: '" + fileData.getFile() + "'.");
     List<TrackCutterProcessingAction> result = new ArrayList<TrackCutterProcessingAction>();
     TrackData previousTrackData = null;
     
@@ -209,6 +225,7 @@ public class TrackCutter
     , final List<TrackCutterProcessingAction> processActions
     )
   {
+    this.getConfiguration().getLogger().fine("Adding processing action for track #" + trackData.getNumber() + ".");
     if (trackData.getIndex(0) == null)
     {
       // No pregap to handle. Just process this track.
@@ -265,6 +282,9 @@ public class TrackCutter
                                     , final long currentAudioFramePos
                                     ) throws IOException
   {
+    this.getConfiguration().getLogger().fine
+      ("Determining audio substream for processing action for track #" + processAction.getTrackData().getNumber() + ".");
+    
     // Skip positions in the audioInputStream until we are at out starting position.
     long fromAudioFramePos = skipToPosition (processAction.getStartPosition(), audioInputStream, currentAudioFramePos);
     
@@ -293,9 +313,13 @@ public class TrackCutter
                                     , final AudioInputStream audioInputStream
                                     ) throws IOException
   {
+    this.getConfiguration().getLogger().info
+      ("Performing processing action for track #" + processAction.getTrackData().getNumber() + ".");
+    
     if (!getConfiguration().getRedirectToPostprocessing())
     {
       // We're going to create target files, so make sure there's a directory for them.
+      this.getConfiguration().getLogger().fine("Creating directory for target files.");
       processAction.getCutFile().getParentFile().mkdirs();
     }
     
@@ -305,6 +329,7 @@ public class TrackCutter
       
       try
       {
+        this.getConfiguration().getLogger().fine("Writing audio to postprocessor.");
         audioOutputStream = this.createPostProcessingProcess(processAction).getOutputStream();
         AudioSystem.write(audioInputStream, configuration.getTargetType(), audioOutputStream);
       }
@@ -313,16 +338,19 @@ public class TrackCutter
         if (audioOutputStream!=null)
         {
           // We can't do anything about any exceptions here, so we don't catch them.
+          this.getConfiguration().getLogger().fine("Closing audio stream.");
           audioOutputStream.close();
         }
       }
     }
     else
     {
+      this.getConfiguration().getLogger().fine("Writing audio to file.");
       AudioSystem.write(audioInputStream, configuration.getTargetType(), processAction.getCutFile());
       
       if (configuration.getDoPostProcessing())
       {
+        this.getConfiguration().getLogger().fine("Performing postprocessing.");
         this.createPostProcessingProcess(processAction);
       }
     }
@@ -338,30 +366,14 @@ public class TrackCutter
     ( final TrackCutterProcessingAction processAction
     ) throws IOException
   {
+    this.getConfiguration().getLogger().fine("Creating post-processing process for command: " + processAction.getPostProcessCommand());
     processAction.getPostProcessFile().getParentFile().mkdirs();
     Process process = Runtime.getRuntime().exec(processAction.getPostProcessCommand());
     
-    pipeStream(process.getInputStream(), processAction.getStdOutRedirectFile());
-    pipeStream(process.getErrorStream(), processAction.getErrRedirectFile());
+    StreamPiper.pipeStream(process.getInputStream(), processAction.getStdOutRedirectFile());
+    StreamPiper.pipeStream(process.getErrorStream(), processAction.getErrRedirectFile());
     
     return process;
-  }
-  
-  /**
-   * Pipe the contents of the specified input stream to the specified file, or throw it away if the file is
-   * null.
-   * @param in
-   * @param file The file to pipe input to, or null if the input should be thrown away.
-   * @throws IOException
-   */
-  private static void pipeStream(final InputStream in, final File file) throws IOException
-  {
-    OutputStream out = null;
-    if (file!=null)
-    {
-      out = new FileOutputStream(file);
-    }
-    new Thread(new StreamPiper(in, out, true)).start();
   }
   
   /**
@@ -378,6 +390,14 @@ public class TrackCutter
     return (long) Math.round(((double) audioFormat.getFrameRate())/75 * position.getTotalFrames());
   }
   
+  /**
+   * Skip to the specified position in the audio data.
+   * @param toPosition The position to skip to.
+   * @param audioInputStream The audio data to skip in.
+   * @param currentAudioFramePos The current position in frames in the audio data.
+   * @return The frame position in the audio data after skipping.
+   * @throws IOException
+   */
   private long skipToPosition
     ( Position toPosition
     , AudioInputStream audioInputStream
@@ -387,6 +407,20 @@ public class TrackCutter
     long toAudioFramePos = getAudioFormatFrames(toPosition, audioInputStream.getFormat());
     audioInputStream.skip((toAudioFramePos - currentAudioFramePos)  * audioInputStream.getFormat().getFrameSize());
     return toAudioFramePos;
+  }
+  
+  /**
+   * Log an exception that was caught.
+   * @param exception The exception that was caught and should now be logged.
+   */
+  private void logCaughtException(Exception exception)
+  {
+    this.getConfiguration().getLogger().severe
+      ("Encountered an " + exception.getClass().getCanonicalName() + ": " + exception.getMessage());
+    StringWriter writer = new StringWriter();
+    exception.printStackTrace(new PrintWriter(writer));
+    this.getConfiguration().getLogger().fine(writer.toString());
+    exception.printStackTrace();
   }
   
   /**

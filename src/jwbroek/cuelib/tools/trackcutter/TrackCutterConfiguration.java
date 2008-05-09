@@ -21,6 +21,7 @@ package jwbroek.cuelib.tools.trackcutter;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.sound.sampled.AudioFileFormat;
 
@@ -106,6 +107,10 @@ public class TrackCutterConfiguration
   private String pregapPostProcessCommandTemplate =
     "C:\\lame\\lame.exe --vbr-new -V 0 -t --tt \"Pregap of <title>\" --ta \"<artist>\" --tl \"<album>\" --ty \"<year>\""
     + " --tc \"Pregap of <title>\" --tn \"<track>\" --tg \"<genre>\" \"<targetFile>\" \"<postProcessFile>\"";
+  /**
+   * Logger to be used by TrackCutter.
+   */
+  private Logger logger = Logger.getLogger("jwbroek.cuelib.tools.trackcutter");
   
   /**
    * Replacer for the template values.
@@ -330,7 +335,7 @@ public class TrackCutterConfiguration
    */
   public File getParentDirectory()
   {
-    return parentDirectory;
+    return this.parentDirectory;
   }
 
   /**
@@ -348,7 +353,7 @@ public class TrackCutterConfiguration
    */
   public String getCutFileNameTemplate()
   {
-    return cutFileNameTemplate;
+    return this.cutFileNameTemplate;
   }
 
   /**
@@ -366,7 +371,7 @@ public class TrackCutterConfiguration
    */
   public String getPostProcessFileNameTemplate()
   {
-    return postProcessFileNameTemplate;
+    return this.postProcessFileNameTemplate;
   }
 
   /**
@@ -384,7 +389,7 @@ public class TrackCutterConfiguration
    */
   public String getPostProcessCommandTemplate()
   {
-    return postProcessCommandTemplate;
+    return this.postProcessCommandTemplate;
   }
 
   /**
@@ -402,7 +407,7 @@ public class TrackCutterConfiguration
    */
   public PregapHandling getPregapHandling()
   {
-    return pregapHandling;
+    return this.pregapHandling;
   }
 
   /**
@@ -420,7 +425,7 @@ public class TrackCutterConfiguration
    */
   public boolean getRedirectErr()
   {
-    return redirectErr;
+    return this.redirectErr;
   }
 
   /**
@@ -438,7 +443,7 @@ public class TrackCutterConfiguration
    */
   public boolean getRedirectStdOut()
   {
-    return redirectStdOut;
+    return this.redirectStdOut;
   }
 
   /**
@@ -456,7 +461,7 @@ public class TrackCutterConfiguration
    */
   public AudioFileFormat.Type getTargetType()
   {
-    return targetType;
+    return this.targetType;
   }
 
   /**
@@ -474,7 +479,7 @@ public class TrackCutterConfiguration
    */
   public boolean getDoPostProcessing()
   {
-    return doPostProcessing;
+    return this.doPostProcessing;
   }
 
   /**
@@ -492,7 +497,7 @@ public class TrackCutterConfiguration
    */
   public boolean getRedirectToPostprocessing()
   {
-    return redirectToPostprocessing;
+    return this.redirectToPostprocessing;
   }
 
   /**
@@ -511,7 +516,7 @@ public class TrackCutterConfiguration
    */
   public String getPregapCutFileNameTemplate()
   {
-    return pregapCutFileNameTemplate;
+    return this.pregapCutFileNameTemplate;
   }
 
   /**
@@ -529,7 +534,7 @@ public class TrackCutterConfiguration
    */
   public String getPregapPostProcessFileNameTemplate()
   {
-    return pregapPostProcessFileNameTemplate;
+    return this.pregapPostProcessFileNameTemplate;
   }
 
   /**
@@ -547,7 +552,7 @@ public class TrackCutterConfiguration
    */
   public String getPregapPostProcessCommandTemplate()
   {
-    return pregapPostProcessCommandTemplate;
+    return this.pregapPostProcessCommandTemplate;
   }
 
   /**
@@ -565,7 +570,7 @@ public class TrackCutterConfiguration
    */
   public long getPregapFrameLengthThreshold()
   {
-    return pregapFrameLengthThreshold;
+    return this.pregapFrameLengthThreshold;
   }
 
   /**
@@ -575,5 +580,23 @@ public class TrackCutterConfiguration
   public void setPregapFrameLengthThreshold(final long pregapFrameLengthThreshold)
   {
     this.pregapFrameLengthThreshold = pregapFrameLengthThreshold;
+  }
+
+  /**
+   * Get the logger to be used.
+   * @return The logger to be used.
+   */
+  public Logger getLogger()
+  {
+    return this.logger;
+  }
+  
+  /**
+   * Set the logger to be used.
+   * @param logger The logger to be used.
+   */
+  public void setLogger(Logger logger)
+  {
+    this.logger = logger;
   }
 }

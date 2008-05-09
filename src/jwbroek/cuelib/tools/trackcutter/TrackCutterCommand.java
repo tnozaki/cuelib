@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -111,6 +113,10 @@ public class TrackCutterCommand
     System.out.println(" -s                  Redirect audio to post-processing step.");
     System.out.println(" -ro                 Redirect output of post-processing step to log file.");
     System.out.println(" -re                 Redirect error output of post-processing step to log file.");
+    System.out.println(" -l level            Override jdk 1.4 logging settings. The following levels are supported:");
+    System.out.println("                     \"none\" (no cuelib logging), \"specific\" (only TrackCutter logging),");
+    System.out.println("                     \"all\" (all cuelib logging). This setting does not influence logging");
+    System.out.println("                     outside of cuelib. For this, use the standard jdk 1.4 logging settings.");
     System.out.println(" -? | --help         Displays this help message and exits.");
     System.out.println("Templates:");
     System.out.println(" <title>             Title of the track.");
@@ -379,6 +385,41 @@ public class TrackCutterCommand
           }
         }
       , "-re"
+      );
+    argumentsParser.registerOption
+      ( new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
+            // Override logging.
+            String level = options[offset+1];
+            if ("none".equals(level))
+            {
+              // Suppress logging of the jwbroek.cuelib tree.
+              Logger.getLogger("jwbroek.cuelib").setLevel(Level.OFF);
+            }
+            else if ("specific".equals(level))
+            {
+              // Suppress logging of the jwbroek.cuelib tree.
+              Logger.getLogger("jwbroek.cuelib").setLevel(Level.OFF);
+              // Do allow INFO logging of the trackcutter log.
+              TrackCutterCommand.this.getConfiguration().getLogger().setLevel(Level.INFO);
+            }
+            else if ("all".equals(level))
+            {
+              // Enable INFO logging of the jwbroek.cuelib tree, and specifically the
+              // TrackCutter log.
+              Logger.getLogger("jwbroek.cuelib").setLevel(Level.INFO);
+              TrackCutterCommand.this.getConfiguration().getLogger().setLevel(Level.INFO);
+            }
+            else
+            {
+              throw new IllegalArgumentException("Invalid level setting for -l option: '" + level + "'");
+            }
+            return offset+2;
+          }
+        }
+      , "-l"
       );
     argumentsParser.registerOption
       ( new SimpleOptionsParser.OptionHandler()
