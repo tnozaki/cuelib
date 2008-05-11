@@ -31,7 +31,7 @@
 	
 	<!--
 		This is a unix newline. Windows/DOS newlines are '&#xD;&#xA;', MAC OS-9 or before and Commodore
-		newlines are '&#xA;'&#xD;.
+		newlines are '&#xA;&#xD;'.
 	 -->
 	<xsl:variable name="newline" select="'&#xA;'"/>
 	<!-- 2 spaces are a single indentation level -->
