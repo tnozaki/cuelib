@@ -3,11 +3,20 @@
 
 =Cuelib changelog=
 
+==1.2.0==
+_Planned; not yet released_
+  * Documentation comes with an XML Schema for the output of !CueSheetToXmlSerializer. (Issue 1.)
+  * The documentation comes with an XSLT stylesheet that can convert the output of !CueSheetToXmlSerializer back into a regular cue sheet. (Issue 3.) This effectively means that you can use all your XML tooling to edit cue sheets, by using cuelib to turn your cue sheets into XML, editing this XML and then using the cuelib XSLT to turn the XML back into a cue sheet.
+  * !TrackCutterCommand has greatly improved file selection. Can now recurse though subdirectories up to a specified depth (which may be infinite), select files using a regular expression, and use configurable base directories. (Issue 2.)
+  * !TrackCutterCommand will now print progress information to stderr. It has options to customize this behaviour. (Issue 5.)
+  * Cuelib now comes with JDK 1.4 logging facilities. (Issue 7.)
+  * Possibly more...
+
 ==1.1.1==
 _2008-04-13_
   * !TrackCutter tool now has an option to disregard pregaps with length below some threshold.
   * Minor correction in !TrackCutterCommand help message.
-  * TrackCutterCommand now has an explicit "help" option.
+  * !TrackCutterCommand now has an explicit "help" option.
 ====Links====
   * [http://cuelib.googlecode.com/files/cuelib-1.1.1-2008-04-13.jar Binaries]
   * [http://cuelib.googlecode.com/files/cuelib-docs-1.1.1-2008-04-13.zip Documentation]
