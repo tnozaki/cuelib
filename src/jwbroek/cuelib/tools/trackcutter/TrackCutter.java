@@ -20,6 +20,7 @@ package jwbroek.cuelib.tools.trackcutter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -89,6 +90,32 @@ public class TrackCutter
     {
       this.getConfiguration().getLogger().severe
         ("Was unable to parse the cue sheet in file '" + cueFile.toString() + "'.");
+      throw new IOException("Problem parsing cue file.", e);
+    }
+    
+    cutTracksInCueSheet(cueSheet);
+  }
+  
+  /**
+   * Cut the the files specified in the cue sheet that will be read from the InputStream into tracks.
+   * @param cueFile
+   * @throws IOException
+   */
+  public void cutTracksInCueSheet(final InputStream inputStream) throws IOException
+  {
+    this.getConfiguration().getLogger().info("Cutting tracks in cue sheet from InputStream.");
+    
+    CueSheet cueSheet = null;
+    
+    try
+    {
+      this.getConfiguration().getLogger().fine("Parsing cue sheet.");
+      cueSheet = CueParser.parse(inputStream);
+    }
+    catch (IOException e)
+    {
+      this.getConfiguration().getLogger().severe
+        ("Was unable to parse the cue sheet from InputStream.");
       throw new IOException("Problem parsing cue file.", e);
     }
     
@@ -225,7 +252,8 @@ public class TrackCutter
     , final List<TrackCutterProcessingAction> processActions
     )
   {
-    this.getConfiguration().getLogger().fine("Adding processing action for track #" + trackData.getNumber() + ".");
+    this.getConfiguration().getLogger().fine
+      ( "Adding processing action for track #" + trackData.getNumber() + ".");
     if (trackData.getIndex(0) == null)
     {
       // No pregap to handle. Just process this track.
@@ -283,7 +311,10 @@ public class TrackCutter
                                     ) throws IOException
   {
     this.getConfiguration().getLogger().fine
-      ("Determining audio substream for processing action for track #" + processAction.getTrackData().getNumber() + ".");
+      ( "Determining audio substream for processing action for "
+      + (processAction.getIsPregap()?"pregap of ":"") + "track #"
+      + processAction.getTrackData().getNumber() + "."
+      );
     
     // Skip positions in the audioInputStream until we are at out starting position.
     long fromAudioFramePos = skipToPosition (processAction.getStartPosition(), audioInputStream, currentAudioFramePos);
@@ -314,7 +345,9 @@ public class TrackCutter
                                     ) throws IOException
   {
     this.getConfiguration().getLogger().info
-      ("Performing processing action for track #" + processAction.getTrackData().getNumber() + ".");
+      ( "Performing processing action for " + (processAction.getIsPregap()?"pregap of ":"")
+      + "track #" + processAction.getTrackData().getNumber() + "."
+      );
     
     if (!getConfiguration().getRedirectToPostprocessing())
     {

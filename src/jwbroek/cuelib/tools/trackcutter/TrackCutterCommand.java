@@ -67,7 +67,11 @@ public class TrackCutterCommand
    * Base directory for file selection. Default is the directory from which the java VM was started.
    */
   private File selectionBaseDirectory = new File(System.getProperty("user.dir"));
-  
+  /**
+   * Whether or not to read a cue sheet from standard input.
+   */
+  private boolean readCueSheetFromStdIn = false;
+
   /**
    * Create a new TrackCutterCommand instance. 
    */
@@ -82,7 +86,7 @@ public class TrackCutterCommand
   private static void printHelp()
   {
     System.out.println("Syntax: [options] [cuefiles]");
-    System.out.println("cuefiles need not be specified if the -fp or -pp option is used.");
+    System.out.println("cuefiles need not be specified if the -fp, -pp, or -i option is used.");
     System.out.println("Options:");
     System.out.println(" -pf regex           Process files such that their names match the specified regular");
     System.out.println("                     expression. This is in addition to files specified as parameter.");
@@ -99,6 +103,7 @@ public class TrackCutterCommand
     System.out.println(" -b directory        Base directory for relative file references in cue sheet, and for relative");
     System.out.println("                     output location. If not specified, the directory of the cue sheet will be");
     System.out.println("                     used.");
+    System.out.println(" -i                  Read cue sheet from standard input.");
     System.out.println(" -f file             Template for file name. Implies no redirect to post-processing.");
     System.out.println(" -t type             Audio type to convert to. Valid types are AIFC, AIFF, AU, SND, WAVE.");
     System.out.println("                     Not all conversions may be supported.");
@@ -237,6 +242,18 @@ public class TrackCutterCommand
           }
         }
       , "-b"
+      );
+    argumentsParser.registerOption
+      ( new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
+            // Read a cue sheet from standard input.
+            TrackCutterCommand.this.setReadCueSheetFromStdIn(true);
+            return offset+1;
+          }
+        }
+      , "-i"
       );
     argumentsParser.registerOption
       ( new SimpleOptionsParser.OptionHandler()
@@ -450,14 +467,15 @@ public class TrackCutterCommand
     
     int firstFileIndex = argumentsParser.parseOptions(args);
     
-    if  (  firstFileIndex == -1
-        || (  firstFileIndex == args.length
-           && this.getFileNameSelectionPattern() == null
-           && this.getPathSelectionPattern() == null
+    if  (  firstFileIndex == -1                           // Something went wrong with parsing the options.
+        || (  firstFileIndex == args.length               // All parameters were parsed.
+           && this.getFileNameSelectionPattern() == null  // No files are to be selected based on file name.
+           && this.getPathSelectionPattern() == null      // No files are to be selected based on path.
+           && ! this.getReadCueSheetFromStdIn()           // No cue sheet will be read from standard input.
            )
         )
     {
-      // Something went wrong, or no files were specified.
+      // Something went wrong, or no files or standard input were specified.
       System.err.println("A problem occurred when parsing the command line arguments. Please check for syntax.");
       printHelp();
       return;
@@ -508,6 +526,19 @@ public class TrackCutterCommand
         try
         {
           cutter.cutTracksInCueSheet(cueFile);
+        }
+        catch (Exception e)
+        {
+          e.printStackTrace();
+        }
+      }
+      
+      // Process cue sheet from standard input, if specified.
+      if (this.readCueSheetFromStdIn)
+      {
+        try
+        {
+          cutter.cutTracksInCueSheet(System.in);
         }
         catch (Exception e)
         {
@@ -572,7 +603,7 @@ public class TrackCutterCommand
    * @param fileNameSelectionPattern The pattern that file names must pass in order for the
    * file to be selected.
    */
-  private void setFileNameSelectionPattern(Pattern fileNameSelectionPattern)
+  private void setFileNameSelectionPattern(final Pattern fileNameSelectionPattern)
   {
     this.fileNameSelectionPattern = fileNameSelectionPattern;
   }
@@ -593,7 +624,7 @@ public class TrackCutterCommand
    * @param pathSelectionPattern The pattern that paths must pass in order for the
    * file to be selected.
    */
-  private void setPathSelectionPattern(Pattern pathSelectionPattern)
+  private void setPathSelectionPattern(final Pattern pathSelectionPattern)
   {
     this.pathSelectionPattern = pathSelectionPattern;
   }
@@ -612,7 +643,7 @@ public class TrackCutterCommand
    * @param recurseIntoSubdirectories The recursion depth for file selection.
    * @see FileSelector#selectFiles(File, FileFilter, List, long, boolean, boolean)
    */
-  private void setRecursionDepth(long recursionDepth)
+  private void setRecursionDepth(final long recursionDepth)
   {
     this.recursionDepth = recursionDepth;
   }
@@ -631,8 +662,26 @@ public class TrackCutterCommand
    * Set the base directory for file selection.
    * @param selectionBaseDirectory The base directory for file selection.
    */
-  private void setSelectionBaseDirectory(File selectionBaseDirectory)
+  private void setSelectionBaseDirectory(final File selectionBaseDirectory)
   {
     this.selectionBaseDirectory = selectionBaseDirectory;
+  }
+  
+  /**
+   * Get whether or not to read a cue sheet from standard input.
+   * @return Whether or not to read a cue sheet from standard input.
+   */
+  private boolean getReadCueSheetFromStdIn()
+  {
+    return readCueSheetFromStdIn;
+  }
+
+  /**
+   * Set whether or not to read a cue sheet from standard input.
+   * @param readCueSheetFromStdIn Whether or not to read a cue sheet from standard input.
+   */
+  private void setReadCueSheetFromStdIn(final boolean readCueSheetFromStdIn)
+  {
+    this.readCueSheetFromStdIn = readCueSheetFromStdIn;
   }
 }
