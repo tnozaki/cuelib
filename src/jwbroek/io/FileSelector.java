@@ -82,7 +82,7 @@ public class FileSelector
   /**
    * Get a FileFilter that will accept only files such that their canonical paths match the pattern.
    * @param pattern The pattern to match.
-   * @return
+   * @return A FileFilter that will accept only files such that their canonical paths match the pattern.
    */
   public static FileFilter getPathPatternFilter(final Pattern pattern)
   {
@@ -109,7 +109,7 @@ public class FileSelector
   /**
    * Get a FileFilter that will accept only files such that their names match the pattern.
    * @param pattern The pattern to match.
-   * @return
+   * @return A FileFilter that will accept only files such that their names match the pattern.
    */
   public static FileFilter getFileNamePatternFilter(final Pattern pattern)
   {
