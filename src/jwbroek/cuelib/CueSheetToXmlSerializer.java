@@ -38,7 +38,86 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Class for serializing a CueSheet to an XML representation.
+ * <p>Class for serializing a {@link jwbroek.cuelib.CueSheet CueSheet} to an XML representation. The serialized
+ * cue sheet will conform to the following XML Schema, which closely resembles the cue sheet syntax, except for
+ * the fact that it is less restrictive with respect to allowed element values. This is necessary, as the
+ * {@link jwbroek.cuelib.CueSheet CueSheet} structure is more lenient than the cue sheet standard.</p>
+ * 
+ * {@code
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:tns="http://jwbroek/cuelib/2008/cuesheet/1"
+  targetNamespace="http://jwbroek/cuelib/2008/cuesheet/1"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified"
+  >
+  
+  <xsd:element name="cuesheet" type="tns:cuesheet"/>
+  
+  <xsd:complexType name="cuesheet">
+    <xsd:sequence>
+      <xsd:element name="file" type="tns:file" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="genre" type="xsd:string" use="optional"/>
+    <xsd:attribute name="date" type="xsd:integer" use="optional"/>
+    <xsd:attribute name="discid" type="xsd:string" use="optional"/>
+    <xsd:attribute name="comment" type="xsd:string" use="optional"/>
+    <xsd:attribute name="catalog" type="xsd:string" use="optional"/>
+    <xsd:attribute name="performer" type="xsd:string" use="optional"/>
+    <xsd:attribute name="title" type="xsd:string" use="optional"/>
+    <xsd:attribute name="songwriter" type="xsd:string" use="optional"/>
+    <xsd:attribute name="cdtextfile" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="file">
+    <xsd:sequence>
+      <xsd:element name="track" type="tns:track" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="file" type="xsd:string" use="optional"/>
+    <xsd:attribute name="type" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="track">
+    <xsd:sequence>
+      <xsd:element name="pregap" type="tns:position" minOccurs="0"/>
+      <xsd:element name="postgap" type="tns:position" minOccurs="0"/>
+      <xsd:element name="flags" type="tns:flags" minOccurs="0"/>
+      <xsd:element name="index" type="tns:index" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="number" type="xsd:integer" use="optional"/>
+    <xsd:attribute name="type" type="xsd:string" use="optional"/>
+    <xsd:attribute name="isrc" type="xsd:string" use="optional"/>
+    <xsd:attribute name="performer" type="xsd:string" use="optional"/>
+    <xsd:attribute name="title" type="xsd:string" use="optional"/>
+    <xsd:attribute name="songwriter" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="position">
+    <xsd:attribute name="minutes" type="xsd:integer"/>
+    <xsd:attribute name="seconds" type="xsd:integer"/>
+    <xsd:attribute name="frames" type="xsd:integer"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="flags">
+    <xsd:sequence>
+      <xsd:element name="flag" type="xsd:string" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  
+  <xsd:complexType name="index">
+    <xsd:annotation>
+      <xsd:documentation>
+        The attributes in this type will either all be present, or all absent. Unfortunately,
+        I know of no way to capture this constraint in XML Schema version 1.0.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute name="minutes" type="xsd:integer" use="optional"/>
+    <xsd:attribute name="seconds" type="xsd:integer" use="optional"/>
+    <xsd:attribute name="frames" type="xsd:integer" use="optional"/>
+    <xsd:attribute name="number" type="xsd:integer" use="optional"/>
+  </xsd:complexType>
+  
+</xsd:schema>}
+ * 
  * @author jwbroek
  */
 public class CueSheetToXmlSerializer
