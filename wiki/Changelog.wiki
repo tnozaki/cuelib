@@ -1,7 +1,7 @@
-#summary Cuelib changelog
+#summary Cuelib changelog and roadmap
 #labels Phase-Design
 
-=Cuelib changelog=
+=Cuelib changelog and roadmap=
 
 ==1.2.0==
 _Planned; not yet released_
