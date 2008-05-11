@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -154,23 +156,34 @@ public class CueParser
   }
   
   /**
+   * Parse a cue sheet that will be read from the InputStream.
+   * @param inputStream An InputStream that produces a cue sheet. The stream will be closed afterward.
+   * @return A representation of the cue sheet.
+   * @throws IOException
+   */
+  public static CueSheet parse(final InputStream inputStream) throws IOException
+  {
+    return CueParser.parse(new LineNumberReader(new InputStreamReader(inputStream)));
+  }
+  
+  /**
    * Parse a cue sheet file.
    * @param file A cue sheet file.
    * @return A representation of the cue sheet.
    * @throws IOException
    */
-  public static CueSheet parse(File file) throws IOException
+  public static CueSheet parse(final File file) throws IOException
   {
     return CueParser.parse(new LineNumberReader(new FileReader(file)));
   }
   
   /**
    * Parse a cue sheet.
-   * @param reader A reader for the cue sheet.
+   * @param reader A reader for the cue sheet. This reader will be closed afterward.
    * @return A representation of the cue sheet.
    * @throws IOException
    */
-  public static CueSheet parse(LineNumberReader reader) throws IOException
+  public static CueSheet parse(final LineNumberReader reader) throws IOException
   {
     CueSheet result = new CueSheet();
     
@@ -326,7 +339,7 @@ public class CueParser
    * @param start The starting string to check for. Should be uppercase, or else the warning will not make sense.
    * @return True if there is a match. False otherwise.
    */
-  private static boolean startsWith(LineOfInput input, String start)
+  private static boolean startsWith(final LineOfInput input, final String start)
   {
     if (input.getInput().startsWith(start))
     {
@@ -352,7 +365,7 @@ public class CueParser
    * checked for case as per the method description.
    * @return True if there is a match. False otherwise.
    */
-  private static boolean contains(LineOfInput input, Pattern pattern)
+  private static boolean contains(final LineOfInput input, final Pattern pattern)
   {
     Matcher matcher = pattern.matcher(input.getInput());
     
@@ -379,7 +392,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseCatalog(LineOfInput input)
+  private static void parseCatalog(final LineOfInput input)
   {
     if (startsWith(input, "CATALOG"))
     {
@@ -413,7 +426,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseFile(LineOfInput input)
+  private static void parseFile(final LineOfInput input)
   {
     Matcher fileMatcher = PATTERN_FILE.matcher(input.getInput());
     
@@ -481,7 +494,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseCdTextFile(LineOfInput input)
+  private static void parseCdTextFile(final LineOfInput input)
   {
     Matcher cdTextFileMatcher = PATTERN_CDTEXTFILE.matcher(input.getInput());
     
@@ -515,7 +528,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseFlags(LineOfInput input)
+  private static void parseFlags(final LineOfInput input)
   {
     Matcher flagsMatcher = PATTERN_FLAGS.matcher(input.getInput());
     
@@ -573,7 +586,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseIndex(LineOfInput input)
+  private static void parseIndex(final LineOfInput input)
   {
     Matcher indexMatcher = PATTERN_INDEX.matcher(input.getInput());
     
@@ -636,7 +649,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseIsrc(LineOfInput input)
+  private static void parseIsrc(final LineOfInput input)
   {
     if (startsWith(input, "ISRC"))
     {
@@ -678,7 +691,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parsePerformer(LineOfInput input)
+  private static void parsePerformer(final LineOfInput input)
   {
     Matcher performerMatcher = PATTERN_PERFORMER.matcher(input.getInput());
     
@@ -736,7 +749,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parsePostgap(LineOfInput input)
+  private static void parsePostgap(final LineOfInput input)
   {
     Matcher postgapMatcher = PATTERN_POSTGAP.matcher(input.getInput());
     
@@ -764,7 +777,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parsePregap(LineOfInput input)
+  private static void parsePregap(final LineOfInput input)
   {
     Matcher pregapMatcher = PATTERN_PREGAP.matcher(input.getInput());
     
@@ -796,7 +809,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseRemComment(LineOfInput input)
+  private static void parseRemComment(final LineOfInput input)
   {
     Matcher matcher = PATTERN_REM_COMMENT.matcher(input.getInput());
     
@@ -822,7 +835,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseRemDate(LineOfInput input)
+  private static void parseRemDate(final LineOfInput input)
   {
     Matcher matcher = PATTERN_REM_DATE.matcher(input.getInput());
     
@@ -848,7 +861,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseRemDiscid(LineOfInput input)
+  private static void parseRemDiscid(final LineOfInput input)
   {
     Matcher matcher = PATTERN_REM_DISCID.matcher(input.getInput());
     
@@ -874,7 +887,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseRemGenre(LineOfInput input)
+  private static void parseRemGenre(final LineOfInput input)
   {
     Matcher matcher = PATTERN_REM_GENRE.matcher(input.getInput());
     
@@ -907,7 +920,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseRem(LineOfInput input)
+  private static void parseRem(final LineOfInput input)
   {
     if (startsWith(input, "REM"))
     {
@@ -963,7 +976,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseSongwriter(LineOfInput input)
+  private static void parseSongwriter(final LineOfInput input)
   {
     Matcher songwriterMatcher = PATTERN_SONGWRITER.matcher(input.getInput());
     
@@ -1024,7 +1037,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseTitle(LineOfInput input)
+  private static void parseTitle(final LineOfInput input)
   {
     Matcher titleMatcher = PATTERN_TITLE.matcher(input.getInput());
     
@@ -1094,7 +1107,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static void parseTrack(LineOfInput input)
+  private static void parseTrack(final LineOfInput input)
   {
     Matcher trackMatcher = PATTERN_TRACK.matcher(input.getInput());
     
@@ -1141,7 +1154,7 @@ public class CueParser
    * 
    * @param input
    */
-  private static Position parsePosition(LineOfInput input, String position)
+  private static Position parsePosition(final LineOfInput input, final String position)
   {
     Matcher positionMatcher = PATTERN_POSITION.matcher(position);
     
@@ -1189,7 +1202,7 @@ public class CueParser
    * @param input
    * @return The last TrackData element. If none exist, an empty one is created and a warning added.
    */
-  private static TrackData getLastTrackData(LineOfInput input)
+  private static TrackData getLastTrackData(final LineOfInput input)
   {
     FileData lastFileData = getLastFileData(input);
     List<TrackData> trackDataList = lastFileData.getTrackData();
@@ -1208,7 +1221,7 @@ public class CueParser
    * @param input
    * @return The last FileData element. If none exist, an empty one is created and a warning added.
    */
-  private static FileData getLastFileData(LineOfInput input)
+  private static FileData getLastFileData(final LineOfInput input)
   {
     List<FileData> fileDataList = input.getAssociatedSheet().getFileData();
     
@@ -1225,7 +1238,7 @@ public class CueParser
    * Parse all .cue files in the user's working directory and print any warnings to standard out.
    * @param args
    */
-  public static void main(String[] args)
+  public static void main(final String[] args)
   {
     CueSheet sheet = null;
     
