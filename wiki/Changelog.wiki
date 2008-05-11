@@ -10,6 +10,7 @@ _Planned; not yet released_
   * !TrackCutterCommand has greatly improved file selection. Can now recurse though subdirectories up to a specified depth (which may be infinite), select files using a regular expression, and use configurable base directories. (Issue 2.)
   * !TrackCutterCommand will now print progress information to stderr. It has options to customize this behaviour. (Issue 5.)
   * Cuelib now comes with JDK 1.4 logging facilities. (Issue 7.)
+  * !TrackCutterCommand can now read a cue sheet from standard input. (Issue 4.)
   * Possibly more...
 
 ==1.1.1==
