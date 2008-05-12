@@ -28,7 +28,7 @@ _2008-04-13_
 _2008-04-12_
   * Added a !TrackCutter command line tool that can create individual tracks based on the information in a cue sheet. Includes support for post-processing (for instance, by encoding with LAME), tracks hidden in pregaps, basic audio format conversions.
   * Added a serializer that writes to XML.
-  * Added a convenient method for getting various metadata cue sheets.
+  * Added a convenient method for getting various metadata from cue sheets.
 *Note: cue sheet data structure is slightly incompatible with 1.0.0, due to different constructors.*
 ====Links====
   * [http://cuelib.googlecode.com/files/cuelib-1.1.0-2008-04-12.jar Binaries]
