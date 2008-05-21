@@ -4,7 +4,7 @@
 =Cuelib changelog and roadmap=
 
 ==1.2.0==
-_Planned; not yet released_
+_2008-05-21_
   * Documentation comes with an XML Schema for the output of !CueSheetToXmlSerializer. (Issue 1.)
   * The documentation comes with an XSLT stylesheet that can convert the output of !CueSheetToXmlSerializer back into a regular cue sheet. (Issue 3.) This effectively means that you can use all your XML tooling to edit cue sheets, by using cuelib to turn your cue sheets into XML, editing this XML and then using the cuelib XSLT to turn the XML back into a cue sheet.
   * !TrackCutterCommand has greatly improved file selection. Can now recurse though subdirectories up to a specified depth (which may be infinite), select files using a regular expression, and use configurable base directories. (Issue 2.)
