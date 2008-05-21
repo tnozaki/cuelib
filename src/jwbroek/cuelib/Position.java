@@ -18,25 +18,57 @@
  */
 package jwbroek.cuelib;
 
+import java.util.logging.Logger;
+
 /**
  * Simple representation for a position field in a cue sheet.
  * @author jwbroek
  */
 public class Position
 {
+  /**
+   * The logger for this class.
+   */
+  private final static Logger logger = Logger.getLogger(Position.class.getCanonicalName());
+  /**
+   * The number of minutes in this position. Must be >= 0. Should be < 60.
+   */
   private int minutes = 0;
+  /**
+   * The number of seconds in this position. Must be >= 0. Should be < 60.
+   */
   private int seconds = 0;
+  /**
+   * The number of frames in this position. Must be >= 0. Should be < 75.
+   */
   private int frames = 0;
   
+  /**
+   * Create a new Position.
+   */
   public Position()
   {
+    Position.logger.entering(Position.class.getCanonicalName(), "Position()");
+    Position.logger.exiting(Position.class.getCanonicalName(), "Position()");
   }
   
-  public Position(int minutes, int seconds, int frames)
+  /**
+   * Create a new Position.
+   * @param minutes The number of minutes in this position. Must be >= 0. Should be < 60.
+   * @param seconds The number of seconds in this position. Must be >= 0. Should be < 60.
+   * @param frames The number of frames in this position. Must be >= 0. Should be < 75.
+   */
+  public Position(final int minutes, final int seconds, final int frames)
   {
+    Position.logger.entering
+      ( Position.class.getCanonicalName()
+      , "LineOfInput(int,int,int)"
+      , new Object[] {minutes, seconds, frames}
+      );
     this.minutes = minutes;
     this.seconds = seconds;
     this.frames = frames;
+    Position.logger.exiting(Position.class.getCanonicalName(), "Position(int,int,int)");
   }
   
   /**
@@ -46,54 +78,75 @@ public class Position
    */
   public int getTotalFrames()
   {
-    return frames + (75 * (seconds + 60 * minutes));
+    Position.logger.entering(Position.class.getCanonicalName(), "getTotalFrames()");
+    int result = frames + (75 * (seconds + 60 * minutes));
+    Position.logger.exiting(Position.class.getCanonicalName(), "getTotalFrames()", result);
+    return result;
   }
   
   /**
-   * @return the frames
+   * Get the number of frames in this position. Must be >= 0. Should be < 75.
+   * @return The number of frames in this position. Must be >= 0. Should be < 75.
    */
   public int getFrames()
   {
-    return frames;
+    Position.logger.entering(Position.class.getCanonicalName(), "getFrames()");
+    Position.logger.exiting(Position.class.getCanonicalName(), "getFrames()", this.frames);
+    return this.frames;
   }
 
   /**
-   * @param frames the frames to set
+   * Set the number of frames in this position. Must be >= 0. Should be < 75.
+   * @param frames The number of frames in this position. Must be >= 0. Should be < 75.
    */
-  public void setFrames(int frames)
+  public void setFrames(final int frames)
   {
+    Position.logger.entering(Position.class.getCanonicalName(), "setFrames(int)", frames);
     this.frames = frames;
+    Position.logger.exiting(Position.class.getCanonicalName(), "setFrames(int)");
   }
 
   /**
-   * @return the minutes
+   * Get the number of minutes in this position. Must be >= 0. Should be < 60.
+   * @return The number of minutes in this position. Must be >= 0. Should be < 60.
    */
   public int getMinutes()
   {
-    return minutes;
+    Position.logger.entering(Position.class.getCanonicalName(), "getMinutes()");
+    Position.logger.exiting(Position.class.getCanonicalName(), "getMinutes()", this.minutes);
+    return this.minutes;
   }
 
   /**
-   * @param minutes the minutes to set
+   * Set the number of minutes in this position. Must be >= 0. Should be < 60.
+   * @param minutes The number of minutes in this position. Must be >= 0. Should be < 60.
    */
-  public void setMinutes(int minutes)
+  public void setMinutes(final int minutes)
   {
+    Position.logger.entering(Position.class.getCanonicalName(), "setMinutes(int)", minutes);
     this.minutes = minutes;
+    Position.logger.exiting(Position.class.getCanonicalName(), "setMinutes(int)");
   }
 
   /**
-   * @return the seconds
+   * Get the number of seconds in this position. Must be >= 0. Should be < 60.
+   * @return The seconds of seconds in this position. Must be >= 0. Should be < 60.
    */
   public int getSeconds()
   {
-    return seconds;
+    Position.logger.entering(Position.class.getCanonicalName(), "getSeconds()");
+    Position.logger.exiting(Position.class.getCanonicalName(), "getSeconds()", this.seconds);
+    return this.seconds;
   }
 
   /**
-   * @param seconds the seconds to set
+   * Set the number of seconds in this position. Must be >= 0. Should be < 60.
+   * @param seconds The number of seconds in this position. Must be >= 0. Should be < 60.
    */
-  public void setSeconds(int seconds)
+  public void setSeconds(final int seconds)
   {
+    Position.logger.entering(Position.class.getCanonicalName(), "setSeconds(int)", seconds);
     this.seconds = seconds;
+    Position.logger.exiting(Position.class.getCanonicalName(), "setSeconds(int)");
   }
 }

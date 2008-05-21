@@ -18,54 +18,91 @@
  */
 package jwbroek.cuelib;
 
+import java.util.logging.Logger;
+
 /**
  * Simple representation of an INDEX datum in a cue sheet.
  * @author jwbroek
  */
 public class Index
 {
+  /**
+   * The logger for this class.
+   */
+  private final static Logger logger = Logger.getLogger(Index.class.getCanonicalName());
+  /**
+   * The index number. -1 signifies that the number was not specified.
+   */
   private int number = -1;
+  /**
+   * The position of this index. Null signifies that it was not specified.
+   */
   private Position position = null;
   
+  /**
+   * Create a new Index.
+   */
   public Index()
   {
-  }
-
-  public Index(int number, Position position)
-  {
-    this.number = number;
-    this.position = position;
+    Index.logger.entering(Index.class.getCanonicalName(), "Index()");
+    Index.logger.exiting(Index.class.getCanonicalName(), "Index()");
   }
 
   /**
-   * @return the number
+   * Create a new Index.
+   * @param number The number of this index. -1 signifies that it was not specified.
+   * @param position The position of this index. Null signifies that it was not specified.
+   */
+  public Index(final int number, final Position position)
+  {
+    Index.logger.entering
+      (Index.class.getCanonicalName(), "Index(int,Position)", new Object[] {number, position});
+    this.number = number;
+    this.position = position;
+    Index.logger.exiting(Index.class.getCanonicalName(), "Index(int,Position)");
+  }
+
+  /**
+   * Get the number of this index. -1 signifies that it was not specified.
+   * @return The number of this index. -1 signifies that it was not specified.
    */
   public int getNumber()
   {
-    return number;
+    Index.logger.entering(Index.class.getCanonicalName(), "getNumber()");
+    Index.logger.exiting(Index.class.getCanonicalName(), "getNumber()", this.number);
+    return this.number;
   }
 
   /**
-   * @param number the number to set
+   * Set the number of this index. -1 signifies that it was not specified.
+   * @param number The number of this index. -1 signifies that it was not specified.
    */
-  public void setNumber(int number)
+  public void setNumber(final int number)
   {
+    Index.logger.entering(Index.class.getCanonicalName(), "setNumber()", number);
     this.number = number;
+    Index.logger.exiting(Index.class.getCanonicalName(), "setNumber()");
   }
 
   /**
-   * @return the position
+   * Get the position of this index. Null signifies that it was not specified.
+   * @return The position of this index. Null signifies that it was not specified.
    */
   public Position getPosition()
   {
-    return position;
+    Index.logger.entering(Index.class.getCanonicalName(), "getPosition()");
+    Index.logger.exiting(Index.class.getCanonicalName(), "getPosition()", this.position);
+    return this.position;
   }
 
   /**
-   * @param position the position to set
+   * Set the position of this index. Null signifies that it was not specified.
+   * @param position The position of this index. Null signifies that it was not specified.
    */
-  public void setPosition(Position position)
+  public void setPosition(final Position position)
   {
+    Index.logger.entering(Index.class.getCanonicalName(), "setPosition(Position)", position);
     this.position = position;
+    Index.logger.exiting(Index.class.getCanonicalName(), "setPosition(Position)");
   }
 }

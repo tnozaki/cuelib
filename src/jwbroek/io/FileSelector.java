@@ -23,6 +23,7 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -32,12 +33,19 @@ import java.util.regex.Pattern;
 public class FileSelector
 {
   /**
+   * The logger for this class.
+   */
+  private final static Logger logger = Logger.getLogger(FileSelector.class.getCanonicalName());
+  
+  /**
    * FileFilter that accepts only directories.
    */
   private static FileFilter dirsFileFilter = new FileFilter()
   {
     public boolean accept(final File file)
     {
+      FileSelector.logger.entering(this.getClass().getCanonicalName(), "accept(File)", file);
+      FileSelector.logger.exiting(this.getClass().getCanonicalName(), "accept(File)", file.isDirectory());
       return file.isDirectory();
     }
   };
@@ -49,6 +57,8 @@ public class FileSelector
   {
     public boolean accept(final File file)
     {
+      FileSelector.logger.entering(this.getClass().getCanonicalName(), "accept(File)", file);
+      FileSelector.logger.exiting(this.getClass().getCanonicalName(), "accept(File)", file.isFile());
       return file.isFile();
     }
   };
@@ -58,7 +68,10 @@ public class FileSelector
    */
   private FileSelector()
   {
-    // Intentionally empty, as this class doesn't need to be instantiated.
+    // Intentionally left blank (besides logging). This class doesn't need to be instantiated.
+    FileSelector.logger.entering(FileSelector.class.getCanonicalName(), "FileSelector(File)");
+    FileSelector.logger.warning("jwbroek.io.FileSelector should not be instantiated.");
+    FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "FileSelector(File)");
   }
   
   /**
@@ -67,6 +80,8 @@ public class FileSelector
    */
   public static FileFilter getDirsFilter()
   {
+    FileSelector.logger.entering(FileSelector.class.getCanonicalName(), "getDirsFilter()");
+    FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "getDirsFilter()", FileSelector.dirsFileFilter);
     return FileSelector.dirsFileFilter;
   }
   
@@ -76,6 +91,8 @@ public class FileSelector
    */
   public static FileFilter getFilesFilter()
   {
+    FileSelector.logger.entering(FileSelector.class.getCanonicalName(), "getFilesFilter()");
+    FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "getFilesFilter()", FileSelector.filesFilter);
     return FileSelector.filesFilter;
   }
   
@@ -86,24 +103,33 @@ public class FileSelector
    */
   public static FileFilter getPathPatternFilter(final Pattern pattern)
   {
-    return new FileFilter()
+    FileSelector.logger.entering(FileSelector.class.getCanonicalName(), "getPathPatternFilter(Pattern)", pattern);
+    FileFilter result = new FileFilter()
     {
       public boolean accept(final File file)
       {
+        FileSelector.logger.entering(this.getClass().getCanonicalName(), "accept(File)", file);
+        boolean result;
         try
         {
-          return pattern.matcher(file.getCanonicalPath()).matches();
+          result = pattern.matcher(file.getCanonicalPath()).matches();
         }
         catch (IOException e)
         {
-          return false;
+          result = false;
         }
         catch (SecurityException e)
         {
-          return false;
+          result = false;
         }
+        FileSelector.logger.fine
+          ("PathPatternFilter " + (result?"accepted ":"did not accept '") + file.toString() + "'.");
+        FileSelector.logger.exiting(this.getClass().getCanonicalName(), "accept(File)", result);
+        return result;
       }
-    };
+    }; 
+    FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "getPathPatternFilter(Pattern)", result);
+    return result;
   }
   
   /**
@@ -113,20 +139,29 @@ public class FileSelector
    */
   public static FileFilter getFileNamePatternFilter(final Pattern pattern)
   {
-    return new FileFilter()
+    FileSelector.logger.entering(FileSelector.class.getCanonicalName(), "getFileNamePatternFilter(Pattern)", pattern);
+    FileFilter result = new FileFilter()
     {
       public boolean accept(final File file)
       {
+        FileSelector.logger.entering(this.getClass().getCanonicalName(), "accept(File)", file);
+        boolean result;
         try
         {
-          return pattern.matcher(file.getName()).matches();
+          result = pattern.matcher(file.getName()).matches();
         }
         catch (SecurityException e)
         {
-          return false;
+          result = false;
         }
+        FileSelector.logger.fine
+          ("FileNamePatternFilter " + (result?"accepted ":"did not accept '") + file.toString() + "'.");
+        FileSelector.logger.exiting(this.getClass().getCanonicalName(), "accept(File)", result);
+        return result;
       }
     };
+    FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "getFileNamePatternFilter(Pattern)", result);
+    return result;
   }
   
   /**
@@ -141,7 +176,11 @@ public class FileSelector
   {
     // The FileFilter ... parameter has lower (implicit) priority than Iterable<FileFilter>, so there is no
     // (directly) recursive call here.
-    return FileSelector.getCombinedFileFilter(fileFilters);
+    FileSelector.logger.entering
+      (FileSelector.class.getCanonicalName(), "getCombinedFileFilter(FileFilter[])", fileFilters);
+    FileFilter result = FileSelector.getCombinedFileFilter(fileFilters);
+    FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "getCombinedFileFilter(FileFilter[])", result);
+    return result;
   }
   
   /**
@@ -154,21 +193,34 @@ public class FileSelector
    */
   public static FileFilter getCombinedFileFilter(final Iterable<FileFilter> fileFilters)
   {
-    return new FileFilter()
+    FileSelector.logger.entering
+      (FileSelector.class.getCanonicalName(), "getCombinedFileFilter(Iterable<FileFilter>)", fileFilters);
+    FileFilter result = new FileFilter()
     {
       public boolean accept(final File file)
       {
+        FileSelector.logger.entering(FileSelector.class.getCanonicalName(), "accept(File)", file);
+        boolean result = true;
+        
+        fileFilterLoop:
         for (FileFilter fileFilter : fileFilters)
         {
           if (! fileFilter.accept(file))
           {
-            return false;
+            result = false;
+            break fileFilterLoop;
           }
         }
         
-        return true;
+        FileSelector.logger.fine
+          ("CombinedFileFilter " + (result?"accepted ":"did not accept '") + file.toString() + "'.");
+        FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "accept(File)", result);
+        return result;
       }
     };
+    FileSelector.logger.exiting
+      (FileSelector.class.getCanonicalName(), "getCombinedFileFilter(Iterable<FileFilter>)", result);
+    return result;
   }
   
   /**
@@ -192,10 +244,17 @@ public class FileSelector
     , final boolean keepGoing
     )
   {
+    FileSelector.logger.entering
+      ( FileSelector.class.getCanonicalName()
+      , "selectFiles(File,Pattern,long,boolean,boolean)"
+      , new Object [] {baseFile, pattern, recurseDepth, considerBaseFile, keepGoing}
+      );
     List<File> fileList = new ArrayList<File>();
     
     selectFiles(baseFile, getPathPatternFilter(pattern), fileList, recurseDepth, considerBaseFile, keepGoing);
     
+    FileSelector.logger.exiting
+      (FileSelector.class.getCanonicalName(), "selectFiles(File,Pattern,long,boolean,boolean)", fileList);
     return fileList;
   }
   
@@ -221,9 +280,17 @@ public class FileSelector
     , final boolean keepGoing
     )
   {
+    FileSelector.logger.entering
+      ( FileSelector.class.getCanonicalName()
+      , "selectFiles(File,FileFilter,List<File>,long,boolean,boolean)"
+      , new Object [] {baseFile, fileFilter, fileList, recurseDepth, considerBaseFile, keepGoing}
+      );
+    
     // We've gone too deep, so stop.
     if (recurseDepth < 0)
     {
+      FileSelector.logger.exiting
+        (FileSelector.class.getCanonicalName(), "selectFiles(File,FileFilter,List<File>,long,boolean,boolean)");
       return;
     }
     
@@ -239,6 +306,8 @@ public class FileSelector
     {
       if (!keepGoing)
       {
+        FileSelector.logger.throwing
+          (FileSelector.class.getCanonicalName(), "selectFiles(File,FileFilter,List<File>,long,boolean,boolean)", e);
         throw e;
       }
     }
@@ -263,9 +332,14 @@ public class FileSelector
       {
         if (!keepGoing)
         {
+          FileSelector.logger.throwing
+            (FileSelector.class.getCanonicalName(), "selectFiles(File,FileFilter,List<File>,long,boolean,boolean)", e);
           throw e;
         }
       }
     }
+    
+    FileSelector.logger.exiting
+      (FileSelector.class.getCanonicalName(), "selectFiles(File,FileFilter,List<File>,long,boolean,boolean)");
   }
 }

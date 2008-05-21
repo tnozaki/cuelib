@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -122,8 +123,18 @@ import org.w3c.dom.Element;
  */
 public class CueSheetToXmlSerializer
 {
+  /**
+   * The builder for creating XML documents.
+   */
   private DocumentBuilder docBuilder;
+  /**
+   * The namespace for the elements in the XML document.
+   */
   private String namespace = "http://jwbroek/cuelib/2008/cuesheet/1";
+  /**
+   * The logger for this class.
+   */
+  private final static Logger logger = Logger.getLogger(CueSheetToXmlSerializer.class.getCanonicalName());
   
   /**
    * Create a default CueSheetToXmlSerializer.
@@ -131,9 +142,11 @@ public class CueSheetToXmlSerializer
    */
   public CueSheetToXmlSerializer() throws ParserConfigurationException
   {
+    CueSheetToXmlSerializer.logger.entering(CueSheetToXmlSerializer.class.getCanonicalName(), "CueSheetToXmlSerializer()");
     DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
     docBuilderFactory.setNamespaceAware(true);
     this.docBuilder = docBuilderFactory.newDocumentBuilder();
+    CueSheetToXmlSerializer.logger.exiting(CueSheetToXmlSerializer.class.getCanonicalName(), "CueSheetToXmlSerializer()");
   }
   
   /**
@@ -142,9 +155,16 @@ public class CueSheetToXmlSerializer
    * @param writer The Writer to write the XML representation to. 
    * @throws TransformerException 
    */
-  public void serializeCueSheet(CueSheet cueSheet, Writer writer) throws TransformerException
+  public void serializeCueSheet(final CueSheet cueSheet, final Writer writer) throws TransformerException
   {
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "serializeCueSheet(CueSheet,Writer)"
+      , new Object[] {cueSheet, writer}
+      );
     serializeCueSheet(cueSheet, new StreamResult(writer));
+    CueSheetToXmlSerializer.logger.exiting
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "serializeCueSheet(CueSheet,Writer)");
   }
   
   /**
@@ -153,9 +173,17 @@ public class CueSheetToXmlSerializer
    * @param outputStream The OutputStream to write the XML representation to. 
    * @throws TransformerException 
    */
-  public void serializeCueSheet(CueSheet cueSheet, OutputStream outputStream) throws TransformerException
+  public void serializeCueSheet(final CueSheet cueSheet, final OutputStream outputStream)
+    throws TransformerException
   {
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "serializeCueSheet(CueSheet,OutputStream)"
+      , new Object[] {cueSheet, outputStream}
+      );
     serializeCueSheet(cueSheet, new StreamResult(outputStream));
+    CueSheetToXmlSerializer.logger.exiting
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "serializeCueSheet(CueSheet,OutputStream)");
   }
 
   /**
@@ -164,9 +192,16 @@ public class CueSheetToXmlSerializer
    * @param file The File to write the XML representation to. 
    * @throws TransformerException 
    */
-  public void serializeCueSheet(CueSheet cueSheet, File file) throws TransformerException
+  public void serializeCueSheet(final CueSheet cueSheet, final File file) throws TransformerException
   {
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "serializeCueSheet(CueSheet,File)"
+      , new Object[] {cueSheet, file}
+      );
     serializeCueSheet(cueSheet, new StreamResult(file));
+    CueSheetToXmlSerializer.logger.exiting
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "serializeCueSheet(CueSheet,File)");
   }
 
   /**
@@ -175,12 +210,19 @@ public class CueSheetToXmlSerializer
    * @param result The Result to write the XML representation to. 
    * @throws TransformerException 
    */
-  public void serializeCueSheet(CueSheet cueSheet, Result result) throws TransformerException
+  public void serializeCueSheet(final CueSheet cueSheet, final Result result) throws TransformerException
   {
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "serializeCueSheet(CueSheet,Result)"
+      , new Object[] {cueSheet, result}
+      );
     TransformerFactory transformerFactory = TransformerFactory.newInstance();
     Transformer identityTransformer = transformerFactory.newTransformer();
     Source cueSheetSource = new DOMSource(serializeCueSheet(cueSheet));
     identityTransformer.transform(cueSheetSource, result);
+    CueSheetToXmlSerializer.logger.exiting
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "serializeCueSheet(CueSheet,Result)");
   }
 
   /**
@@ -188,8 +230,10 @@ public class CueSheetToXmlSerializer
    * @param cueSheet The CueSheet to serialize.
    * @return An XML DOM tree representation of the cue sheet. 
    */
-  public Document serializeCueSheet(CueSheet cueSheet)
+  public Document serializeCueSheet(final CueSheet cueSheet)
   {
+    CueSheetToXmlSerializer.logger.entering
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "serializeCueSheet(CueSheet)", cueSheet);
     Document doc = docBuilder.newDocument();
     Element cueSheetElement = doc.createElementNS(this.namespace, "cuesheet");
     doc.appendChild(cueSheetElement);
@@ -209,6 +253,8 @@ public class CueSheetToXmlSerializer
       serializeFileData(cueSheetElement, fileData);
     }
     
+    CueSheetToXmlSerializer.logger.exiting
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "serializeCueSheet(CueSheet)", doc);
     return doc;
   }
   
@@ -217,8 +263,13 @@ public class CueSheetToXmlSerializer
    * @param parentElement The parent element for the FileData.
    * @param fileData The FileData to serialize.
    */
-  private void serializeFileData(Element parentElement, FileData fileData)
+  private void serializeFileData(final Element parentElement, final FileData fileData)
   {
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "serializeFileData(Element,FileData)"
+      , new Object[] {parentElement, fileData}
+      );
     Document doc = parentElement.getOwnerDocument();
     Element fileElement = doc.createElementNS(this.namespace, "file");
     parentElement.appendChild(fileElement);
@@ -230,6 +281,8 @@ public class CueSheetToXmlSerializer
     {
       serializeTrackData(fileElement, trackData);
     }
+    CueSheetToXmlSerializer.logger.exiting
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "serializeFileData(Element,FileData)");
   }
 
   /**
@@ -237,8 +290,13 @@ public class CueSheetToXmlSerializer
    * @param parentElement The parent element for the TrackData.
    * @param trackData The TrackData to serialize.
    */
-  private void serializeTrackData(Element parentElement, TrackData trackData)
+  private void serializeTrackData(final Element parentElement, final TrackData trackData)
   {
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "serializeTrackData(Element,TrackData)"
+      , new Object[] {parentElement, trackData}
+      );
     Document doc = parentElement.getOwnerDocument();
     Element trackElement = doc.createElementNS(this.namespace, "track");
     parentElement.appendChild(trackElement);
@@ -263,6 +321,8 @@ public class CueSheetToXmlSerializer
     {
       serializeIndex(trackElement, index);
     }
+    CueSheetToXmlSerializer.logger.exiting
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "serializeTrackData(Element,TrackData)");
   }
   
   /**
@@ -270,8 +330,13 @@ public class CueSheetToXmlSerializer
    * @param parentElement The parent element for the TrackData.
    * @param flags The flags to serialize.
    */
-  private void serializeFlags(Element parentElement, Set<String> flags)
+  private void serializeFlags(final Element parentElement, final Set<String> flags)
   {
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "serializeFlags(Element,Set<String>)"
+      , new Object[] {parentElement, flags}
+      );
     Document doc = parentElement.getOwnerDocument();
     Element flagsElement = doc.createElementNS(this.namespace, "flags");
     parentElement.appendChild(flagsElement);
@@ -280,6 +345,8 @@ public class CueSheetToXmlSerializer
     {
       addElement(flagsElement, "flag", flag);
     }
+    CueSheetToXmlSerializer.logger.exiting
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "serializeFlags(Element,Set<String>)");
   }
   
   /**
@@ -287,11 +354,18 @@ public class CueSheetToXmlSerializer
    * @param parentElement The parent element for the TrackData.
    * @param index The Index to serialize.
    */
-  private void serializeIndex(Element parentElement, Index index)
+  private void serializeIndex(final Element parentElement, final Index index)
   {
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "serializeIndex(Element,Index)"
+      , new Object[] {parentElement, index}
+      );
     Element indexElement = addElement(parentElement, "index", index.getPosition(), true);
     
     addAttribute(indexElement, "number", index.getNumber());
+    CueSheetToXmlSerializer.logger.exiting
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "serializeIndex(Element,Index)");
   }
   
   /**
@@ -302,12 +376,20 @@ public class CueSheetToXmlSerializer
    * @param value The value to add.
    * @return The element that was created, or null if no element was created.
    */
-  private Element addElement  ( Element parentElement
-                              , String elementName
-                              , Position position
+  private Element addElement  ( final Element parentElement
+                              , final String elementName
+                              , final Position position
                               )
   {
-    return addElement(parentElement, elementName, position, false);
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "addElement(Element,String,Position)"
+      , new Object[] {parentElement, elementName, position}
+      );
+    Element result = addElement(parentElement, elementName, position, false);
+    CueSheetToXmlSerializer.logger.exiting
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "addElement(Element,String,Position)", result);
+    return result;
   }
 
   /**
@@ -319,12 +401,17 @@ public class CueSheetToXmlSerializer
    * @param value The value to add.
    * @return The element that was created, or null if no element was created.
    */
-  private Element addElement  ( Element parentElement
-                              , String elementName
-                              , Position position
-                              , boolean forceElement
+  private Element addElement  ( final Element parentElement
+                              , final String elementName
+                              , final Position position
+                              , final boolean forceElement
                               )
   {
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "addElement(Element,String,Position,boolean)"
+      , new Object[] {parentElement, elementName, position, forceElement}
+      );
     Element positionElement = null;
     
     if (position != null || forceElement)
@@ -340,6 +427,11 @@ public class CueSheetToXmlSerializer
       }
     }
     
+    CueSheetToXmlSerializer.logger.exiting
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "addElement(Element,String,Position,boolean)"
+      , positionElement
+      );
     return positionElement;
   }
 
@@ -351,8 +443,13 @@ public class CueSheetToXmlSerializer
    * @param value The value for the element.
    * @return The element that was created, or null if no element was created.
    */
-  private Element addElement(Element parentElement, String elementName, String value)
+  private Element addElement(final Element parentElement, final String elementName, final String value)
   {
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "addElement(Element,String,String)"
+      , new Object[] {parentElement, elementName, value}
+      );
     Element newElement = null;
     
     if (value != null)
@@ -362,6 +459,11 @@ public class CueSheetToXmlSerializer
       parentElement.appendChild(newElement);
     }
     
+    CueSheetToXmlSerializer.logger.exiting
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "addElement(Element,String,String)"
+      , newElement
+      );
     return newElement;
   }
   
@@ -373,8 +475,13 @@ public class CueSheetToXmlSerializer
    * @param value The value for the element.
    * @return The element that was created, or null if no element was created.
    */
-  private Element addElement(Element parentElement, String elementName, int value)
+  private Element addElement(final Element parentElement, final String elementName, final int value)
   {
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "addElement(Element,String,int)"
+      , new Object[] {parentElement, elementName, value}
+      );
     Element newElement = null;
     
     if (value > -1)
@@ -384,6 +491,8 @@ public class CueSheetToXmlSerializer
       parentElement.appendChild(newElement);
     }
     
+    CueSheetToXmlSerializer.logger.exiting
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "addElement(Element,String,int)", newElement);
     return newElement;
   }
 
@@ -394,12 +503,19 @@ public class CueSheetToXmlSerializer
    * @param attributeName The name for the attribute.
    * @param value The value for the attribute.
    */
-  private void addAttribute(Element parentElement, String attributeName, String value)
+  private void addAttribute(final Element parentElement, final String attributeName, final String value)
   {
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "addAttribute(Element,String,String)"
+      , new Object[] {parentElement, attributeName, value}
+      );
     if (value != null)
     {
       parentElement.setAttribute(attributeName, value);
     }
+    CueSheetToXmlSerializer.logger.exiting
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "addAttribute(Element,String,String)");
   }
   
   /**
@@ -409,11 +525,18 @@ public class CueSheetToXmlSerializer
    * @param attributeName The name for the attribute.
    * @param value The value for the attribute.
    */
-  private void addAttribute(Element parentElement, String attributeName, int value)
+  private void addAttribute(final Element parentElement, final String attributeName, final int value)
   {
+    CueSheetToXmlSerializer.logger.entering
+      ( CueSheetToXmlSerializer.class.getCanonicalName()
+      , "addAttribute(Element,String,int)"
+      , new Object[] {parentElement, attributeName, value}
+      );
     if (value > -1)
     {
       parentElement.setAttribute(attributeName, "" + value);
     }
+    CueSheetToXmlSerializer.logger.exiting
+      (CueSheetToXmlSerializer.class.getCanonicalName(), "addAttribute(Element,String,int)");
   }
 }
