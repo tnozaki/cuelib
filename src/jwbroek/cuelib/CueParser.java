@@ -176,7 +176,8 @@ final public class CueParser
   
   /**
    * Parse a cue sheet that will be read from the InputStream.
-   * @param inputStream An InputStream that produces a cue sheet. The stream will be closed afterward.
+   * @param inputStream An {@link java.io.InputStream} that produces a cue sheet. The stream will be closed
+   * afterward.
    * @return A representation of the cue sheet.
    * @throws IOException
    */
@@ -405,7 +406,8 @@ final public class CueParser
    * and there is a capturing group, then the first such group will be checked for case. If it is not uppercase,
    * then a "TOKEN NOT UPPERCASE" warning will be added to the cue sheet associated with the input.
    * @param input The input to check.
-   * @param pattern Pattern to check for. If it contains a capturing group, then on a match, this group will be
+   * @param pattern {@link java.util.regex.Pattern} to check for. If it contains a capturing group, then on a match,
+   * this group will be
    * checked for case as per the method description.
    * @return True if there is a match. False otherwise.
    */
@@ -1320,9 +1322,11 @@ final public class CueParser
   }
 
   /**
-   * Get the last TrackData element. If none exist, an empty one is created and a warning added.
+   * Get the last {@link jwbroek.cuelib.TrackData} element. If none exist, an empty one is created and a warning
+   * added.
    * @param input
-   * @return The last TrackData element. If none exist, an empty one is created and a warning added.
+   * @return The last {@link jwbroek.cuelib.TrackData} element. If none exist, an empty one is created and a
+   * warning added.
    */
   private static TrackData getLastTrackData(final LineOfInput input)
   {
@@ -1343,9 +1347,11 @@ final public class CueParser
   }
 
   /**
-   * Get the last FileData element. If none exist, an empty one is created and a warning added.
+   * Get the last {@link jwbroek.cuelib.FileData} element. If none exist, an empty one is created and a warning
+   * added.
    * @param input
-   * @return The last FileData element. If none exist, an empty one is created and a warning added.
+   * @return The last {@link jwbroek.cuelib.FileData} element. If none exist, an empty one is created and a warning
+   * added.
    */
   private static FileData getLastFileData(final LineOfInput input)
   {
@@ -1365,8 +1371,9 @@ final public class CueParser
   }
   
   /**
-   * Write a warning to the logging and the CueSheet associated with the LineOfInput.
-   * @param input The LineOfInput the warning pertains to.
+   * Write a warning to the logging and the {@link jwbroek.cuelib.CueSheet} associated with the
+   * {@link jwbroek.cuelib.LineOfInput}.
+   * @param input The {@link jwbroek.cuelib.LineOfInput} the warning pertains to.
    * @param warning The warning to write.
    */
   private static void addWarning(final LineOfInput input, final String warning)
