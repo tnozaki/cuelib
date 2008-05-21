@@ -19,6 +19,7 @@
 package jwbroek.util;
 
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,13 +37,23 @@ import java.util.regex.Pattern;
  * 
  * <p>Instances of this class are reusable. They are also safe for concurrent use, as long as the Map instance they are
  * constructed on is safe for concurrent reads. (The Map need not be safe for concurrent writes.) Most Map
- * implementations, including java.util.HashMap, java.util.Hashtable, and java.util.TreeMap, will meet this
- * requirement.</p>
+ * implementations, including {@link java.util.HashMap}, {@link java.util.Hashtable}, and {@link java.util.TreeMap},
+ * will meet this requirement.</p>
  * @author jwbroek
  */
 public class StringReplacer
 {
+  /**
+   * The logger for this class.
+   */
+  private final static Logger logger = Logger.getLogger(StringReplacer.class.getCanonicalName());
+  /**
+   * A Pattern that is used to perform the replacements.
+   */
   private Pattern replacementPattern;
+  /**
+   * A map from "value to search for", to "value to change to".
+   */
   private Map<String, String> replacements;
   
   /**
@@ -52,6 +63,8 @@ public class StringReplacer
    */
   public StringReplacer(Map<String, String> replacements)
   {
+    StringReplacer.logger.entering
+      (StringReplacer.class.getCanonicalName(), "StringReplacer(Map<String,String>)", replacements);
     StringBuilder builder = new StringBuilder();
     
     builder.append('(');
@@ -75,6 +88,7 @@ public class StringReplacer
     
     this.replacementPattern = Pattern.compile(builder.toString());
     this.replacements = replacements;
+    StringReplacer.logger.exiting(StringReplacer.class.getCanonicalName(), "StringReplacer(Map<String,String>)");
   }
   
   /**
@@ -85,6 +99,7 @@ public class StringReplacer
    */
   public String replace(String input)
   {
+    StringReplacer.logger.entering(StringReplacer.class.getCanonicalName(), "replace(String)", input);
     StringBuffer buffer = new StringBuffer();
     
     Matcher matcher = this.replacementPattern.matcher(input);
@@ -96,6 +111,8 @@ public class StringReplacer
     
     matcher.appendTail(buffer);
     
-    return buffer.toString();
+    String result = buffer.toString();
+    StringReplacer.logger.entering(StringReplacer.class.getCanonicalName(), "replace(String)", result);
+    return result;
   }
 }

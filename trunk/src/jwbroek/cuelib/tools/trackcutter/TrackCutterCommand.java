@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -34,6 +35,7 @@ import javax.sound.sampled.AudioFileFormat;
 import jwbroek.cuelib.Position;
 import jwbroek.cuelib.tools.trackcutter.TrackCutterConfiguration.PregapHandling;
 import jwbroek.io.FileSelector;
+import jwbroek.util.LogUtil;
 import jwbroek.util.SimpleOptionsParser;
 
 /**
@@ -71,13 +73,18 @@ public class TrackCutterCommand
    * Whether or not to read a cue sheet from standard input.
    */
   private boolean readCueSheetFromStdIn = false;
+  /**
+   * The logger for this class.
+   */
+  private final static Logger logger = Logger.getLogger(TrackCutterCommand.class.getCanonicalName());
 
   /**
    * Create a new TrackCutterCommand instance. 
    */
   private TrackCutterCommand()
   {
-    // No need to instantiate from outside this class.
+    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "TrackCutterCommand()");
+    TrackCutterCommand.logger.exiting(TrackCutterCommand.class.getCanonicalName(), "TrackCutterCommand()");
   }
   
   /**
@@ -85,6 +92,7 @@ public class TrackCutterCommand
    */
   private static void printHelp()
   {
+    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "printHelp()");
     System.out.println("Syntax: [options] [cuefiles]");
     System.out.println("cuefiles need not be specified if the -fp, -pp, or -i option is used.");
     System.out.println("Options:");
@@ -120,8 +128,10 @@ public class TrackCutterCommand
     System.out.println(" -re                 Redirect error output of post-processing step to log file.");
     System.out.println(" -l level            Override jdk 1.4 logging settings. The following levels are supported:");
     System.out.println("                     \"none\" (no cuelib logging), \"specific\" (only TrackCutter logging),");
-    System.out.println("                     \"all\" (all cuelib logging). This setting does not influence logging");
-    System.out.println("                     outside of cuelib. For this, use the standard jdk 1.4 logging settings.");
+    System.out.println("                     \"all\" (all cuelib logging). When logging is enabled, TrackCutter will");
+    System.out.println("                     also try to ensure that logging is directed to the console. This setting");
+    System.out.println("                     does not influence logging outside of cuelib. For this, use the standard");
+    System.out.println("                     jdk 1.4 logging settings.");
     System.out.println(" -? | --help         Displays this help message and exits.");
     System.out.println("Templates:");
     System.out.println(" <title>             Title of the track.");
@@ -160,6 +170,7 @@ public class TrackCutterCommand
     System.out.println("No guarantees are made as to the order in which files are processed. Some effort is made");
     System.out.println("to provent files from being processed more than once per run.");
     System.out.println("Conflicting options may result in unpredictable behaviour.");
+    TrackCutterCommand.logger.exiting(TrackCutterCommand.class.getCanonicalName(), "printHelp()");
   }
   
   /**
@@ -168,6 +179,7 @@ public class TrackCutterCommand
    */
   private SimpleOptionsParser getArgumentsParser()
   {
+    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "getArgumentsParser()");
     SimpleOptionsParser argumentsParser = new SimpleOptionsParser();
     argumentsParser.registerOption
       ( new SimpleOptionsParser.OptionHandler()
@@ -420,14 +432,52 @@ public class TrackCutterCommand
               // Suppress logging of the jwbroek.cuelib tree.
               Logger.getLogger("jwbroek.cuelib").setLevel(Level.OFF);
               // Do allow INFO logging of the trackcutter log.
-              TrackCutterCommand.this.getConfiguration().getLogger().setLevel(Level.INFO);
+              Logger trackCutterLogger = Logger.getLogger(TrackCutter.class.getCanonicalName());
+              if (! trackCutterLogger.isLoggable(Level.INFO))
+              {
+                trackCutterLogger.setLevel(Level.INFO);
+              }
+              // If there is no ConsoleLogger configured, then add one.
+              if  ( ! LogUtil.hasHandlerActive  ( trackCutterLogger
+                                                , Level.INFO
+                                                , ConsoleHandler.class
+                                                )
+                  )
+              {
+                trackCutterLogger.addHandler(new ConsoleHandler());
+              }
             }
             else if ("all".equals(level))
             {
               // Enable INFO logging of the jwbroek.cuelib tree, and specifically the
               // TrackCutter log.
-              Logger.getLogger("jwbroek.cuelib").setLevel(Level.INFO);
-              TrackCutterCommand.this.getConfiguration().getLogger().setLevel(Level.INFO);
+              Logger cuelibLoggger = Logger.getLogger("jwbroek.cuelib");
+              if (! cuelibLoggger.isLoggable(Level.INFO))
+              {
+                cuelibLoggger.setLevel(Level.INFO);
+              }
+              Logger trackCutterLogger = Logger.getLogger(TrackCutter.class.getCanonicalName());
+              if (! trackCutterLogger.isLoggable(Level.INFO))
+              {
+                trackCutterLogger.setLevel(Level.INFO);
+              }
+              // If there is no ConsoleLogger configured, then add one.
+              if  ( ! LogUtil.hasHandlerActive  ( Logger.getLogger("jwbroek.cuelib")
+                                                , Level.INFO
+                                                , ConsoleHandler.class
+                                                )
+                  )
+              {
+                Logger.getLogger("jwbroek.cuelib").addHandler(new ConsoleHandler());
+              }
+              if  ( ! LogUtil.hasHandlerActive  ( trackCutterLogger
+                                                , Level.INFO
+                                                , ConsoleHandler.class
+                                                )
+                  )
+              {
+                trackCutterLogger.addHandler(new ConsoleHandler());
+              }
             }
             else
             {
@@ -453,6 +503,7 @@ public class TrackCutterCommand
       , "-?", "--help"
       );
     
+    TrackCutterCommand.logger.exiting(TrackCutterCommand.class.getCanonicalName(), "getArgumentsParser()", argumentsParser);
     return argumentsParser;
   }
   
@@ -462,6 +513,7 @@ public class TrackCutterCommand
    */
   public void performProcessing(final String [] args)
   {
+    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "performProcessing(String[])", args);
     TrackCutter cutter = new TrackCutter(this.getConfiguration());
     SimpleOptionsParser argumentsParser = getArgumentsParser();
     
@@ -549,6 +601,7 @@ public class TrackCutterCommand
     
     // Set doProcessing to true, as someone may want to reuse this instance.
     this.setDoProcessing(true);
+    TrackCutterCommand.logger.exiting(TrackCutterCommand.class.getCanonicalName(), "performProcessing(String[])");
   }
 
   /**
@@ -557,7 +610,9 @@ public class TrackCutterCommand
    */
   public static void main(final String[] args)
   {
+    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "main(String[])", args);
     new TrackCutterCommand().performProcessing(args);
+    TrackCutterCommand.logger.exiting(TrackCutterCommand.class.getCanonicalName(), "main(String[])");
   }
 
   /**
@@ -566,6 +621,9 @@ public class TrackCutterCommand
    */
   private TrackCutterConfiguration getConfiguration()
   {
+    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "getConfiguration()");
+    TrackCutterCommand.logger.exiting
+      (TrackCutterCommand.class.getCanonicalName(), "getConfiguration()", this.configuration);
     return this.configuration;
   }
   
@@ -575,6 +633,9 @@ public class TrackCutterCommand
    */
   private boolean getDoProcessing()
   {
+    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "getDoProcessing()");
+    TrackCutterCommand.logger.exiting
+      (TrackCutterCommand.class.getCanonicalName(), "getDoProcessing()", this.doProcessing);
     return this.doProcessing;
   }
 
@@ -584,7 +645,11 @@ public class TrackCutterCommand
    */
   private void setDoProcessing(final boolean doProcessing)
   {
+    TrackCutterCommand.logger.entering
+      (TrackCutterCommand.class.getCanonicalName(), "setDoProcessing(boolean)", doProcessing);
     this.doProcessing = doProcessing;
+    TrackCutterCommand.logger.exiting
+      (TrackCutterCommand.class.getCanonicalName(), "setDoProcessing(boolean)", this.doProcessing);
   }
 
   /**
@@ -594,7 +659,13 @@ public class TrackCutterCommand
    */
   private Pattern getFileNameSelectionPattern()
   {
-    return fileNameSelectionPattern;
+    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "getFileNameSelectionPattern()");
+    TrackCutterCommand.logger.exiting
+      ( TrackCutterCommand.class.getCanonicalName()
+      , "getFileNameSelectionPattern()"
+      , this.fileNameSelectionPattern
+      );
+    return this.fileNameSelectionPattern;
   }
 
   /**
@@ -605,7 +676,13 @@ public class TrackCutterCommand
    */
   private void setFileNameSelectionPattern(final Pattern fileNameSelectionPattern)
   {
+    TrackCutterCommand.logger.entering
+      ( TrackCutterCommand.class.getCanonicalName()
+      , "setFileNameSelectionPattern(Pattern)"
+      , fileNameSelectionPattern
+      );
     this.fileNameSelectionPattern = fileNameSelectionPattern;
+    TrackCutterCommand.logger.exiting(TrackCutterCommand.class.getCanonicalName(), "setFileNameSelectionPattern(Pattern)");
   }
 
   /**
@@ -615,6 +692,9 @@ public class TrackCutterCommand
    */
   private Pattern getPathSelectionPattern()
   {
+    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "getPathSelectionPattern()");
+    TrackCutterCommand.logger.exiting
+      (TrackCutterCommand.class.getCanonicalName(), "getPathSelectionPattern()", this.pathSelectionPattern);
     return this.pathSelectionPattern;
   }
 
@@ -626,7 +706,10 @@ public class TrackCutterCommand
    */
   private void setPathSelectionPattern(final Pattern pathSelectionPattern)
   {
+    TrackCutterCommand.logger.entering
+      (TrackCutterCommand.class.getCanonicalName(), "getPathSelectionPattern(Pattern)", pathSelectionPattern);
     this.pathSelectionPattern = pathSelectionPattern;
+    TrackCutterCommand.logger.exiting(TrackCutterCommand.class.getCanonicalName(), "getPathSelectionPattern(Pattern)");
   }
 
   /**
@@ -635,6 +718,8 @@ public class TrackCutterCommand
    */
   private long getRecursionDepth()
   {
+    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "getRecursionDepth()");
+    TrackCutterCommand.logger.exiting(TrackCutterCommand.class.getCanonicalName(), "getRecursionDepth()", this.recursionDepth);
     return this.recursionDepth;
   }
 
@@ -645,7 +730,10 @@ public class TrackCutterCommand
    */
   private void setRecursionDepth(final long recursionDepth)
   {
+    TrackCutterCommand.logger.entering
+      (TrackCutterCommand.class.getCanonicalName(), "setRecursionDepth(long)", recursionDepth);
     this.recursionDepth = recursionDepth;
+    TrackCutterCommand.logger.exiting(TrackCutterCommand.class.getCanonicalName(), "setRecursionDepth(long)");
   }
 
   /**
@@ -655,6 +743,12 @@ public class TrackCutterCommand
    */
   private File getSelectionBaseDirectory()
   {
+    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "getSelectionBaseDirectory()");
+    TrackCutterCommand.logger.exiting
+      ( TrackCutterCommand.class.getCanonicalName()
+      , "getSelectionBaseDirectory()"
+      , this.selectionBaseDirectory
+      );
     return this.selectionBaseDirectory;
   }
 
@@ -664,7 +758,16 @@ public class TrackCutterCommand
    */
   private void setSelectionBaseDirectory(final File selectionBaseDirectory)
   {
+    TrackCutterCommand.logger.entering
+      ( TrackCutterCommand.class.getCanonicalName()
+      , "setSelectionBaseDirectory(File)"
+      , selectionBaseDirectory
+      );
     this.selectionBaseDirectory = selectionBaseDirectory;
+    TrackCutterCommand.logger.exiting
+      ( TrackCutterCommand.class.getCanonicalName()
+      , "setSelectionBaseDirectory(File)"
+      );
   }
   
   /**
@@ -673,7 +776,10 @@ public class TrackCutterCommand
    */
   private boolean getReadCueSheetFromStdIn()
   {
-    return readCueSheetFromStdIn;
+    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "getReadCueSheetFromStdIn()");
+    TrackCutterCommand.logger.exiting
+      (TrackCutterCommand.class.getCanonicalName(), "getReadCueSheetFromStdIn()", this.readCueSheetFromStdIn);
+    return this.readCueSheetFromStdIn;
   }
 
   /**
@@ -682,6 +788,12 @@ public class TrackCutterCommand
    */
   private void setReadCueSheetFromStdIn(final boolean readCueSheetFromStdIn)
   {
+    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "setReadCueSheetFromStdIn(boolean)");
     this.readCueSheetFromStdIn = readCueSheetFromStdIn;
+    TrackCutterCommand.logger.exiting
+      ( TrackCutterCommand.class.getCanonicalName()
+      , "setReadCueSheetFromStdIn(boolean)"
+      , this.readCueSheetFromStdIn
+      );
   }
 }

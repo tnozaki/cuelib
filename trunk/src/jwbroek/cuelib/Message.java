@@ -24,8 +24,28 @@ package jwbroek.cuelib;
  */
 public interface Message
 {
+  /**
+   * Get the message text.
+   * @return The message text.
+   */
   public String getMessage();
+  
+  /**
+   * Get the line number that this message applies to.
+   * @return The line number that this message applies to.
+   */
   public int getLineNumber();
+  
+  /**
+   * Get the input that this message applies to.
+   * @return The input that this message applies to.
+   */
   public String getInput();
+  
+  /**
+   * Get a textual representation of this Message. It is highly desirable to have an informative
+   * String representation.
+   * @return Aa textual representation of this Message.
+   */
   public String toString();
 }

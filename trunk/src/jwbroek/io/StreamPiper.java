@@ -23,6 +23,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import jwbroek.util.LogUtil;
 
 /**
  * Utility class for piping data from an InputStream to an OutputStream, or to nowhere. This class is particularly useful
@@ -31,9 +35,22 @@ import java.io.OutputStream;
  */
 public class StreamPiper implements Runnable
 {
+  /**
+   * Stream to read input from. mus not be null.
+   */
   private InputStream from;
+  /**
+   * Stream to pipe input to. May be null, in which case all input is discarded.
+   */
   private OutputStream to;
+  /**
+   * Whether or not to close the output stream after all data has been piped.
+   */
   private boolean closeOutput;
+  /**
+   * The logger for this class.
+   */
+  private final static Logger logger = Logger.getLogger(StreamPiper.class.getCanonicalName());
   
   /**
    * Pipe all input from the InputStream to the OutputStream. The OutputStream is explicitly allowed to be null.
@@ -42,9 +59,12 @@ public class StreamPiper implements Runnable
    * @param from
    * @param to
    */
-  public StreamPiper(InputStream from, OutputStream to)
+  public StreamPiper(final InputStream from, final OutputStream to)
   {
     this(from, to, false);
+    StreamPiper.logger.entering
+      (StreamPiper.class.getCanonicalName(), "StreamPiper(InputStream,OutputStream)", new Object[] {from, to});
+    StreamPiper.logger.exiting(StreamPiper.class.getCanonicalName(), "StreamPiper(InputStream,OutputStream)");
   }
   
   /**
@@ -55,28 +75,37 @@ public class StreamPiper implements Runnable
    * @param to
    * @param closeOutput
    */
-  public StreamPiper(InputStream from, OutputStream to, boolean closeOutput)
+  public StreamPiper(final InputStream from, final OutputStream to, final boolean closeOutput)
   {
+    StreamPiper.logger.entering
+      ( StreamPiper.class.getCanonicalName()
+      , "StreamPiper(InputStream,OutputStream,boolean)"
+      , new Object [] {from, to, closeOutput}
+      );
     this.from = from;
     this.to = to;
     this.closeOutput = closeOutput;
+    StreamPiper.logger.exiting(StreamPiper.class.getCanonicalName(), "StreamPiper(InputStream,OutputStream,boolean)");
   }
   
   /**
    * Pipe the contents of the specified input stream to the specified file, or throw it away if the file is
    * null.
-   * @param in The input to stream to file.
+   * @param from The input to stream to file.
    * @param file The file to pipe input to, or null if the input should be thrown away.
    * @throws IOException
    */
-  public static void pipeStream(final InputStream in, final File file) throws IOException
+  public static void pipeStream(final InputStream from, final File file) throws IOException
   {
+    StreamPiper.logger.entering
+      (StreamPiper.class.getCanonicalName(), "pipeStream(InputStream,File)", new Object [] {from, file});
     OutputStream out = null;
     if (file!=null)
     {
       out = new FileOutputStream(file);
     }
-    new Thread(new StreamPiper(in, out, true)).start();
+    new Thread(new StreamPiper(from, out, true)).start();
+    StreamPiper.logger.exiting(StreamPiper.class.getCanonicalName(), "pipeStream(InputStream,File)");
   }
   
   /**
@@ -84,6 +113,7 @@ public class StreamPiper implements Runnable
    */
   public void run()
   {
+    StreamPiper.logger.entering(StreamPiper.class.getCanonicalName(), "run()");
     try
     {
       int input = this.from.read();
@@ -99,6 +129,7 @@ public class StreamPiper implements Runnable
     catch (IOException e)
     {
       // Nothing we can do.
+      LogUtil.logStacktrace(StreamPiper.logger, Level.WARNING, e);
     }
     finally
     {
@@ -109,6 +140,7 @@ public class StreamPiper implements Runnable
       catch (IOException e)
       {
         // Nothing we can do.
+        LogUtil.logStacktrace(StreamPiper.logger, Level.WARNING, e);
       }
       if (this.closeOutput && this.to != null)
       {
@@ -119,8 +151,10 @@ public class StreamPiper implements Runnable
         catch (IOException e)
         {
           // Nothing we can do.
+          LogUtil.logStacktrace(StreamPiper.logger, Level.WARNING, e);
         }
       }
     }
+    StreamPiper.logger.exiting(StreamPiper.class.getCanonicalName(), "run()");
   }
 }
