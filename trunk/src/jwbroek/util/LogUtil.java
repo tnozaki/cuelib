@@ -63,9 +63,13 @@ public final class LogUtil
       , new Object[] {logger, level, throwable}
       );
     
-    final StringWriter sw = new StringWriter();
-    throwable.printStackTrace(new PrintWriter(sw));
-    logger.log(level, sw.toString());
+    // No need to do anything if the message isn't loggable.
+    if (logger.isLoggable(level))
+    {
+      final StringWriter sw = new StringWriter();
+      throwable.printStackTrace(new PrintWriter(sw));
+      logger.log(level, sw.toString());
+    }
     
     LogUtil.logger.exiting(LogUtil.class.getCanonicalName(), "logStacktrace(Logger,Level,Throwable)");
   }
