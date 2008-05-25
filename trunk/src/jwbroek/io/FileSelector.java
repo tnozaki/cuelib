@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -165,31 +166,29 @@ public class FileSelector
   }
   
   /**
-   * Get a FileFilter that combines all the specified FileFilters, such that it will only accept a file
-   * if it is accepted by all specified FileFilters. The filters will be tested in order, so it is generally
-   * preferable to put cheap and highly discriminating filters at low indices.
+   * Get a FileFilter that combines all the specified FileFilters, such that the resulting filter will only
+   * accept a file if it is accepted by all specified FileFilters. The filters will be tested in order, so
+   * it is generally preferable to put cheap and highly discriminating filters at low indices.
    * @param fileFilters The FileFilter instances to combine.
-   * @return A FileFilter that combines all the specified FileFilters, such that it will only accept a file
-   * if it is accepted by all specified FileFilters.
+   * @return A FileFilter that combines all the specified FileFilters, such that the resulting filter will
+   * only accept a file if it is accepted by all specified FileFilters.
    */
   public static FileFilter getCombinedFileFilter(final FileFilter ... fileFilters)
   {
-    // The FileFilter ... parameter has lower (implicit) priority than Iterable<FileFilter>, so there is no
-    // (directly) recursive call here.
     FileSelector.logger.entering
       (FileSelector.class.getCanonicalName(), "getCombinedFileFilter(FileFilter[])", fileFilters);
-    FileFilter result = FileSelector.getCombinedFileFilter(fileFilters);
+    FileFilter result = FileSelector.getCombinedFileFilter(Arrays.asList(fileFilters));
     FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "getCombinedFileFilter(FileFilter[])", result);
     return result;
   }
   
   /**
-   * Get a FileFilter that combines all the specified FileFilters, such that it will only accept a file
-   * if it is accepted by all specified FileFilters. The filters will be tested in order, so it is generally
-   * preferable to put cheap and highly discriminating filters at low indices.
+   * Get a FileFilter that combines all the specified FileFilters, such that the resulting filter will only
+   * accept a file if it is accepted by all specified FileFilters. The filters will be tested in order, so it
+   * is generally preferable to put cheap and highly discriminating filters at low indices.
    * @param fileFilters The FileFilter instances to combine.
-   * @return A FileFilter that combines all the specified FileFilters, such that it will only accept a file
-   * if it is accepted by all specified FileFilters.
+   * @return A FileFilter that combines all the specified FileFilters, such that the resulting filter will
+   * only accept a file if it is accepted by all specified FileFilters.
    */
   public static FileFilter getCombinedFileFilter(final Iterable<FileFilter> fileFilters)
   {
