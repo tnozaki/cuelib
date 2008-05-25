@@ -53,7 +53,7 @@ public class SimpleOptionsParser
   /**
    * Map from option key to handler for that option.
    */
-  Map<String, OptionHandler> optionHandlers = new HashMap<String, OptionHandler>();
+  private Map<String, OptionHandler> optionHandlers = new HashMap<String, OptionHandler>();
   
   /**
    * Create a new SimpleOptionsParser.

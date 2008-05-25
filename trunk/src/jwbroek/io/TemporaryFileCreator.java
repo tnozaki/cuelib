@@ -30,7 +30,7 @@ import jwbroek.util.LogUtil;
  * Utility class for creating temporary files.
  * @author jwbroek
  */
-public class TemporaryFileCreator
+final public class TemporaryFileCreator
 {
   /**
    * The logger for this class.

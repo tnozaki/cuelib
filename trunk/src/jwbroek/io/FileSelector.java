@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  * Convenience class for selecting files based on some criterium.
  * @author jwbroek
  */
-public class FileSelector
+final public class FileSelector
 {
   /**
    * The logger for this class.

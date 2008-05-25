@@ -38,7 +38,7 @@ public class SimpleOptionsToPropertiesParser
   /**
    * Map from option key to a list of property keys.
    */
-  Map<String, List<String>> argumentData = new HashMap<String, List<String>>();
+  private Map<String, List<String>> argumentData = new HashMap<String, List<String>>();
   
   public SimpleOptionsToPropertiesParser()
   {
