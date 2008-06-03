@@ -20,7 +20,6 @@ package jwbroek.io;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,6 +35,14 @@ final public class TemporaryFileCreator
    * The logger for this class.
    */
   private final static Logger logger = Logger.getLogger(TemporaryFileCreator.class.getCanonicalName());
+  /**
+   * Counter for added to the names of temporary files and directories.
+   */
+  private static int counter = 0;
+  /**
+   * Lock for counter.
+   */
+  private static Object counterLock = new Object();
   
   /**
    * Create a temporary directory based on the information provided. The directory will be
@@ -175,14 +182,16 @@ final public class TemporaryFileCreator
       throw tooFewAttemptsException;
     }
     
-    // The filename consists of the prefix, the current time in milliseconds, and a
-    // random number in hex, separated by underscores, and followed by the suffix.
+    // The filename consists of the prefix, a random number in hex, and a number from the counter.
+    // This is probably a little overkill, but you never know...
+    int counterNumber;
+    synchronized(TemporaryFileCreator.counterLock)
+    {
+      counterNumber = counter++;
+    }
     StringBuilder nameBuilder = new StringBuilder(prefix)
-      .append('_')
-      .append(Calendar.getInstance()
-      .getTimeInMillis())
-      .append('_')
       .append(Double.toHexString(Math.random()))
+      .append(counterNumber)
       ;
     
     // Make the specified number of attempt to create a temporary file.
