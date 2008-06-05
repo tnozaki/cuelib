@@ -299,13 +299,13 @@ public class TrackCutterConfiguration
       );
     String result = String.format
       ( this.getTemplateReplacer().replace(processCommandTemplate)
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.TITLE))
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.PERFORMER))
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.ALBUMTITLE))
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.YEAR))
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.COMMENT))
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.TRACKNUMBER))
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.GENRE))
+      , trackData.getMetaData(CueSheet.MetaDataField.TITLE)
+      , trackData.getMetaData(CueSheet.MetaDataField.PERFORMER)
+      , trackData.getMetaData(CueSheet.MetaDataField.ALBUMTITLE)
+      , trackData.getMetaData(CueSheet.MetaDataField.YEAR)
+      , trackData.getMetaData(CueSheet.MetaDataField.COMMENT)
+      , trackData.getMetaData(CueSheet.MetaDataField.TRACKNUMBER)
+      , trackData.getMetaData(CueSheet.MetaDataField.GENRE)
       , cutFileName
       , processFileName
       );
