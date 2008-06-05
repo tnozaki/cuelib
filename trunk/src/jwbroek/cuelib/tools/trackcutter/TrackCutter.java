@@ -22,8 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -154,11 +152,19 @@ public class TrackCutter
       }
       catch (UnsupportedAudioFileException e)
       {
-        logCaughtException(e);
+        TrackCutter.logger.severe
+          ( "Encountered an " + e.getClass().getCanonicalName()
+          + " when processing \"" + fileData.getFile() + "\": " + e.getMessage()
+          );
+        LogUtil.logStacktrace(TrackCutter.logger, Level.FINE, e);
       }
       catch (IOException e)
       {
-        logCaughtException(e);
+        TrackCutter.logger.severe
+          ( "Encountered an " + e.getClass().getCanonicalName()
+          + " when processing \"" + fileData.getFile() + "\": " + e.getMessage()
+          );
+        LogUtil.logStacktrace(TrackCutter.logger, Level.FINE, e);
       }
     }
     TrackCutter.logger.info("Done cutting tracks in cue sheet.");
@@ -279,7 +285,15 @@ public class TrackCutter
     if (trackData.getIndex(0) == null)
     {
       // No pregap to handle. Just process this track.
-      processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, getConfiguration()));
+      processActions.add
+        ( new TrackCutterProcessingAction
+          ( trackData.getIndex(1).getPosition()
+          , nextPosition
+          , trackData
+          , false
+          , getConfiguration()
+          )
+        );
     }
     else
     {
@@ -287,7 +301,15 @@ public class TrackCutter
       {
         case DISCARD:
           // Discard the pregap, process the track.
-          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, getConfiguration()));
+          processActions.add
+            ( new TrackCutterProcessingAction
+              ( trackData.getIndex(1).getPosition()
+              , nextPosition
+              , trackData
+              , false
+              , getConfiguration()
+              )
+            );
           break;
         case PREPEND:
           // Prepend the pregap, if long enough.
@@ -296,11 +318,27 @@ public class TrackCutter
               >= this.getConfiguration().getPregapFrameLengthThreshold()
               )
           {
-            processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), nextPosition, trackData, true, getConfiguration()));
+            processActions.add
+              ( new TrackCutterProcessingAction
+                ( trackData.getIndex(0).getPosition()
+                , nextPosition
+                , trackData
+                , true
+                , getConfiguration()
+                )
+              );
           }
           else
           {
-            processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, getConfiguration()));
+            processActions.add
+              ( new TrackCutterProcessingAction
+                ( trackData.getIndex(1).getPosition()
+                , nextPosition
+                , trackData
+                , false
+                , getConfiguration()
+                )
+              );
           }
           break;
         case SEPARATE:
@@ -311,9 +349,25 @@ public class TrackCutter
               >= this.getConfiguration().getPregapFrameLengthThreshold()
               )
           {
-            processActions.add(new TrackCutterProcessingAction(trackData.getIndex(0).getPosition(), trackData.getIndex(1).getPosition(), trackData, true, getConfiguration()));
+            processActions.add
+              ( new TrackCutterProcessingAction
+                ( trackData.getIndex(0).getPosition()
+                , trackData.getIndex(1).getPosition()
+                , trackData
+                , true
+                , getConfiguration()
+                )
+              );
           }
-          processActions.add(new TrackCutterProcessingAction(trackData.getIndex(1).getPosition(), nextPosition, trackData, false, getConfiguration()));
+          processActions.add
+            ( new TrackCutterProcessingAction
+              ( trackData.getIndex(1).getPosition()
+              , nextPosition
+              , trackData
+              , false
+              , getConfiguration()
+              )
+            );
           break;
       }
     }
@@ -506,25 +560,10 @@ public class TrackCutter
       , new Object[] {toPosition, audioInputStream, currentAudioFramePos}
       );
     long toAudioFramePos = getAudioFormatFrames(toPosition, audioInputStream.getFormat());
-    audioInputStream.skip((toAudioFramePos - currentAudioFramePos)  * audioInputStream.getFormat().getFrameSize());
+    audioInputStream.skip((toAudioFramePos - currentAudioFramePos) * audioInputStream.getFormat().getFrameSize());
     TrackCutter.logger.exiting
       (TrackCutter.class.getCanonicalName(), "skipToPosition(Position,AudioInputStream,long)", toAudioFramePos);
     return toAudioFramePos;
-  }
-  
-  /**
-   * Log an exception that was caught.
-   * @param exception The exception that was caught and should now be logged.
-   */
-  private void logCaughtException(Exception exception)
-  {
-    TrackCutter.logger.entering(TrackCutter.class.getCanonicalName(), "logCaughtException(Exception)", exception);
-    TrackCutter.logger.severe
-      ("Encountered an " + exception.getClass().getCanonicalName() + ": " + exception.getMessage());
-    StringWriter writer = new StringWriter();
-    exception.printStackTrace(new PrintWriter(writer));
-    TrackCutter.logger.fine(writer.toString());
-    TrackCutter.logger.exiting(TrackCutter.class.getCanonicalName(), "logCaughtException(Exception)");
   }
   
   /**
