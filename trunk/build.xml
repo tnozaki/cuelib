@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="cuelib" default="makeDist" basedir=".">
+	
+	<!-- Date on which the release was built. -->
 	<tstamp>
 		<format property="release.date" pattern="yyyy-MM-dd"/>
 	</tstamp>
+	
+	<!-- Configuration. -->
 	<property name="release.version" value="1.2.0"/>
 	<property name="release.printname" value="Cuelib version ${release.version}"/>
 	<property name="src" value="src"/>
@@ -13,18 +17,28 @@
 	<property name="config" value="config"/>
 	<property name="javadoc.stylesheet" value="${config}/${doc}/stylesheet.css"/>
 	<property name="javadoc.external" value="http://java.sun.com/j2se/1.5.0/docs/api/"/>
+	
+	<!-- Compile the project. -->
 	<target name="compile" depends="binDir">
 		<javac srcdir="${src}" destdir="${bin}"/>
 	</target>
+	
+	<!-- Create the directory for the binaries. -->
 	<target name="binDir">
 		<mkdir dir="${bin}"/>
 	</target>
+	
+	<!-- Create the directory for the distribution. -->
 	<target name="distDir">
 		<mkdir dir="${dist}"/>
 	</target>
+	
+	<!-- Create the directory for the docs. -->
 	<target name="docDir">
 		<mkdir dir="${doc.api}"/>
 	</target>
+	
+	<!-- Create the docs. -->
 	<target name="makeDoc" depends="docDir">
 		<javadoc destDir="${doc.api}"
 			Windowtitle="${release.printname}"
@@ -34,6 +48,8 @@
 			<fileset includes="**/*.java" dir="${src}"/>
 		</javadoc>
 	</target>
+	
+	<!-- Create the jar file. -->
 	<target name="makeJar" depends="compile, distDir">
 		<jar	jarfile="${dist}/cuelib-${release.version}-${release.date}.jar"
 				includes="**/*.class"
@@ -43,16 +59,22 @@
 			<metainf includes="lgpl-2.1.txt" dir="${basedir}"/>
 		</jar>
 	</target>
+	
+	<!-- Remove all generated artifacts. -->
 	<target name="clean">
 		<delete dir="${bin}"/>
 		<delete dir="${dist}"/>
 		<delete dir="${doc.api}"/>
 	</target>
+	
+	<!-- Create a zip containing the docs. -->
 	<target name="zipDocs" depends="makeDoc, distDir">
 		<zip zipfile="${dist}/cuelib-docs-${release.version}-${release.date}.zip" includes="**/*" basedir="${doc}">
 			<fileset includes="lgpl-2.1.txt" dir="${basedir}"/>
 		</zip>
 	</target>
+	
+	<!-- Create a zip containing the sources. -->
 	<target name="zipSources" depends="distDir">
 		<zip	zipfile="${dist}/cuelib-src-${release.version}-${release.date}.zip"
 				includes="src/**/*"
@@ -62,5 +84,15 @@
 			<fileset includes="build.xml" dir="${basedir}"/>
 		</zip>
 	</target>
-	<target name="makeDist" depends="clean, makeJar, zipDocs, zipSources"/>
+	
+	<!-- Create a zip file containing the binaries, sources, and docs. -->
+	<target name="zipAll" depends="makeJar, zipDocs, zipSources">
+		<zip zipfile="${dist}/cuelib-complete-${release.version}-${release.date}.zip">
+			<fileset includes="cuelib*-${release.version}-${release.date}.zip" dir="${dist}"/>
+			<fileset includes="cuelib*-${release.version}-${release.date}.jar" dir="${dist}"/>
+		</zip>
+	</target>
+	
+	<!-- Create a distribution. -->
+	<target name="makeDist" depends="clean, zipAll"/>
 </project>
