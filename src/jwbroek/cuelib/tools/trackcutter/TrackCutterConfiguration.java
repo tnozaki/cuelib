@@ -29,6 +29,9 @@ import jwbroek.cuelib.CueSheet;
 import jwbroek.cuelib.FileData;
 import jwbroek.cuelib.TrackData;
 import jwbroek.util.StringReplacer;
+import jwbroek.util.properties.AudioFileFormatTypePropertyHandler;
+import jwbroek.util.properties.EnhancedProperties;
+import jwbroek.util.properties.FilePropertyHandler;
 
 /**
  * This class represents a configuration for a TrackCutter instance. It takes care of much of the bookkeeping,
@@ -156,13 +159,102 @@ public class TrackCutterConfiguration
   }
   
   /**
+   * <p>Load configuration data from the specified Properties.</p>
+   * <p>The following properties are supported. If a value is not specified in the properties file, the
+   * configuration for that field is not changed.</p>
+   * <table>
+   * <tr><th>Property</th><th>Description</th><th>Values</th></tr>
+   * <tr><td>parentDirectory</td><td>Parent directory for relative paths.</td><td>Directory path. When not set, a default is used.</td></tr>
+   * <tr><td>pregapHandling</td><td>How to handle pregaps.</td><td>{@link TrackCutterConfiguration.PregapHandling}</td></tr>
+   * <tr><td>pregapFrameLengthThreshold</td><td>Only process pregaps with a frame length greater than this.</td><td>{@link Long}.</td></tr>
+   * <tr><td><targetType/td><td>Audio type to convert to.</td><td>{@link javax.sound.sampled.AudioFileFormat.Type} name.</td></tr>
+   * <tr><td>redirectErr</td><td>Whether or not error output from post-processing should be redirected.</td><td>{@link Boolean}.</td></tr>
+   * <tr><td>redirectStdOut</td><td>Whether or not standard output from post-processing should be redirected.</td><td>{@link Boolean}.</td></tr>
+   * <tr><td>doPostProcessing</td><td>Whether or not we should do post-processing.</td><td>{@link Boolean}.</td></tr>
+   * <tr><td>redirectToPostprocessing</td><td>Whether or not we should redirect output directly to post-processing.</td><td>{@link Boolean}.</td></tr>
+   * <tr><td>cutFileNameTemplate</td><td>Template for the file name of the cut tracks.</td><td>{@link String}.</td></tr>
+   * <tr><td>postProcessFileNameTemplate</td><td>Template for the file name of the post-processed tracks.</td><td>{@link String}.</td></tr>
+   * <tr><td>postProcessCommandTemplate</td><td>Template for the post-processing command.</td><td>{@link String}.</td></tr>
+   * <tr><td>pregapCutFileNameTemplate</td><td>Template for the file name of the cut pregaps.</td><td>{@link String}.</td></tr>
+   * <tr><td>pregapPostProcessFileNameTemplate</td><td>Template for the file name of the post-processed pregaps.</td><td>{@link String}.</td></tr>
+   * <tr><td>pregapPostProcessCommandTemplate</td><td>Template for the post-processing command for the pregaps.</td><td>{@link String}.</td></tr>
+   * </table>
+   * @param properties The Properties to load configuration from.
+   */
+  public void loadProperties(final EnhancedProperties properties)
+  {
+    TrackCutterConfiguration.logger.entering
+      (TrackCutterConfiguration.class.getCanonicalName(), "loadProperties(EnhancedProperties)");
+    
+    this.parentDirectory = properties.getProperty
+      ("parentDirectory", this.parentDirectory, FilePropertyHandler.getInstance());
+    this.pregapHandling = properties.getProperty("pregapHandling", this.pregapHandling);
+    this.pregapFrameLengthThreshold = properties.getPropertyAsLong
+      ("pregapFrameLengthThreshold", this.pregapFrameLengthThreshold);
+    this.targetType = properties.getProperty
+      ("targetType", this.targetType, AudioFileFormatTypePropertyHandler.getInstance());
+    this.redirectErr = properties.getPropertyAsBoolean("redirectErr", this.redirectErr);
+    this.redirectStdOut = properties.getPropertyAsBoolean("redirectStdOut", this.redirectStdOut);
+    this.doPostProcessing = properties.getPropertyAsBoolean("doPostProcessing", this.doPostProcessing);
+    this.redirectToPostprocessing = properties.getPropertyAsBoolean
+      ("redirectToPostprocessing", this.redirectToPostprocessing);
+    this.cutFileNameTemplate = properties.getProperty("cutFileNameTemplate", this.cutFileNameTemplate);
+    this.postProcessFileNameTemplate = properties.getProperty
+      ("postProcessFileNameTemplate", this.postProcessFileNameTemplate);
+    this.postProcessCommandTemplate = properties.getProperty
+      ("postProcessCommandTemplate", this.postProcessCommandTemplate);
+    this.pregapCutFileNameTemplate = properties.getProperty
+      ("pregapCutFileNameTemplate", this.pregapCutFileNameTemplate);
+    this.pregapPostProcessFileNameTemplate = properties.getProperty
+      ("pregapPostProcessFileNameTemplate", this.pregapPostProcessFileNameTemplate);
+    this.pregapPostProcessCommandTemplate = properties.getProperty
+      ("pregapPostProcessCommandTemplate", this.pregapPostProcessCommandTemplate);
+    
+    TrackCutterConfiguration.logger.exiting
+      (TrackCutterConfiguration.class.getCanonicalName(), "loadProperties(EnhancedProperties)");
+  }
+  
+  /**
+   * Get a snapshot of the configuration data stored as in an EnhancedProperties instance. The properties are
+   * stored as per {@link #loadProperties(EnhancedProperties)}.
+   * @return A snapshot of the configuration data stored as in an EnhancedProperties instance.
+   */
+  public EnhancedProperties getPropertiesSnapshot()
+  {
+    TrackCutterConfiguration.logger.entering
+      (TrackCutterConfiguration.class.getCanonicalName(), "getPropertiesSnapshot()");
+    
+    final EnhancedProperties properties = new EnhancedProperties();
+    
+    properties.setProperty("parentDirectory", this.parentDirectory, FilePropertyHandler.getInstance());
+    properties.setProperty("pregapHandling", this.pregapHandling);
+    properties.setProperty("pregapFrameLengthThreshold", this.pregapFrameLengthThreshold);
+    properties.setProperty("targetType", this.targetType, AudioFileFormatTypePropertyHandler.getInstance());
+    properties.setProperty("redirectErr", this.redirectErr);
+    properties.setProperty("redirectStdOut", this.redirectStdOut);
+    properties.setProperty("doPostProcessing", this.doPostProcessing);
+    properties.setProperty("redirectToPostprocessing", this.redirectToPostprocessing);
+    properties.setProperty("cutFileNameTemplate", this.cutFileNameTemplate);
+    properties.setProperty("postProcessFileNameTemplate", this.postProcessFileNameTemplate);
+    properties.setProperty("postProcessCommandTemplate", this.postProcessCommandTemplate);
+    properties.setProperty("pregapCutFileNameTemplate", this.pregapCutFileNameTemplate);
+    properties.setProperty("pregapPostProcessFileNameTemplate", this.pregapPostProcessFileNameTemplate);
+    properties.setProperty("pregapPostProcessCommandTemplate", this.pregapPostProcessCommandTemplate);
+    
+    TrackCutterConfiguration.logger.exiting
+      (TrackCutterConfiguration.class.getCanonicalName(), "getPropertiesSnapshot()", properties);
+    return properties;
+  }
+  
+  /**
    * Get a file instance representing the audio file specified in the FileData.
    * @param fileData
    * @return A file instance representing the audio file specified in the FileData.
    */
   public File getAudioFile(final FileData fileData)
   {
-    TrackCutterConfiguration.logger.entering(TrackCutterConfiguration.class.getCanonicalName(), "getAudioFile(FileData)");
+    TrackCutterConfiguration.logger.entering
+      (TrackCutterConfiguration.class.getCanonicalName(), "getAudioFile(FileData)");
     File audioFile = new File(fileData.getFile());
     if (audioFile.getParent()==null)
     {
