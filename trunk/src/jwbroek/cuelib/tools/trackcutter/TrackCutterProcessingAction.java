@@ -75,7 +75,8 @@ public class TrackCutterProcessingAction
    * @param startPosition Starting position for the track.
    * @param endPosition Ending position for the track.
    * @param trackData The TrackData instance corresponding to the processing action.
-   * @param isPregap Whether or not this action concerns the pregap of a track. (These may be treated as separate tracks.)
+   * @param isPregap Whether or not this action concerns the pregap of a track. (These may be treated as separate
+   * tracks.)
    * @param configuration The TrackCutterConfiguration of the TrackCutter for which this action is intended.
    */
   public TrackCutterProcessingAction

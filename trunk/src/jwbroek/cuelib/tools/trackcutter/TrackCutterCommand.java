@@ -20,7 +20,12 @@ package jwbroek.cuelib.tools.trackcutter;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
@@ -37,6 +42,7 @@ import jwbroek.cuelib.tools.trackcutter.TrackCutterConfiguration.PregapHandling;
 import jwbroek.io.FileSelector;
 import jwbroek.util.LogUtil;
 import jwbroek.util.SimpleOptionsParser;
+import jwbroek.util.properties.EnhancedProperties;
 
 /**
  * Command line interface for TrackCutter.
@@ -73,6 +79,14 @@ public class TrackCutterCommand
    * Whether or not to read a cue sheet from standard input.
    */
   private boolean readCueSheetFromStdIn = false;
+  /**
+   * File to write the properties configuration to. If null, no configuration will be written.
+   */
+  private File writePropertiesConfigurationTo = null;
+  /**
+   * File to write the XML configuration to. If null, no configuration will be written.
+   */
+  private File writeXmlConfigurationTo = null;
   /**
    * The logger for this class.
    */
@@ -132,6 +146,10 @@ public class TrackCutterCommand
     System.out.println("                     also try to ensure that logging is directed to the console. This setting");
     System.out.println("                     does not influence logging outside of cuelib. For this, use the standard");
     System.out.println("                     jdk 1.4 logging settings.");
+    System.out.println(" -rp file            Read configuration from properties file.");
+    System.out.println(" -wp file            Write configuration to properties file.");
+    System.out.println(" -rx file            Read configuration from xml properties file.");
+    System.out.println(" -wx file            Write configuration to xml properties file.");
     System.out.println(" -? | --help         Displays this help message and exits.");
     System.out.println("Templates:");
     System.out.println(" <title>             Title of the track.");
@@ -493,6 +511,104 @@ public class TrackCutterCommand
         {
           public int handleOption(String [] options, int offset)
           {
+            // Read configuration from properties file.
+            EnhancedProperties properties = new EnhancedProperties();
+            InputStream inputStream = null;
+            try
+            {
+              inputStream = new FileInputStream(options[offset+1]);
+              properties.load(inputStream);
+              TrackCutterCommand.this.getConfiguration().loadProperties(properties);
+            }
+            catch (IOException e)
+            {
+              LogUtil.logStacktrace(TrackCutterCommand.logger, Level.CONFIG, e);
+            }
+            finally
+            {
+              if (inputStream!=null)
+              {
+                try
+                {
+                  inputStream.close();
+                }
+                catch (IOException e)
+                {
+                  LogUtil.logStacktrace(TrackCutterCommand.logger, Level.FINE, e);
+                }
+              }
+            }
+            return offset+2;
+          }
+        }
+      , "-rp"
+      );
+    argumentsParser.registerOption
+      ( new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
+            // Write configuration to properties file after configuration has been set.
+            TrackCutterCommand.this.setWritePropertiesConfigurationTo(new File(options[offset+1]));
+            return offset+2;
+          }
+        }
+      , "-wp"
+      );
+    argumentsParser.registerOption
+      ( new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
+            // Read configuration from XML file.
+            EnhancedProperties properties = new EnhancedProperties();
+            InputStream inputStream = null;
+            try
+            {
+              inputStream = new FileInputStream(options[offset+1]);
+              properties.loadFromXML(inputStream);
+              TrackCutterCommand.this.getConfiguration().loadProperties(properties);
+            }
+            catch (IOException e)
+            {
+              LogUtil.logStacktrace(TrackCutterCommand.logger, Level.CONFIG, e);
+            }
+            finally
+            {
+              if (inputStream!=null)
+              {
+                try
+                {
+                  inputStream.close();
+                }
+                catch (IOException e)
+                {
+                  LogUtil.logStacktrace(TrackCutterCommand.logger, Level.FINE, e);
+                }
+              }
+            }
+            return offset+2;
+          }
+        }
+      , "-rx"
+      );
+    argumentsParser.registerOption
+      ( new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
+            // Write configuration to XML file after configuration has been set.
+            TrackCutterCommand.this.setWriteXmlConfigurationTo(new File(options[offset+1]));
+            return offset+2;
+          }
+        }
+      , "-wx"
+      );
+    argumentsParser.registerOption
+      ( new SimpleOptionsParser.OptionHandler()
+        {
+          public int handleOption(String [] options, int offset)
+          {
             // Display help message.
             TrackCutterCommand.printHelp();
             // Don't do any processing.
@@ -533,6 +649,39 @@ public class TrackCutterCommand
       return;
     }
     
+    // Write properties configuration, if requested.
+    if (this.getWritePropertiesConfigurationTo()!=null)
+    {
+      try
+      {
+        this.getConfiguration().getPropertiesSnapshot().store
+          ( new FileOutputStream(this.getWritePropertiesConfigurationTo())
+          , "Configuration for TrackCutter."
+          );
+      }
+      catch (IOException e)
+      {
+        LogUtil.logStacktrace(TrackCutterCommand.logger, Level.SEVERE, e);
+      }
+    }
+    
+    // Write XML configuration, if requested.
+    if (this.getWriteXmlConfigurationTo()!=null)
+    {
+      try
+      {
+        this.getConfiguration().getPropertiesSnapshot().storeToXML
+          ( new FileOutputStream(this.getWriteXmlConfigurationTo())
+          , "Configuration for TrackCutter, as specified on " + new Date().toString() + "."
+          );
+      }
+      catch (IOException e)
+      {
+        LogUtil.logStacktrace(TrackCutterCommand.logger, Level.SEVERE, e);
+      }
+    }
+    
+    // Only do processing if this is not disabled. (I.e. by the "-?" command.)
     if (this.getDoProcessing())
     {
       Set<File> fileSet = new HashSet<File>();
@@ -581,7 +730,7 @@ public class TrackCutterCommand
         }
         catch (Exception e)
         {
-          e.printStackTrace();
+          LogUtil.logStacktrace(TrackCutterCommand.logger, Level.SEVERE, e);
         }
       }
       
@@ -594,7 +743,7 @@ public class TrackCutterCommand
         }
         catch (Exception e)
         {
-          e.printStackTrace();
+          LogUtil.logStacktrace(TrackCutterCommand.logger, Level.SEVERE, e);
         }
       }
     }
@@ -788,12 +937,68 @@ public class TrackCutterCommand
    */
   private void setReadCueSheetFromStdIn(final boolean readCueSheetFromStdIn)
   {
-    TrackCutterCommand.logger.entering(TrackCutterCommand.class.getCanonicalName(), "setReadCueSheetFromStdIn(boolean)");
+    TrackCutterCommand.logger.entering
+      (TrackCutterCommand.class.getCanonicalName(), "setReadCueSheetFromStdIn(boolean)");
     this.readCueSheetFromStdIn = readCueSheetFromStdIn;
     TrackCutterCommand.logger.exiting
       ( TrackCutterCommand.class.getCanonicalName()
       , "setReadCueSheetFromStdIn(boolean)"
       , this.readCueSheetFromStdIn
       );
+  }
+
+  /**
+   * Get the File to write the properties configuration to. If null, no configuration will be written.
+   * @return The File to write the properties configuration to. If null, no configuration will be written.
+   */
+  private File getWritePropertiesConfigurationTo()
+  {
+    logger.entering(TrackCutterCommand.class.getCanonicalName(),
+        "getWritePropertiesConfigurationTo()");
+    logger.exiting(TrackCutterCommand.class.getCanonicalName(),
+        "getWritePropertiesConfigurationTo()", writePropertiesConfigurationTo);
+    return writePropertiesConfigurationTo;
+  }
+
+  /**
+   * Set the File to write the properties configuration to. If null, no configuration will be written.
+   * @param writePropertiesConfigurationTo The File to write the properties configuration to. If null, no
+   * configuration will be written.
+   */
+  private void setWritePropertiesConfigurationTo(
+      File writePropertiesConfigurationTo)
+  {
+    logger.entering(TrackCutterCommand.class.getCanonicalName(),
+        "setWritePropertiesConfigurationTo()", writePropertiesConfigurationTo);
+    this.writePropertiesConfigurationTo = writePropertiesConfigurationTo;
+    logger.exiting(TrackCutterCommand.class.getCanonicalName(),
+        "setWritePropertiesConfigurationTo()");
+  }
+
+  /**
+   * Get the File to write the XML configuration to. If null, no configuration will be written.
+   * @return The File to write the XML configuration to. If null, no configuration will be written.
+   */
+  private File getWriteXmlConfigurationTo()
+  {
+    logger.entering(TrackCutterCommand.class.getCanonicalName(),
+        "getWriteXmlConfigurationTo()");
+    logger.exiting(TrackCutterCommand.class.getCanonicalName(),
+        "getWriteXmlConfigurationTo()", writeXmlConfigurationTo);
+    return writeXmlConfigurationTo;
+  }
+
+  /**
+   * Set the File to write the XML configuration to. If null, no configuration will be written.
+   * @param writeXmlConfigurationTo The File to write the XML configuration to. If null, no configuration
+   * will be written.
+   */
+  private void setWriteXmlConfigurationTo(File writeXmlConfigurationTo)
+  {
+    logger.entering(TrackCutterCommand.class.getCanonicalName(),
+        "setWriteXmlConfigurationTo()", writeXmlConfigurationTo);
+    this.writeXmlConfigurationTo = writeXmlConfigurationTo;
+    logger.exiting(TrackCutterCommand.class.getCanonicalName(),
+        "setWriteXmlConfigurationTo()");
   }
 }
