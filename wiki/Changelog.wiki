@@ -3,6 +3,10 @@
 
 =Cuelib changelog and roadmap=
 
+==1.2.1==
+_2008-06-13_
+  * Cuelib is Java 5 compatible again. (Issue 19.)
+
 ==1.2.0==
 _2008-05-21_
   * Documentation comes with an XML Schema for the output of !CueSheetToXmlSerializer. (Issue 1.)
