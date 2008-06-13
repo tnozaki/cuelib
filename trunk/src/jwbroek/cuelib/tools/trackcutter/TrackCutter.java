@@ -98,7 +98,11 @@ public class TrackCutter
     catch (IOException e)
     {
       TrackCutter.logger.severe("Was unable to parse the cue sheet in file '" + cueFile.toString() + "'.");
-      throw new IOException("Problem parsing cue file.", e);
+      LogUtil.logStacktrace(TrackCutter.logger, Level.SEVERE, e);
+      IOException resultException = new IOException("Problem parsing cue file.");
+      resultException.initCause(e);
+      TrackCutter.logger.throwing(TrackCutter.class.getCanonicalName(), "cutTracksInCueSheet(File)", resultException);
+      throw resultException;
     }
     
     cutTracksInCueSheet(cueSheet);
@@ -126,7 +130,10 @@ public class TrackCutter
     {
       TrackCutter.logger.severe("Was unable to parse the cue sheet from InputStream.");
       LogUtil.logStacktrace(TrackCutter.logger, Level.SEVERE, e);
-      throw new IOException("Problem parsing cue file.", e);
+      IOException resultException = new IOException("Problem parsing cue file.");
+      resultException.initCause(e);
+      TrackCutter.logger.throwing(TrackCutter.class.getCanonicalName(), "cutTracksInCueSheet(File)", resultException);
+      throw resultException;
     }
     
     cutTracksInCueSheet(cueSheet);
