@@ -169,9 +169,9 @@ final public class CueParser
   private CueParser()
   {
     // Intentionally left blank (besides logging). This class doesn't need to be instantiated.
-    CueParser.logger.entering(FileSelector.class.getCanonicalName(), "FileSelector(File)");
+    CueParser.logger.entering(FileSelector.class.getCanonicalName(), "CueParser()");
     CueParser.logger.warning("jwbroek.cuelib.CueParser should not be initialized");
-    CueParser.logger.exiting(FileSelector.class.getCanonicalName(), "FileSelector(File)");
+    CueParser.logger.exiting(FileSelector.class.getCanonicalName(), "CueParser()");
   }
   
   /**
