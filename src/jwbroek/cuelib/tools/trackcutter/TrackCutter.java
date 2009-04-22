@@ -408,7 +408,7 @@ public class TrackCutter
       + processAction.getTrackData().getNumber() + "."
       );
     
-    // Skip positions in the audioInputStream until we are at out starting position.
+    // Skip positions in the audioInputStream until we are at our starting position.
     long fromAudioFramePos = skipToPosition (processAction.getStartPosition(), audioInputStream, currentAudioFramePos);
     
     // Determine the position to which we should read from the input.
