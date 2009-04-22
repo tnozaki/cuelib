@@ -159,6 +159,9 @@ public class TrackCutterCommand
     System.out.println(" <comment>           Comment of the album.");
     System.out.println(" <track>             Track number");
     System.out.println(" <genre>             Genre of the album.");
+    System.out.println(" <id3genre>          Normalized genre of the album, allowing only 1d3 genres.");
+    System.out.println(" <id31genre>         Normalized genre of the album, allowing only 1d3v1 genres.");
+    System.out.println(" <lamegenre>         Normalized genre of the album, allowing LAME extensions to id3v1 genres.");
     System.out.println(" <cutFile>           Name of the file after cutting. Can only be used in the post-");
     System.out.println("                     processing command template.");
     System.out.println(" <postProcessFile>   Name of the file after post-processing. Can only be used in");

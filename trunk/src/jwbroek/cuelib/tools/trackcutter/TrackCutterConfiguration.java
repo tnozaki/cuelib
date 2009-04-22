@@ -28,6 +28,7 @@ import javax.sound.sampled.AudioFileFormat;
 import jwbroek.cuelib.CueSheet;
 import jwbroek.cuelib.FileData;
 import jwbroek.cuelib.TrackData;
+import jwbroek.cuelib.tools.genrenormalizer.GenreNormalizer;
 import jwbroek.util.StringReplacer;
 import jwbroek.util.properties.AudioFileFormatTypePropertyHandler;
 import jwbroek.util.properties.EnhancedProperties;
@@ -118,7 +119,7 @@ public class TrackCutterConfiguration
   /**
    * Replacer for the template values.
    */
-  public static final StringReplacer templateReplacer =
+  private static final StringReplacer templateReplacer =
     new StringReplacer(getHumanReadableToFormatStringReplacements());
   
   /**
@@ -148,8 +149,11 @@ public class TrackCutterConfiguration
     replacements.put("<comment>", "%5$s");
     replacements.put("<track>", "%6$s");
     replacements.put("<genre>", "%7$s");
-    replacements.put("<cutFile>", "%8$s");
-    replacements.put("<postProcessFile>", "%9$s");
+    replacements.put("<id3genre>", "%8$s");
+    replacements.put("<id31genre>", "%9$s");
+    replacements.put("<lamegenre>", "%10$s");
+    replacements.put("<cutFile>", "%11$s");
+    replacements.put("<postProcessFile>", "%12$s");
     TrackCutterConfiguration.logger.exiting
       ( TrackCutterConfiguration.class.getCanonicalName()
       , "getHumanReadableToFormatStringReplacements()"
@@ -354,7 +358,8 @@ public class TrackCutterConfiguration
       , "getExpandedFileName(TrackData, String)"
       , new Object [] {trackData, fileNameTemplate}
       );
-    String result = String.format
+    final String genre = trackData.getMetaData(CueSheet.MetaDataField.GENRE);
+    final String result = String.format
       ( this.getTemplateReplacer().replace(fileNameTemplate)
       , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.TITLE))
       , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.PERFORMER))
@@ -362,7 +367,10 @@ public class TrackCutterConfiguration
       , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.YEAR))
       , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.COMMENT))
       , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.TRACKNUMBER))
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.GENRE))
+      , normalizeFileName(genre)
+      , normalizeFileName(GenreNormalizer.normalizeGenreDescription(genre, false, false))
+      , normalizeFileName(GenreNormalizer.normalizeGenreDescription(genre, true, false))
+      , normalizeFileName(GenreNormalizer.normalizeGenreDescription(genre, true, true))
       );
     TrackCutterConfiguration.logger.exiting
       (TrackCutterConfiguration.class.getCanonicalName(), "getExpandedFileName(TrackData, String)", result);
@@ -389,7 +397,8 @@ public class TrackCutterConfiguration
       , "getExpandedFileName(TrackData, String, String, String)"
       , new Object [] {trackData, processCommandTemplate, cutFileName, processFileName}
       );
-    String result = String.format
+    final String genre = trackData.getMetaData(CueSheet.MetaDataField.GENRE);
+    final String result = String.format
       ( this.getTemplateReplacer().replace(processCommandTemplate)
       , trackData.getMetaData(CueSheet.MetaDataField.TITLE)
       , trackData.getMetaData(CueSheet.MetaDataField.PERFORMER)
@@ -397,7 +406,10 @@ public class TrackCutterConfiguration
       , trackData.getMetaData(CueSheet.MetaDataField.YEAR)
       , trackData.getMetaData(CueSheet.MetaDataField.COMMENT)
       , trackData.getMetaData(CueSheet.MetaDataField.TRACKNUMBER)
-      , trackData.getMetaData(CueSheet.MetaDataField.GENRE)
+      , genre
+      , GenreNormalizer.normalizeGenreDescription(genre, false, false)
+      , GenreNormalizer.normalizeGenreDescription(genre, true, false)
+      , GenreNormalizer.normalizeGenreDescription(genre, true, true)
       , cutFileName
       , processFileName
       );
