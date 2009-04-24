@@ -279,8 +279,8 @@ public class TrackCutterConfiguration
   {
     TrackCutterConfiguration.logger.entering
       (TrackCutterConfiguration.class.getCanonicalName(), "normalizeFileName(String)", fileName);
-    StringBuilder builder = new StringBuilder(fileName.length());
-    int length = fileName.length();
+    final StringBuilder builder = new StringBuilder(fileName.length());
+    final int length = fileName.length();
     for (int index = 0; index < length; index++)
     {
       char currentChar = fileName.charAt(index);
@@ -310,7 +310,7 @@ public class TrackCutterConfiguration
         }
       }
     }
-    String result = builder.toString();
+    final String result = builder.toString();
     TrackCutterConfiguration.logger.exiting
       (TrackCutterConfiguration.class.getCanonicalName(), "normalizeFileName(String)", result);
     return result;
@@ -361,16 +361,16 @@ public class TrackCutterConfiguration
     final String genre = trackData.getMetaData(CueSheet.MetaDataField.GENRE);
     final String result = String.format
       ( this.getTemplateReplacer().replace(fileNameTemplate)
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.TITLE))
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.PERFORMER))
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.ALBUMTITLE))
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.YEAR))
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.COMMENT))
-      , normalizeFileName(trackData.getMetaData(CueSheet.MetaDataField.TRACKNUMBER))
-      , normalizeFileName(genre)
-      , normalizeFileName(GenreNormalizer.normalizeGenreDescription(genre, false, false))
-      , normalizeFileName(GenreNormalizer.normalizeGenreDescription(genre, true, false))
-      , normalizeFileName(GenreNormalizer.normalizeGenreDescription(genre, true, true))
+      , normalizeFileName(""+trackData.getMetaData(CueSheet.MetaDataField.TITLE))
+      , normalizeFileName(""+trackData.getMetaData(CueSheet.MetaDataField.PERFORMER))
+      , normalizeFileName(""+trackData.getMetaData(CueSheet.MetaDataField.ALBUMTITLE))
+      , normalizeFileName(""+trackData.getMetaData(CueSheet.MetaDataField.YEAR))
+      , normalizeFileName(""+trackData.getMetaData(CueSheet.MetaDataField.COMMENT))
+      , normalizeFileName(""+trackData.getMetaData(CueSheet.MetaDataField.TRACKNUMBER))
+      , normalizeFileName(""+genre)
+      , normalizeFileName(""+GenreNormalizer.normalizeGenreDescription(genre, false, false))
+      , normalizeFileName(""+GenreNormalizer.normalizeGenreDescription(genre, true, false))
+      , normalizeFileName(""+GenreNormalizer.normalizeGenreDescription(genre, true, true))
       );
     TrackCutterConfiguration.logger.exiting
       (TrackCutterConfiguration.class.getCanonicalName(), "getExpandedFileName(TrackData, String)", result);
