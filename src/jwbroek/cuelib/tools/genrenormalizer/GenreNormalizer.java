@@ -160,7 +160,7 @@ public class GenreNormalizer
     int result = -1;
     
     final String inputGenreSignature = getGenreSignature(genreDescription);
-    Integer index = GenreNormalizer.genreSignatureToID3Index.get(inputGenreSignature);
+    final Integer index = GenreNormalizer.genreSignatureToID3Index.get(inputGenreSignature);
     
     if (index == null)
     {
@@ -196,12 +196,6 @@ public class GenreNormalizer
             result = heuristicGenreIndex;
           }
         }
-        
-        // If we still have no result, then use code 12: "Other".
-        if (result == -1)
-        {
-          result = 12;
-        }
       }
     }
     else
@@ -225,6 +219,12 @@ public class GenreNormalizer
       {
         result = -1;
       }
+    }
+    
+    // If we still have no result, and we're using the heuristic search, then use code 12: "Other".
+    if (result == -1 && searchMode == SearchMode.HEURISTIC)
+    {
+      result = 12;
     }
     
     GenreNormalizer.logger.exiting
@@ -329,5 +329,11 @@ public class GenreNormalizer
       , result
       );
     return result;
+  }
+  
+  public static void main(String ... Param)
+  {
+    System.out.println(GenreNormalizer.normalizeGenreDescription("Crossover", false, false));
+    System.out.println(String.format("%1$s", (Object) null));
   }
 }
