@@ -290,7 +290,7 @@ public class FileSelectorTest
     final Set<File> prediction = new HashSet<File>();
     prediction.add(new File(this.testRoot, this.testRoot.getName() + "file"));
     testFileFilter
-      (this.testRoot, combinedFileFilter, prediction, "FileSelector.getPathPatternFilter(Pattern)");
+      (this.testRoot, combinedFileFilter, prediction, "FileSelector.getCombinedFileFilter(FileFilter[])");
   }
   
   /**
@@ -311,7 +311,7 @@ public class FileSelectorTest
     final Set<File> prediction = new HashSet<File>();
     prediction.add(new File(this.testRoot, this.testRoot.getName() + "file"));
     testFileFilter
-      (this.testRoot, combinedFileFilter, prediction, "FileSelector.getPathPatternFilter(Pattern)");
+      (this.testRoot, combinedFileFilter, prediction, "FileSelector.getCombinedFileFilter(Iterable)");
   }
   
   /**
@@ -330,7 +330,7 @@ public class FileSelectorTest
     final Set<File> prediction = new HashSet<File>();
     prediction.add(new File(this.testRoot, this.testRoot.getName() + "file"));
     testFileFilter
-      (this.testRoot, intersectionFileFilter, prediction, "FileSelector.getPathPatternFilter(Pattern)");
+      (this.testRoot, intersectionFileFilter, prediction, "FileSelector.getIntersectionFileFilter(FileFilter[])");
   }
   
   /**
@@ -351,7 +351,45 @@ public class FileSelectorTest
     final Set<File> prediction = new HashSet<File>();
     prediction.add(new File(this.testRoot, this.testRoot.getName() + "file"));
     testFileFilter
-      (this.testRoot, intersectionFileFilter, prediction, "FileSelector.getPathPatternFilter(Pattern)");
+      (this.testRoot, intersectionFileFilter, prediction, "FileSelector.getIntersectionFileFilter(Iterable)");
+  }
+  
+  /**
+   * Test for {@link FileSelector#getUnionFileFilter(FileFilter[])} and
+   * {@link FileSelector#getUnionFileFilter(Iterable)}.
+   */
+  @Test
+  public void testUnionFileFilterFromArray()
+  {
+    // Create an UnionFileFilter that must match only files or directories named "b1" or "b3".
+    final FileFilter unionFileFilter =
+      FileSelector.getUnionFileFilter
+        (FileSelector.getFileNamePatternFilter("b1"), FileSelector.getFileNamePatternFilter("b3"));
+    final Set<File> prediction = new HashSet<File>();
+    prediction.add(new File(this.testRoot, "a/b1"));
+    prediction.add(new File(this.testRoot, "a/b3"));
+    testFileFilter
+      (new File(this.testRoot, "a"), unionFileFilter, prediction, "FileSelector.getUnionFileFilter(FileFilter[])");
+  }
+  
+  /**
+   * Test for {@link FileSelector#getUnionFileFilter(Iterable)}.
+   */
+  @Test
+  public void testUnionFileFilterFromIterable()
+  {
+    // Create an UnionFileFilter that must match only files or directories named "b1" or "b3".
+    final FileFilter nameFilterB1 = FileSelector.getFileNamePatternFilter("b1");
+    final FileFilter nameFilterB3 = FileSelector.getFileNamePatternFilter("b3");
+    final List<FileFilter> fileFilterList = new ArrayList<FileFilter>();
+    fileFilterList.add(nameFilterB1);
+    fileFilterList.add(nameFilterB3);
+    final FileFilter unionFileFilter = FileSelector.getUnionFileFilter(fileFilterList);
+    final Set<File> prediction = new HashSet<File>();
+    prediction.add(new File(this.testRoot, "a/b1"));
+    prediction.add(new File(this.testRoot, "a/b3"));
+    testFileFilter
+      (new File(this.testRoot, "a"), unionFileFilter, prediction, "FileSelector.getUnionFileFilter(Iterable)");
   }
   
   /**
@@ -501,7 +539,7 @@ public class FileSelectorTest
     )
   {
     // Get the files that matched the filter.
-    final File [] matchedFiles = this.testRoot.listFiles(filter);
+    final File [] matchedFiles = directory.listFiles(filter);
     
     testFilesAgainstPrediction(Arrays.asList(matchedFiles), predictedResult, filterName);
   }
