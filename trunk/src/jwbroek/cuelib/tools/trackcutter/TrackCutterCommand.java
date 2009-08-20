@@ -715,7 +715,7 @@ public class TrackCutterCommand
         List<File> fileList = new ArrayList<File>();
         FileSelector.selectFiles
           ( this.getSelectionBaseDirectory()
-          , FileSelector.getCombinedFileFilter(fileFilters)
+          , FileSelector.getIntersectionFileFilter(fileFilters)
           , fileList
           , this.getRecursionDepth()
           , false
