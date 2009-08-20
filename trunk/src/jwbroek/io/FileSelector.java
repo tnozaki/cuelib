@@ -173,11 +173,12 @@ final public class FileSelector
    * @return A FileFilter that combines all the specified FileFilters, such that the resulting filter will
    * only accept a file if it is accepted by all specified FileFilters.
    */
+  @Deprecated
   public static FileFilter getCombinedFileFilter(final FileFilter ... fileFilters)
   {
     FileSelector.logger.entering
       (FileSelector.class.getCanonicalName(), "getCombinedFileFilter(FileFilter[])", fileFilters);
-    FileFilter result = FileSelector.getCombinedFileFilter(Arrays.asList(fileFilters));
+    final FileFilter result = FileSelector.getIntersectionFileFilter(fileFilters);
     FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "getCombinedFileFilter(FileFilter[])", result);
     return result;
   }
@@ -190,11 +191,46 @@ final public class FileSelector
    * @return A FileFilter that combines all the specified FileFilters, such that the resulting filter will
    * only accept a file if it is accepted by all specified FileFilters.
    */
+  @Deprecated
   public static FileFilter getCombinedFileFilter(final Iterable<FileFilter> fileFilters)
   {
     FileSelector.logger.entering
-      (FileSelector.class.getCanonicalName(), "getCombinedFileFilter(Iterable<FileFilter>)", fileFilters);
-    FileFilter result = new FileFilter()
+    (FileSelector.class.getCanonicalName(), "getIntersectionFileFilter(Iterable<FileFilter>)", fileFilters);
+    final FileFilter result = FileSelector.getIntersectionFileFilter(fileFilters);
+    FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "getCombinedFileFilter(FileFilter[])", result);
+    return result;
+  }
+  
+  /**
+   * Get a FileFilter that accepts the intersection of the files accepted by the specified FileFilters.
+   * The filters will be tested in order, so it is generally advisable to put cheap and highly
+   * discriminating filters at low indices.
+   * @param fileFilters The FileFilter instances to combine.
+   * @return A FileFilter that combines all the specified FileFilters, such that the resulting filter will
+   * only accept the intersection of the specified filters.
+   */
+  public static FileFilter getIntersectionFileFilter(final FileFilter ... fileFilters)
+  {
+    FileSelector.logger.entering
+      (FileSelector.class.getCanonicalName(), "getIntersectionFileFilter(FileFilter[])", fileFilters);
+    final FileFilter result = FileSelector.getIntersectionFileFilter(Arrays.asList(fileFilters));
+    FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "getIntersectionFileFilter(FileFilter[])", result);
+    return result;
+  }
+  
+  /**
+   * Get a FileFilter that accepts the intersection of the files accepted by the specified FileFilters.
+   * The filters will be tested in order, so it is generally advisable to put cheap and highly
+   * discriminating filters at low indices.
+   * @param fileFilters The FileFilter instances to combine.
+   * @return A FileFilter that combines all the specified FileFilters, such that the resulting filter will
+   * only accept the intersection of the specified filters.
+   */
+  public static FileFilter getIntersectionFileFilter(final Iterable<FileFilter> fileFilters)
+  {
+    FileSelector.logger.entering
+      (FileSelector.class.getCanonicalName(), "getIntersectionFileFilter(Iterable<FileFilter>)", fileFilters);
+    final FileFilter result = new FileFilter()
     {
       public boolean accept(final File file)
       {
@@ -212,13 +248,70 @@ final public class FileSelector
         }
         
         FileSelector.logger.fine
-          ("CombinedFileFilter " + (result?"accepted ":"did not accept '") + file.toString() + "'.");
+          ("IntersectionFileFilter " + (result?"accepted ":"did not accept '") + file.toString() + "'.");
         FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "accept(File)", result);
         return result;
       }
     };
     FileSelector.logger.exiting
-      (FileSelector.class.getCanonicalName(), "getCombinedFileFilter(Iterable<FileFilter>)", result);
+      (FileSelector.class.getCanonicalName(), "getIntersectionFileFilter(Iterable<FileFilter>)", result);
+    return result;
+  }
+  
+  /**
+   * Get a FileFilter that accepts the union of the files accepted by the specified FileFilters.
+   * The filters will be tested in order, so it is generally advisable to put cheap and forgiving
+   * filters at low indices.
+   * @param fileFilters The FileFilter instances to combine.
+   * @return A FileFilter that combines all the specified FileFilters, such that the resulting filter will
+   * accept the union of the files accepted by specified filters.
+   */
+  public static FileFilter getUnionFileFilter(final FileFilter ... fileFilters)
+  {
+    FileSelector.logger.entering
+      (FileSelector.class.getCanonicalName(), "getUnionFileFilter(FileFilter[])", fileFilters);
+    final FileFilter result = FileSelector.getUnionFileFilter(Arrays.asList(fileFilters));
+    FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "getUnionFileFilter(FileFilter[])", result);
+    return result;
+  }
+  
+  /**
+   * Get a FileFilter that accepts the union of the files accepted by the specified FileFilters.
+   * The filters will be tested in order, so it is generally advisable to put cheap and forgiving
+   * filters at low indices.
+   * @param fileFilters The FileFilter instances to combine.
+   * @return A FileFilter that combines all the specified FileFilters, such that the resulting filter will
+   * accept the union of the files accepted by specified filters.
+   */
+  public static FileFilter getUnionFileFilter(final Iterable<FileFilter> fileFilters)
+  {
+    FileSelector.logger.entering
+      (FileSelector.class.getCanonicalName(), "getUnionFileFilter(Iterable<FileFilter>)", fileFilters);
+    final FileFilter result = new FileFilter()
+    {
+      public boolean accept(final File file)
+      {
+        FileSelector.logger.entering(FileSelector.class.getCanonicalName(), "accept(File)", file);
+        boolean result = false;
+        
+        fileFilterLoop:
+        for (FileFilter fileFilter : fileFilters)
+        {
+          if (fileFilter.accept(file))
+          {
+            result = true;
+            break fileFilterLoop;
+          }
+        }
+        
+        FileSelector.logger.fine
+          ("UnionFileFilter " + (result?"accepted ":"did not accept '") + file.toString() + "'.");
+        FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "accept(File)", result);
+        return result;
+      }
+    };
+    FileSelector.logger.exiting
+      (FileSelector.class.getCanonicalName(), "getUnionFileFilter(Iterable<FileFilter>)", result);
     return result;
   }
   
