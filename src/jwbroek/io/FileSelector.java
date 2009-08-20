@@ -98,9 +98,22 @@ final public class FileSelector
   }
   
   /**
-   * Get a FileFilter that will accept only files such that their canonical paths match the pattern.
+   * Get a FileFilter that will accept only files whose canonical paths match the pattern.
    * @param pattern The pattern to match.
-   * @return A FileFilter that will accept only files such that their canonical paths match the pattern.
+   * @return A FileFilter that will accept only files whose canonical paths match the pattern.
+   */
+  public static FileFilter getPathPatternFilter(final String pattern)
+  {
+    FileSelector.logger.entering(FileSelector.class.getCanonicalName(), "getPathPatternFilter(String)", pattern);
+    final FileFilter result = FileSelector.getPathPatternFilter(Pattern.compile(pattern));
+    FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "getPathPatternFilter(String)", result);
+    return result;
+  }
+  
+  /**
+   * Get a FileFilter that will accept only files whose canonical paths match the pattern.
+   * @param pattern The pattern to match.
+   * @return A FileFilter that will accept only files whose canonical paths match the pattern.
    */
   public static FileFilter getPathPatternFilter(final Pattern pattern)
   {
@@ -134,6 +147,19 @@ final public class FileSelector
   }
   
   /**
+   * Get a FileFilter that will accept only files whose names match the pattern.
+   * @param pattern The pattern to match.
+   * @return A FileFilter that will accept only files whose names match the pattern.
+   */
+  public static FileFilter getFileNamePatternFilter(final String pattern)
+  {
+    FileSelector.logger.entering(FileSelector.class.getCanonicalName(), "getFileNamePatternFilter(String)", pattern);
+    final FileFilter result = FileSelector.getFileNamePatternFilter(Pattern.compile(pattern));
+    FileSelector.logger.exiting(FileSelector.class.getCanonicalName(), "getFileNamePatternFilter(String)", result);
+    return result;
+  }
+  
+  /**
    * Get a FileFilter that will accept only files such that their names match the pattern.
    * @param pattern The pattern to match.
    * @return A FileFilter that will accept only files such that their names match the pattern.
@@ -141,7 +167,7 @@ final public class FileSelector
   public static FileFilter getFileNamePatternFilter(final Pattern pattern)
   {
     FileSelector.logger.entering(FileSelector.class.getCanonicalName(), "getFileNamePatternFilter(Pattern)", pattern);
-    FileFilter result = new FileFilter()
+    final FileFilter result = new FileFilter()
     {
       public boolean accept(final File file)
       {
