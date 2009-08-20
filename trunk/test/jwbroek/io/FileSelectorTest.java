@@ -315,6 +315,46 @@ public class FileSelectorTest
   }
   
   /**
+   * Test for {@link FileSelector#getIntersectionFileFilter(FileFilter[])} and
+   * {@link FileSelector#getIntersectionFileFilter(Iterable)}.
+   */
+  @Test
+  public void testIntersectionFileFilterFromArray()
+  {
+    // Create an IntersectionFileFilter that must match only files (not directories) that start with the name
+    // of their parent directory.
+    final FileFilter filesFilter = FileSelector.getFilesFilter();
+    final FileFilter pathPatternFilter = FileSelector.getPathPatternFilter
+      (FileSelectorTest.getParentDirNameAsFileNamePattern());
+    final FileFilter intersectionFileFilter = FileSelector.getIntersectionFileFilter(filesFilter, pathPatternFilter);
+    final Set<File> prediction = new HashSet<File>();
+    prediction.add(new File(this.testRoot, this.testRoot.getName() + "file"));
+    testFileFilter
+      (this.testRoot, intersectionFileFilter, prediction, "FileSelector.getPathPatternFilter(Pattern)");
+  }
+  
+  /**
+   * Test for {@link FileSelector#getIntersectionFileFilter(Iterable)}.
+   */
+  @Test
+  public void testIntersectionFileFilterFromIterable()
+  {
+    // Create an IntersectionFileFilter that must match only files (not directories) that start with the name
+    // of their parent directory.
+    final FileFilter filesFilter = FileSelector.getFilesFilter();
+    final FileFilter pathPatternFilter = FileSelector.getPathPatternFilter
+      (FileSelectorTest.getParentDirNameAsFileNamePattern());
+    final List<FileFilter> fileFilterList = new ArrayList<FileFilter>();
+    fileFilterList.add(filesFilter);
+    fileFilterList.add(pathPatternFilter);
+    final FileFilter intersectionFileFilter = FileSelector.getIntersectionFileFilter(fileFilterList);
+    final Set<File> prediction = new HashSet<File>();
+    prediction.add(new File(this.testRoot, this.testRoot.getName() + "file"));
+    testFileFilter
+      (this.testRoot, intersectionFileFilter, prediction, "FileSelector.getPathPatternFilter(Pattern)");
+  }
+  
+  /**
    * Test for {@link FileSelector#selectFiles(File, Pattern, long, boolean, boolean)} with negative depth.
    */
   @Test
