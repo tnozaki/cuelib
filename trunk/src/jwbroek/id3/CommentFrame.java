@@ -46,7 +46,7 @@ public class CommentFrame implements ID3Frame
     builder .append("Comment frame: ").append(this.languageCode).append(" [").append(this.totalFrameSize).append("] ")
             .append(this.charset.toString()).append('\n')
             .append("Flags: ").append(this.flags.toString()).append('\n')
-            .append("Description: ").append(this.description)
+            .append("Description: ").append(this.description).append('\n')
             .append("Text: ").append(this.text)
             ;
     return builder.toString();

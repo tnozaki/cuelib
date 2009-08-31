@@ -39,9 +39,21 @@ public class URLFrameReader implements FrameReader
 
   public URLFrame readFrameBody(final int size, final InputStream input) throws IOException, UnsupportedEncodingException
   {
+    return this.readFrameBody(null, size, input);
+  }
+  
+  public URLFrame readFrameBody(final String additionalTypeInfo, final int size, final InputStream input) throws IOException, UnsupportedEncodingException
+  {
     final URLFrame result = new URLFrame(this.canonicalFrameType);
     result.setTotalFrameSize(size + this.headerSize);
+    // Read encoding. Should not be there officially.
+    input.read();
     result.setUrl(FieldReader.readField(input, size, Charset.forName("ISO-8859-1")));
+    
+    if (additionalTypeInfo != null)
+    {
+      result.setAdditionalTypeInfo(additionalTypeInfo);
+    }
     return result;
   }
 }

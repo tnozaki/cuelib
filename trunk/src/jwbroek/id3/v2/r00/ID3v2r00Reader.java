@@ -167,7 +167,8 @@ public class ID3v2r00Reader implements ID3Reader
       final ID3v2r00Reader reader = new ID3v2r00Reader();
       //final File file1 = new File("C:\\tmp\\01 Dead.mp3"); 
       //final File file1 = new File("C:\\tmp\\01 Prowler.mp3");
-      final File file1 = new File("C:\\tmp\\06 United.mp3");
+      //final File file1 = new File("C:\\tmp\\06 United.mp3");
+      final File file1 = new File("C:\\tmp\\June 12th, 2009_ Eberron.mp3");
       System.out.println(reader.hasTag(file1));
       final ID3Tag tag = reader.read(file1);
       if (tag != null)

@@ -39,6 +39,11 @@ public class TextFrameReader implements FrameReader
   
   public TextFrame readFrameBody(final int size, final InputStream input) throws IOException, UnsupportedEncodingException
   {
+    return this.readFrameBody(null, size, input);
+  }
+  
+  public TextFrame readFrameBody(final String additionalTypeInfo, final int size, final InputStream input) throws IOException, UnsupportedEncodingException
+  {
     final TextFrame result = new TextFrame(this.canonicalFrameType);
     
     final int encoding = input.read();
@@ -69,6 +74,12 @@ public class TextFrameReader implements FrameReader
     // Size -1 because we have to count the byte used for encoding.
     result.setText(FieldReader.readField(input, size-1, charset));
     result.setTotalFrameSize(size + headerSize);
+    
+    if (additionalTypeInfo != null)
+    {
+      result.setAdditionalTypeInfo(additionalTypeInfo);
+    }
+    
     return result;
   }
 }

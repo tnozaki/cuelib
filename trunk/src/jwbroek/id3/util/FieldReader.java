@@ -29,29 +29,54 @@ public class FieldReader
     // No need to instantiate.
   }
   
-  public static String readUntilNul(final InputStream input, final int length, final Charset charset, final int charLength) throws IOException
+  public static String readUntilNul(final InputStream input, final int length, final Charset charset) throws IOException
   {
-    if (length % charLength != 0)
+    final boolean singleNul;
+    if (charset.equals(Charset.forName("ISO-8859-1")))
     {
-      throw new IllegalArgumentException("length is not a multiple of charLength.");
+      // Nul is reliably identified as a single 0 byte.
+      singleNul = true;
     }
-    final int maxIterations = length / charLength;
-    final byte [] b = new byte[charLength];
-    final StringBuilder result = new StringBuilder();
-    for (int index = 0; index < maxIterations; index++)
+    else if (charset.equals(Charset.forName("UTF-16")))
     {
-      input.read(b);
-      final String c = new String(b, charset);
-      if ("\u0000".equals(c))
+      // Nul is reliably identified as two 0 bytes. (This encoding can also be read
+      // in 2-byte chunks without missing the nul.)
+      singleNul = false;
+    }
+    else if (charset.equals(Charset.forName("UTF-16BE")))
+    {
+      // Nul is reliably identified as two 0 bytes. (This encoding can also be read
+      // in 2-byte chunks without missing the nul.)
+      singleNul = false;
+    }
+    else if (charset.equals(Charset.forName("UTF-8")))
+    {
+      // Nul is reliably identified as a single 0 byte.
+      singleNul = true;
+    }
+    else
+    {
+      throw new IllegalArgumentException("Encoding not supported: " + charset.toString());
+    }
+    
+    final byte [] b = new byte[length];
+    int previousValue = -1;
+    
+    for (int index = 0; index < length; index++)
+    {
+      byte currentValue = (byte) input.read();
+      if (currentValue == 0 && (singleNul || previousValue == 0))
       {
-        break;
+        final int bytesUntilNul = index - (singleNul?0:1);
+        return new String(b, 0, bytesUntilNul, charset);
       }
       else
       {
-        result.append(c);
+        b[index] = currentValue;
+        previousValue = currentValue;
       }
     }
-    return result.toString();
+    return new String(b, charset);
   }
   
   public static String readField(final InputStream input, final int length, final Charset charset) throws IOException

@@ -31,6 +31,7 @@ import jwbroek.id3.ID3Frame;
 import jwbroek.id3.ID3Tag;
 import jwbroek.id3.v2.COMFrameReader;
 import jwbroek.id3.v2.FrameReader;
+import jwbroek.id3.v2.ITunesPodcastFrameReader;
 import jwbroek.id3.v2.MCIFrameReader;
 import jwbroek.id3.v2.MalformedFrameException;
 import jwbroek.id3.v2.TXXFrameReader;
@@ -87,6 +88,9 @@ public class FramesReader
     // TODO MLLT
     // TODO OWNE
     // TODO PCNT
+    // TODO Make switch for this.
+    // Unofficial.
+    frameReaders.put("PCST", new ITunesPodcastFrameReader(FramesReader.FRAME_HEADER_LENGTH));
     // TODO POPM
     // TODO POSS
     // TODO PRIV
@@ -100,6 +104,9 @@ public class FramesReader
     FramesReader.putTextFrameReader("TALB");
     // Integer.
     FramesReader.putTextFrameReader("TBPM");
+    // Unofficial
+    // TODO Make switch for this.
+    FramesReader.putTextFrameReader("TCAT");
     // Composers separated by "/".
     FramesReader.putTextFrameReader("TCOM");
     // Effectively genre. Free text, but you can also reference an ID3v1
@@ -112,19 +119,28 @@ public class FramesReader
     // a space.
     FramesReader.putTextFrameReader("TCOP");
     // Numeric. Delay in ms between tracks in playlist.
-    // TODO TDEN
-    // TODO TDLR
+    FramesReader.putTextFrameReader("TDEN");
+    // Unofficial
+    // TODO Make switch for this.
+    FramesReader.putTextFrameReader("TDES");
+    FramesReader.putTextFrameReader("TDLR");
     FramesReader.putTextFrameReader("TDLY");
-    // TODO TDOR
-    // TODO TDRC
-    // TODO TDTG
+    FramesReader.putTextFrameReader("TDOR");
+    FramesReader.putTextFrameReader("TDRC");
+    // Unofficial
+    // TODO Make switch for this.
+    FramesReader.putTextFrameReader("TDRL");
+    FramesReader.putTextFrameReader("TDTG");
     FramesReader.putTextFrameReader("TENC");
     // Textwriters separated by "/".
     FramesReader.putTextFrameReader("TEXT");
     // Default is "MPG". Are a bunch of predefined values. They are not
     // in parentheses.
     FramesReader.putTextFrameReader("TFLT");
-    // TODO TIPL
+    // TODO Make switch for this.
+    // Unofficial
+    FramesReader.putTextFrameReader("TGID");
+    FramesReader.putTextFrameReader("TIPL");
     FramesReader.putTextFrameReader("TIT1");
     FramesReader.putTextFrameReader("TIT2");
     FramesReader.putTextFrameReader("TIT3");
@@ -133,13 +149,16 @@ public class FramesReader
     // represented as "m". Example "Cbm". Off key is represented with an "o"
     // only.
     FramesReader.putTextFrameReader("TKEY");
+    // TODO Make switch for this.
+    // Unofficial
+    FramesReader.putTextFrameReader("TKWD");
     FramesReader.putTextFrameReader("TLAN");
     // Numeric
     FramesReader.putTextFrameReader("TLEN");
-    // TODO TMCL
+    FramesReader.putTextFrameReader("TMCL");
     // Are a bunch of predefined values. Those are in parentheses.
     FramesReader.putTextFrameReader("TMED");
-    // TODO TMOO
+    FramesReader.putTextFrameReader("TMOO");
     FramesReader.putTextFrameReader("TOAL");
     FramesReader.putTextFrameReader("TOFN");
     // Textwriters separated by "/".
@@ -153,18 +172,19 @@ public class FramesReader
     FramesReader.putTextFrameReader("TPE4");
     // Effectively disc number. Can use "/" to include total. I.e. 1/3.
     FramesReader.putTextFrameReader("TPOS");
-    // TODO TPRO
+    // First five characters must be year followed by space.
+    FramesReader.putTextFrameReader("TPRO");
     FramesReader.putTextFrameReader("TPUB");
     // Can use "/" to include total. I.e. 3/12.
     FramesReader.putTextFrameReader("TRCK");
     FramesReader.putTextFrameReader("TRSN");
     FramesReader.putTextFrameReader("TRSO");
-    // TODO TSOA
-    // TODO TSOP
-    // TODO TSOT
+    FramesReader.putTextFrameReader("TSOA");
+    FramesReader.putTextFrameReader("TSOP");
+    FramesReader.putTextFrameReader("TSOT");
     FramesReader.putTextFrameReader("TSRC");
     FramesReader.putTextFrameReader("TSSE");
-    // TODO TSST
+    FramesReader.putTextFrameReader("TSST");
     // User defined text. Must be only one of these per description.
     frameReaders.put("TXXX", new TXXFrameReader(FramesReader.FRAME_HEADER_LENGTH));
     frameReaders.put("UFID", new UFIFrameReader(FramesReader.FRAME_HEADER_LENGTH));
@@ -172,6 +192,10 @@ public class FramesReader
     // TODO USLT
     FramesReader.putURLFrameReader("WCOM");
     FramesReader.putURLFrameReader("WCOP");
+    // TODO Make switch for this.
+    // Unofficial. Name and purpose suggest that its a URL frame, but it's actually a text frame
+    // as it contains an encoding byte.
+    FramesReader.putTextFrameReader("WFED");
     FramesReader.putURLFrameReader("WOAF");
     // May be more than one if there is more than one artist.
     FramesReader.putURLFrameReader("WOAR");
@@ -264,18 +288,18 @@ public class FramesReader
       else if (frameName.charAt(0)=='T')
       {
         // TODO: Add option to enable/disable this behaviour.
-        System.out.println("Encountered unknown text frame.");
-        frame = new TextFrameReader(CanonicalFrameType.USER_DEFINED_TEXT, FramesReader.FRAME_HEADER_LENGTH).readFrameBody(frameSize, input);
+        System.out.println("Encountered unknown text frame: " + frameName);
+        frame = new TextFrameReader(CanonicalFrameType.USER_DEFINED_TEXT, FramesReader.FRAME_HEADER_LENGTH).readFrameBody(frameName, frameSize, input);
       }
       else if (frameName.charAt(0)=='W')
       {
         // TODO: Add option to enable/disable this behaviour.
-        System.out.println("Encountered unknown URL frame.");
-        frame = new TextFrameReader(CanonicalFrameType.USER_DEFINED_URL, FramesReader.FRAME_HEADER_LENGTH).readFrameBody(frameSize, input);
+        System.out.println("Encountered unknown URL frame: " + frameName);
+        frame = new URLFrameReader(CanonicalFrameType.USER_DEFINED_URL, FramesReader.FRAME_HEADER_LENGTH).readFrameBody(frameName, frameSize, input);
       }
       else
       {
-        System.out.println("Encountered unsupported frame type: " + frameName);
+        System.out.println("Encountered unsupported frame type: " + frameName + " of length " + frameSize);
         input.skip(frameSize);
         frame = null;
         // TODO Handle

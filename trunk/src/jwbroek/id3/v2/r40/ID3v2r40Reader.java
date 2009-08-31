@@ -334,7 +334,8 @@ public class ID3v2r40Reader implements ID3Reader
       final ID3v2r40Reader reader = new ID3v2r40Reader();
       //final File file1 = new File("C:\\tmp\\mp3\\Anaal Nathrakh\\Rock Tribune CD Sampler Juli 2009\\12_The Lucifer Effect.mp3"); 
       //final File file1 = new File("C:\\tmp\\01 Prowler.mp3");
-      final File file1 = new File("C:\\tmp\\01 Satyriasis.mp3");
+      //final File file1 = new File("C:\\tmp\\01 Satyriasis.mp3");
+      final File file1 = new File("C:\\tmp\\August 21, 2009_ Gen Con Revisited.mp3");
       System.out.println(reader.hasTag(file1));
       final ID3Tag tag = reader.read(file1);
       if (tag != null)
