@@ -25,6 +25,7 @@ import java.util.Properties;
 public class URLFrame implements ID3Frame
 {
   // TODO Use proper URL.
+  private String additionalTypeInfo = "";
   private String url;
   private int totalFrameSize;
   private CanonicalFrameType canonicalFrameType;
@@ -48,6 +49,7 @@ public class URLFrame implements ID3Frame
   {
     final StringBuilder builder = new StringBuilder();
     builder .append("URL frame: ").append(this.canonicalFrameType.toString())
+            .append(' ').append(this.additionalTypeInfo)
             .append(" [").append(this.totalFrameSize).append("]\n")
             .append("Flags: ").append(this.flags.toString()).append('\n')
             .append("URL: ").append(this.url)
@@ -106,5 +108,23 @@ public class URLFrame implements ID3Frame
   public void setCanonicalFrameType(final CanonicalFrameType canonicalFrameType)
   {
     this.canonicalFrameType = canonicalFrameType;
+  }
+
+  /**
+   * Get the additionalTypeInfo of this URLFrame.
+   * @return The additionalTypeInfo of this URLFrame.
+   */
+  public String getAdditionalTypeInfo()
+  {
+    return additionalTypeInfo;
+  }
+
+  /**
+   * Set the additionalTypeInfo of this URLFrame.
+   * @param additionalTypeInfo The additionalTypeInfo of this URLFrame.
+   */
+  public void setAdditionalTypeInfo(String additionalTypeInfo)
+  {
+    this.additionalTypeInfo = additionalTypeInfo;
   }
 }

@@ -48,6 +48,7 @@ public class FrameDictionary
     FrameDictionary.addToDictionary("TSRC", CanonicalFrameType.ISRC);
     FrameDictionary.addToDictionary("TYER", CanonicalFrameType.YEAR);
     FrameDictionary.addToDictionary("TDAT", CanonicalFrameType.DATE);
+    FrameDictionary.addToDictionary("TGID", CanonicalFrameType.ITUNES_PODCAST_URL);
     FrameDictionary.addToDictionary("TIME", CanonicalFrameType.TIME);
     FrameDictionary.addToDictionary("TRDA", CanonicalFrameType.RECORDING_DATES);
     FrameDictionary.addToDictionary("TMED", CanonicalFrameType.MEDIA_TYPE);
@@ -60,6 +61,7 @@ public class FrameDictionary
     FrameDictionary.addToDictionary("TOFN", CanonicalFrameType.ORIGINAL_FILE_NAME);
     FrameDictionary.addToDictionary("TLEN", CanonicalFrameType.TRACK_LENGTH_MS);
     FrameDictionary.addToDictionary("TSIZ", CanonicalFrameType.TRACK_SIZE_BYTES);
+    FrameDictionary.addToDictionary("TDES", CanonicalFrameType.ITUNES_PODCAST_DESCRIPTION);
     FrameDictionary.addToDictionary("TDLY", CanonicalFrameType.PLAYLIST_DELAY_MS);
     FrameDictionary.addToDictionary("TKEY", CanonicalFrameType.INITIAL_KEY);
     FrameDictionary.addToDictionary("TOAL", CanonicalFrameType.ORIGINAL_TITLE);
@@ -69,12 +71,20 @@ public class FrameDictionary
     FrameDictionary.addToDictionary("TOWN", CanonicalFrameType.OWNER);
     FrameDictionary.addToDictionary("TRSN", CanonicalFrameType.RADIO_STATION);
     FrameDictionary.addToDictionary("TRSO", CanonicalFrameType.RADIO_STATION_OWNER);
+    // Unofficial
+    FrameDictionary.addToDictionary("TCAT", CanonicalFrameType.ITUNES_PODCAST_CATEGORY);
+    // Unofficial
+    FrameDictionary.addToDictionary("TDRL", CanonicalFrameType.ITUNES_PODCAST_RELEASE_TIME);
+    // Unofficial
+    FrameDictionary.addToDictionary("TKWD", CanonicalFrameType.ITUNES_PODCAST_KEYWORDS);
     FrameDictionary.addToDictionary("TXXX", CanonicalFrameType.CUSTOM_TEXT);
     FrameDictionary.addToDictionary("WOAF", CanonicalFrameType.OFFICIAL_AUDIO_FILE_WEBPAGE);
     FrameDictionary.addToDictionary("WOAR", CanonicalFrameType.OFFICIAL_ARTIST_WEBPAGE);
     FrameDictionary.addToDictionary("WOAS", CanonicalFrameType.OFFICIAL_AUDIO_SOURCE_WEBPAGE);
     FrameDictionary.addToDictionary("WCOM", CanonicalFrameType.COMMERCIAL_INFORMATION_URL);
     FrameDictionary.addToDictionary("WCOP", CanonicalFrameType.COPYRIGHT_OR_LEGAL_INFORMATION_URL);
+    // Unofficial
+    FrameDictionary.addToDictionary("WFED", CanonicalFrameType.ITUNES_PODCAST_FEED_URL);
     FrameDictionary.addToDictionary("WPUB", CanonicalFrameType.OFFICIAL_PUBLISHER_WEBPAGE);
     FrameDictionary.addToDictionary("WORS", CanonicalFrameType.OFFICIAL_RADIO_STATION_WEBPAGE);
     FrameDictionary.addToDictionary("WPAY", CanonicalFrameType.OFFICIAL_PAYMENT_WEBPAGE);
@@ -104,6 +114,7 @@ public class FrameDictionary
     // TODO ENCR
     // TODO GRID
     // TODO PRIV
+    FrameDictionary.addToDictionary("PCST", CanonicalFrameType.ITUNES_PODCAST);
     FrameDictionary.addToDictionary("XYZX", CanonicalFrameType.UNRECOGNISED_FRAME);
   }
   

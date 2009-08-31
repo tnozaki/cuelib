@@ -72,7 +72,7 @@ public class WXXFrameReader implements FrameReader
     // First read variable length field with user-defined encoding. Then
     // read rest of field with ISO-8859-1 encoding.
     // Size -1 because of the encoding byte.
-    final String description = FieldReader.readUntilNul(input, size-1, charset, charLength);
+    final String description = FieldReader.readUntilNul(input, size-1, charset);
     result.setDescription(description);
     // Length is what remains after the description and encoding byte. Length
     // of description is length in characters + 1 (for the nul) times the

@@ -23,6 +23,7 @@ import java.util.Properties;
 
 public class TextFrame implements ID3Frame
 {
+  private String additionalTypeInfo = "";
   private String text;
   private int totalFrameSize;
   private CanonicalFrameType canonicalFrameType;
@@ -51,6 +52,7 @@ public class TextFrame implements ID3Frame
   {
     final StringBuilder builder = new StringBuilder();
     builder .append("Text frame: ").append(this.canonicalFrameType.toString())
+            .append(' ').append(this.additionalTypeInfo)
             .append(" [").append(this.totalFrameSize).append("] ")
             .append(this.charset.toString()).append('\n')
             .append("Flags: ").append(this.flags.toString()).append('\n')
@@ -125,5 +127,23 @@ public class TextFrame implements ID3Frame
   public Properties getFlags()
   {
     return flags;
+  }
+
+  /**
+   * Get the additionalTypeInfo of this TextFrame.
+   * @return The additionalTypeInfo of this TextFrame.
+   */
+  public String getAdditionalTypeInfo()
+  {
+    return additionalTypeInfo;
+  }
+
+  /**
+   * Set the additionalTypeInfo of this TextFrame.
+   * @param additionalTypeInfo The additionalTypeInfo of this TextFrame.
+   */
+  public void setAdditionalTypeInfo(String additionalTypeInfo)
+  {
+    this.additionalTypeInfo = additionalTypeInfo;
   }
 }

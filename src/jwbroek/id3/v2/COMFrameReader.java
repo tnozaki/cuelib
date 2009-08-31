@@ -80,7 +80,7 @@ public class COMFrameReader implements FrameReader
       throw new MalformedFrameException("Description not terminated in COM frame.");
     }
     final String description = rawResult.substring(0, nulPosition);
-    final String rawText = rawResult.substring(nulPosition);
+    final String rawText = rawResult.substring(nulPosition+1);
     nulPosition = rawText.indexOf(0);
     final String value = rawText.substring(0, (nulPosition==-1)?rawText.length():nulPosition);
     result.setLanguageCode(languageBuilder.toString());

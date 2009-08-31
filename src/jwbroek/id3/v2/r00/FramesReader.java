@@ -28,6 +28,7 @@ import jwbroek.id3.ID3Tag;
 import jwbroek.id3.v2.COMFrameReader;
 import jwbroek.id3.v2.FrameReader;
 import jwbroek.id3.v2.IPLFrameReader;
+import jwbroek.id3.v2.ITunesPodcastFrameReader;
 import jwbroek.id3.v2.MCIFrameReader;
 import jwbroek.id3.v2.MalformedFrameException;
 import jwbroek.id3.v2.TXXFrameReader;
@@ -83,6 +84,10 @@ public class FramesReader
     // parenthesis in your refinement, use a double opening parenthesis,
     // such as (31)((I think).
     FramesReader.putTextFrameReader("TCO");
+    
+    // Unofficial
+    // TODO Make switch for this.
+    FramesReader.putTextFrameReader("TDS");
     
     FramesReader.putTextFrameReader("TAL");
     
@@ -152,6 +157,22 @@ public class FramesReader
     // As per TYE.
     FramesReader.putTextFrameReader("TOR");
     
+    // TODO Make switch for this.
+    // Unofficial.
+    FramesReader.putTextFrameReader("TID");
+    
+    // TODO Make switch for this.
+    // Unofficial.
+    FramesReader.putTextFrameReader("TCT");
+    
+    // TODO Make switch for this.
+    // Unofficial.
+    FramesReader.putTextFrameReader("TDR");
+    
+    // TODO Make switch for this.
+    // Unofficial.
+    FramesReader.putTextFrameReader("TKW");
+    
     // User defined text. Must be only one of these per description.
     frameReaders.put("TXX", new TXXFrameReader(FramesReader.FRAME_HEADER_LENGTH));
     
@@ -167,6 +188,11 @@ public class FramesReader
     FramesReader.putURLFrameReader("WCP");
     
     FramesReader.putURLFrameReader("WPB");
+    
+    // TODO Make switch for this.
+    // Unofficial. Name and purpose suggest that its a URL frame, but it's actually a text frame
+    // as it contains an encoding byte.
+    FramesReader.putTextFrameReader("WFD");
     
     // User defined URL. Must be only one of these per description.
     frameReaders.put("WXX", new WXXFrameReader(FramesReader.FRAME_HEADER_LENGTH));
@@ -214,6 +240,10 @@ public class FramesReader
     // TODO CRA
     
     // TODO LNK
+    
+    // TODO Make switch for this.
+    // Unofficial.
+    frameReaders.put("PCS", new ITunesPodcastFrameReader(FramesReader.FRAME_HEADER_LENGTH));
   }
   
   public FramesReader()
@@ -243,18 +273,18 @@ public class FramesReader
       else if (frameName.charAt(0)=='T')
       {
         // TODO: Add option to enable/disable this behaviour.
-        System.out.println("Encountered unknown text frame.");
-        tag.getFrames().add(new TextFrameReader(CanonicalFrameType.USER_DEFINED_TEXT, FramesReader.FRAME_HEADER_LENGTH).readFrameBody(frameSize, input));
+        System.out.println("Encountered unknown text frame: " + frameName);
+        tag.getFrames().add(new TextFrameReader(CanonicalFrameType.USER_DEFINED_TEXT, FramesReader.FRAME_HEADER_LENGTH).readFrameBody(frameName, frameSize, input));
       }
       else if (frameName.charAt(0)=='W')
       {
         // TODO: Add option to enable/disable this behaviour.
-        System.out.println("Encountered unknown URL frame.");
-        tag.getFrames().add(new TextFrameReader(CanonicalFrameType.USER_DEFINED_URL, FramesReader.FRAME_HEADER_LENGTH).readFrameBody(frameSize, input));
+        System.out.println("Encountered unknown URL frame: " + frameName);
+        tag.getFrames().add(new URLFrameReader(CanonicalFrameType.USER_DEFINED_URL, FramesReader.FRAME_HEADER_LENGTH).readFrameBody(frameName, frameSize, input));
       }
       else
       {
-        System.out.println("Encountered unsupported frame type: " + frameName);
+        System.out.println("Encountered unsupported frame type: " + frameName + " of length " + frameSize);
         input.skip(frameSize);
         // TODO Handle
       }
