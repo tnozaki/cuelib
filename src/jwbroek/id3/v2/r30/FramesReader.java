@@ -35,6 +35,7 @@ import jwbroek.id3.v2.IPLFrameReader;
 import jwbroek.id3.v2.ITunesPodcastFrameReader;
 import jwbroek.id3.v2.MCIFrameReader;
 import jwbroek.id3.v2.MalformedFrameException;
+import jwbroek.id3.v2.PICFrameReader;
 import jwbroek.id3.v2.TXXFrameReader;
 import jwbroek.id3.v2.TextFrameReader;
 import jwbroek.id3.v2.UFIFrameReader;
@@ -244,7 +245,8 @@ public class FramesReader
     
     // TODO RVRB
     
-    // TODO APIC
+    // Must be only one per decription pair. Also only one per icon type allowed.
+    frameReaders.put("APIC", new PICFrameReader(FramesReader.FRAME_HEADER_LENGTH, false));
     
     // TODO GEOB
     

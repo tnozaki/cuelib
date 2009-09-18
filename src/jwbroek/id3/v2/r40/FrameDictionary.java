@@ -31,7 +31,7 @@ public class FrameDictionary
   static
   {
     // TODO AENC
-    // TODO APIC
+    FrameDictionary.addToDictionary("APIC", CanonicalFrameType.PICTURE);
     // TODO ASPI
     FrameDictionary.addToDictionary("COMM", CanonicalFrameType.COMMENT);
     // TODO COMR

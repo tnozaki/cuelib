@@ -77,7 +77,7 @@ public class WXXFrameReader implements FrameReader
     // Length is what remains after the description and encoding byte. Length
     // of description is length in characters + 1 (for the nul) times the
     // character length.
-    // TODO Fixme. Method doesn't work for UTF-8.
+    // TODO Fixme. Method doesn't work reliably for any of the UTF encodings.
     final String url = FieldReader.readField(input, size - (description.length() + 1) * charLength -1, charset);
     result.setUrl(url);
     

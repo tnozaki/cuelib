@@ -20,14 +20,33 @@ package jwbroek.id3;
 
 public enum ID3Version
 {
-  ID3v1,
-  ID3v1r0,
-  ID3v1r1,
-  ID3v2,
-  ID3v2r0,
-  ID3v2r2,
-  ID3v2r3,
-  ID3v2r4
+  ID3v1(1,0),
+  ID3v1r0(1,0),
+  ID3v1r1(1,1),
+  ID3v2(2,0),
+  ID3v2r0(2,0),
+  ID3v2r2(2,2),
+  ID3v2r3(2,3),
+  ID3v2r4(3,3);
   
-  // TODO Make Comparable.
+  private int majorVersion;
+  private int minorVersion;
+  
+  ID3Version(final int majorVersion, final int minorVersion)
+  {
+    this.majorVersion = majorVersion;
+    this.minorVersion = minorVersion;
+  }
+  
+  public int getMajorVersion()
+  {
+    return this.majorVersion;
+  }
+  
+  public int getMinorVersion()
+  {
+    return this.minorVersion;
+  }
+  
+  // TODO Provide better ordering.
 }
