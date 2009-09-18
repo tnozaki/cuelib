@@ -182,7 +182,7 @@ public class PictureFrame implements ID3Frame
     DURING_RECORDING(14),
     DURING_PERFORMANCE(15),
     MOVIE_CAPTURE(16),
-    A_BRIGHT_COLORED_FISH(17),  // Not a joke. Actually in spec.
+    A_BRIGHT_COLOURED_FISH(17),  // Not a joke. Actually in spec.
     ILLUSTRATION(18),
     BAND_OR_ARTIST_LOGOTYPE(19),
     PUBLISHER_OR_STUDIO_LOGOTYPE(20),
