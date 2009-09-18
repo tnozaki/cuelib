@@ -100,7 +100,7 @@ public class FrameDictionary
     // TODO RVAD
     // TODO EQUA
     // TODO RVRB
-    // TODO APIC
+    FrameDictionary.addToDictionary("APIC", CanonicalFrameType.PICTURE);
     // TODO GEOB
     // TODO PCNT
     // TODO POPM

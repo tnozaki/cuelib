@@ -95,7 +95,7 @@ public class FrameDictionary
     // TODO RVA
     // TODO EQU
     // TODO REV
-    // TODO PIC
+    FrameDictionary.addToDictionary("PIC", CanonicalFrameType.PICTURE);
     // TODO GEO
     // TODO CNT
     // TODO POP

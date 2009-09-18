@@ -81,7 +81,7 @@ public class FieldReader
   
   public static String readField(final InputStream input, final int length, final Charset charset) throws IOException
   {
-    // Read entire field, but throw away everything after nul character.
+    // Read entire field, but throw away everything after first nul character.
     final byte [] b = new byte[length];
     input.read(b);
     final String rawResult = new String(b, charset);
