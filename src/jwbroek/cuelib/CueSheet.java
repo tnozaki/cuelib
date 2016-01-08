@@ -63,6 +63,10 @@ public class CueSheet
      */
     DISCID,
     /**
+     * Disc number of the album.
+     */
+    DISCNUMBER,
+    /**
      * Genre of the album.
      */
     GENRE,
@@ -82,6 +86,10 @@ public class CueSheet
      * Title of the album or track.
      */
     TITLE,
+    /**
+     * Total Discs of the album.
+     */
+    TOTALDISCS,
     /**
      * Number of a track.
      */
@@ -153,7 +161,15 @@ public class CueSheet
    * The genre of the album. May be null.
    */
   private String genre = null;
-  
+  /**
+   * Total discs of the album. -1 signifies that it has not been specified.
+   */
+  private int totalDiscs = -1;
+  /**
+   * Disc number of the album. -1 signifies that it has not been specified.
+   */
+  private int discNumber = -1;
+
   /**
    * The logger for this class.
    */
@@ -195,6 +211,9 @@ public class CueSheet
       case DISCID:
         result = this.getDiscid()==null?"":this.getDiscid();
         break;
+      case DISCNUMBER:
+        result = this.getDiscNumber()==-1?"":""+this.getDiscNumber();
+        break;
       case GENRE:
         result = this.getGenre()==null?"":this.getGenre();
         break;
@@ -209,6 +228,9 @@ public class CueSheet
       case TITLE:
       case ALBUMTITLE:
         result = this.getTitle()==null?"":this.getTitle();
+        break;
+      case TOTALDISCS:
+        result = this.getTotalDiscs()==-1?"":""+this.getTotalDiscs();
         break;
       case YEAR:
         result = this.getYear()==-1?"":""+this.getYear();
@@ -496,5 +518,49 @@ public class CueSheet
     logger.entering(CueSheet.class.getCanonicalName(), "getMessages()");
     logger.exiting(CueSheet.class.getCanonicalName(), "getMessages()", this.messages);
     return this.messages;
+  }
+
+  /**
+   * Get the total discs of the album. -1 indicated that no value is set.
+   * @return The total discs of the album.
+   */
+  public int getTotalDiscs()
+  {
+    logger.entering(CueSheet.class.getCanonicalName(), "getTotalDiscs()");
+    logger.exiting(CueSheet.class.getCanonicalName(), "getTotalDiscs()", this.totalDiscs);
+    return this.totalDiscs;
+  }
+
+  /**
+   * Set the total discs of the album. -1 indicated that no value is set.
+   * @param totalDiscs The total discs of the album.
+   */
+  public void setTotalDiscs(final int totalDiscs)
+  {
+    logger.entering(CueSheet.class.getCanonicalName(), "setTotalDiscs(int)", totalDiscs);
+    this.totalDiscs = totalDiscs;
+    logger.exiting(CueSheet.class.getCanonicalName(), "setTotalDiscs(int)");
+  }
+
+  /**
+   * Get the total discs of the album. -1 indicated that no value is set.
+   * @return The total discs of the album.
+   */
+  public int getDiscNumber()
+  {
+    logger.entering(CueSheet.class.getCanonicalName(), "getDiscNumber()");
+    logger.exiting(CueSheet.class.getCanonicalName(), "getDiscNumber()", this.discNumber);
+    return this.discNumber;
+  }
+
+  /**
+   * Set the disc number of the album. -1 indicated that no value is set.
+   * @param discNumber The disc number of the album.
+   */
+  public void setDiscNumber(final int discNumber)
+  {
+    logger.entering(CueSheet.class.getCanonicalName(), "setDiscNumber(int)", discNumber);
+     this.discNumber = discNumber;
+    logger.exiting(CueSheet.class.getCanonicalName(), "setDiscNumber(int)");
   }
 }

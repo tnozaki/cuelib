@@ -85,6 +85,10 @@ final public class CueParser
     "A PREGAP datum must come after TRACK, but before any INDEX of that TRACK.";
   private final static String WARNING_INDEX_AFTER_POSTGAP     = 
     "A POSTGAP datum must come after all INDEX data of a TRACK.";
+  private final static String WARNING_INVALID_DISCNUMBER      =
+    "Invalid disc number. Should be a number from 1.";
+  private final static String WARNING_INVALID_TOTALDISCS      =
+    "Invalid total discs. Should be a number from 1.";
   private final static String WARNING_INVALID_TRACK_NUMBER    =
     "Invalid track number. First number must be 1; all next ones sequential.";
   private final static String WARNING_INVALID_YEAR            =
@@ -114,8 +118,12 @@ final public class CueParser
     ("^(REM\\s+DATE)\\s+(\\d+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_REM_DISCID             = Pattern.compile
     ("^(REM\\s+DISCID)\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
+  private final static Pattern PATTERN_REM_DISCNUMBER         = Pattern.compile
+    ("^(REM\\s+DISCNUMBER)\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_REM_GENRE              = Pattern.compile
     ("^(REM\\s+GENRE)\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
+  private final static Pattern PATTERN_REM_TOTALDISCS         = Pattern.compile
+    ("^(REM\\s+TOTALDISCS)\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_SONGWRITER             = Pattern.compile
     ("^SONGWRITER\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_TITLE                  = Pattern.compile
@@ -981,6 +989,36 @@ final public class CueParser
   }
 
   /**
+   * Parse the non-standard REM DISCNUMBER command.
+   *
+   * REM DISCNUMBER [discNumber]
+   *
+   * @param input
+   */
+  private static void parseRemDiscNumber(final LineOfInput input)
+  {
+    CueParser.logger.entering(CueParser.class.getCanonicalName(), "parseRemDiscNumber(LineOfInput)", input);
+
+    Matcher matcher = PATTERN_REM_DISCNUMBER.matcher(input.getInput());
+
+    if (matcher.find())
+    {
+      int discNumber = Integer.parseInt(matcher.group(2));
+      if (discNumber < 1)
+      {
+        addWarning(input, WARNING_INVALID_DISCNUMBER);
+      }
+      input.getAssociatedSheet().setDiscNumber(discNumber);
+    }
+    else
+    {
+      addWarning(input, WARNING_UNPARSEABLE_INPUT);
+    }
+
+    CueParser.logger.exiting(CueParser.class.getCanonicalName(), "parseRemDiscNumber(LineOfInput)");
+  }
+
+  /**
    * Parse the non-standard REM GENRE command.
    *
    * REM GENRE [genre]
@@ -1009,7 +1047,37 @@ final public class CueParser
     
     CueParser.logger.exiting(CueParser.class.getCanonicalName(), "parseRemGenre(LineOfInput)");
   }
-  
+
+  /**
+   * Parse the non-standard REM TOTALDISCS command.
+   *
+   * REM TOTALDISCS [totalDiscs]
+   *
+   * @param input
+   */
+  private static void parseRemTotalDiscs(final LineOfInput input)
+  {
+    CueParser.logger.entering(CueParser.class.getCanonicalName(), "parseRemTotalDiscs(LineOfInput)", input);
+
+    Matcher matcher = PATTERN_REM_TOTALDISCS.matcher(input.getInput());
+
+    if (matcher.find())
+    {
+      int totalDiscs = Integer.parseInt(matcher.group(2));
+      if (totalDiscs < 1)
+      {
+        addWarning(input, WARNING_INVALID_TOTALDISCS);
+      }
+      input.getAssociatedSheet().setTotalDiscs(totalDiscs);
+    }
+    else
+    {
+      addWarning(input, WARNING_UNPARSEABLE_INPUT);
+    }
+
+    CueParser.logger.exiting(CueParser.class.getCanonicalName(), "parseRemTotalDiscs(LineOfInput)");
+  }
+
   /**
    * Parse the REM command. Will also parse a number of non-standard commands used by Exact Audio Copy.
    *
@@ -1055,12 +1123,23 @@ final public class CueParser
           {
             parseRemDiscid(input);
           }
+          else if (contains(input, PATTERN_REM_DISCNUMBER))
+          {
+            parseRemDiscNumber(input);
+          }
           break;
         case 'g':
         case 'G':
           if (contains(input, PATTERN_REM_GENRE))
           {
             parseRemGenre(input);
+          }
+          break;
+        case 't':
+        case 'T':
+          if (contains(input, PATTERN_REM_TOTALDISCS))
+          {
+            parseRemTotalDiscs(input);
           }
           break;
       }
