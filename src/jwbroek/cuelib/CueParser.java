@@ -628,15 +628,17 @@ final public class CueParser
           addWarning(input, WARNING_DATUM_APPEARS_TOO_OFTEN);
         }
         
-        Scanner flagScanner = new Scanner(flagsMatcher.group(1));
-        while (flagScanner.hasNext())
+        try (Scanner flagScanner = new Scanner(flagsMatcher.group(1)))
         {
-          String flag = flagScanner.next();
-          if (!COMPLIANT_FLAGS.contains(flag))
+          while (flagScanner.hasNext())
           {
-            addWarning(input, WARNING_NONCOMPLIANT_FLAG);
+            String flag = flagScanner.next();
+            if (!COMPLIANT_FLAGS.contains(flag))
+            {
+              addWarning(input, WARNING_NONCOMPLIANT_FLAG);
+            }
+            flagCollection.add(flag);
           }
-          flagCollection.add(flag);
         }
       }
     }
