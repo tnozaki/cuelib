@@ -67,6 +67,7 @@ final public class CueParser
   private final static String WARNING_INVALID_SECONDS_VALUE   = 
     "Position has invalid seconds value. Should be 00-59.";
   private final static String WARNING_DATUM_APPEARS_TOO_OFTEN = "Datum appears too often.";
+  @SuppressWarnings("unused")
   private final static String WARNING_FILE_IN_WRONG_PLACE     = 
     "A FILE datum must come before everything else except REM and CATALOG.";
   private final static String WARNING_FLAGS_IN_WRONG_PLACE    =
