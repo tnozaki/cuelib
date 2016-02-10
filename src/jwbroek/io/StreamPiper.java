@@ -23,10 +23,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import jwbroek.util.LogUtil;
 
 /**
  * Utility class for piping data from an InputStream to an OutputStream, or to nowhere. This class is particularly useful
@@ -47,10 +43,6 @@ public class StreamPiper implements Runnable
    * Whether or not to close the output stream after all data has been piped.
    */
   private boolean closeOutput;
-  /**
-   * The logger for this class.
-   */
-  private final static Logger logger = Logger.getLogger(StreamPiper.class.getCanonicalName());
   
   /**
    * Pipe all input from the InputStream to the OutputStream. The OutputStream is explicitly allowed to be null.
@@ -62,9 +54,6 @@ public class StreamPiper implements Runnable
   public StreamPiper(final InputStream from, final OutputStream to)
   {
     this(from, to, false);
-    StreamPiper.logger.entering
-      (StreamPiper.class.getCanonicalName(), "StreamPiper(InputStream,OutputStream)", new Object[] {from, to});
-    StreamPiper.logger.exiting(StreamPiper.class.getCanonicalName(), "StreamPiper(InputStream,OutputStream)");
   }
   
   /**
@@ -77,15 +66,9 @@ public class StreamPiper implements Runnable
    */
   public StreamPiper(final InputStream from, final OutputStream to, final boolean closeOutput)
   {
-    StreamPiper.logger.entering
-      ( StreamPiper.class.getCanonicalName()
-      , "StreamPiper(InputStream,OutputStream,boolean)"
-      , new Object [] {from, to, closeOutput}
-      );
     this.from = from;
     this.to = to;
     this.closeOutput = closeOutput;
-    StreamPiper.logger.exiting(StreamPiper.class.getCanonicalName(), "StreamPiper(InputStream,OutputStream,boolean)");
   }
   
   /**
@@ -97,15 +80,12 @@ public class StreamPiper implements Runnable
    */
   public static void pipeStream(final InputStream from, final File file) throws IOException
   {
-    StreamPiper.logger.entering
-      (StreamPiper.class.getCanonicalName(), "pipeStream(InputStream,File)", new Object [] {from, file});
     OutputStream out = null;
     if (file!=null)
     {
       out = new FileOutputStream(file);
     }
     new Thread(new StreamPiper(from, out, true)).start();
-    StreamPiper.logger.exiting(StreamPiper.class.getCanonicalName(), "pipeStream(InputStream,File)");
   }
   
   /**
@@ -113,7 +93,6 @@ public class StreamPiper implements Runnable
    */
   public void run()
   {
-    StreamPiper.logger.entering(StreamPiper.class.getCanonicalName(), "run()");
     try
     {
       int input = this.from.read();
@@ -129,7 +108,7 @@ public class StreamPiper implements Runnable
     catch (IOException e)
     {
       // Nothing we can do.
-      LogUtil.logStacktrace(StreamPiper.logger, Level.WARNING, e);
+      e.printStackTrace();
     }
     finally
     {
@@ -140,7 +119,7 @@ public class StreamPiper implements Runnable
       catch (IOException e)
       {
         // Nothing we can do.
-        LogUtil.logStacktrace(StreamPiper.logger, Level.WARNING, e);
+        e.printStackTrace();
       }
       if (this.closeOutput && this.to != null)
       {
@@ -151,10 +130,9 @@ public class StreamPiper implements Runnable
         catch (IOException e)
         {
           // Nothing we can do.
-          LogUtil.logStacktrace(StreamPiper.logger, Level.WARNING, e);
+          e.printStackTrace();
         }
       }
     }
-    StreamPiper.logger.exiting(StreamPiper.class.getCanonicalName(), "run()");
   }
 }

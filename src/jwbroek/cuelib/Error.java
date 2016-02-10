@@ -18,19 +18,12 @@
  */
 package jwbroek.cuelib;
 
-import java.util.logging.Logger;
-
 /**
  * Simple error for use by a cue sheet.
  * @author jwbroek
  */
 public class Error extends MessageImplementation
 {
-  /**
-   * The logger for this class.
-   */
-  private final static Logger logger = Logger.getLogger(Error.class.getCanonicalName());
-  
   /**
    * Create a new Error message.
    * @param input The input that caused the error.
@@ -40,8 +33,6 @@ public class Error extends MessageImplementation
   public Error(final String input, final int lineNumber, final String message)
   {
     super("Error", input, lineNumber, message);
-    Error.logger.entering(Error.class.getCanonicalName(), "Error()");
-    Error.logger.exiting(Error.class.getCanonicalName(), "Error()");
   }
 
   /**
@@ -52,7 +43,5 @@ public class Error extends MessageImplementation
   public Error(final LineOfInput lineOfInput, final String message)
   {
     super("Error", lineOfInput, message);
-    Error.logger.entering(Error.class.getCanonicalName(), "Error()");
-    Error.logger.exiting(Error.class.getCanonicalName(), "Error()");
   }
 }

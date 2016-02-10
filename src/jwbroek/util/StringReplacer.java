@@ -19,7 +19,6 @@
 package jwbroek.util;
 
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,10 +43,6 @@ import java.util.regex.Pattern;
 public class StringReplacer
 {
   /**
-   * The logger for this class.
-   */
-  private final static Logger logger = Logger.getLogger(StringReplacer.class.getCanonicalName());
-  /**
    * A Pattern that is used to perform the replacements.
    */
   private Pattern replacementPattern;
@@ -63,8 +58,6 @@ public class StringReplacer
    */
   public StringReplacer(Map<String, String> replacements)
   {
-    StringReplacer.logger.entering
-      (StringReplacer.class.getCanonicalName(), "StringReplacer(Map<String,String>)", replacements);
     StringBuilder builder = new StringBuilder();
     
     builder.append('(');
@@ -88,7 +81,6 @@ public class StringReplacer
     
     this.replacementPattern = Pattern.compile(builder.toString());
     this.replacements = replacements;
-    StringReplacer.logger.exiting(StringReplacer.class.getCanonicalName(), "StringReplacer(Map<String,String>)");
   }
   
   /**
@@ -99,7 +91,6 @@ public class StringReplacer
    */
   public String replace(String input)
   {
-    StringReplacer.logger.entering(StringReplacer.class.getCanonicalName(), "replace(String)", input);
     StringBuffer buffer = new StringBuffer();
     
     Matcher matcher = this.replacementPattern.matcher(input);
@@ -112,7 +103,6 @@ public class StringReplacer
     matcher.appendTail(buffer);
     
     String result = buffer.toString();
-    StringReplacer.logger.entering(StringReplacer.class.getCanonicalName(), "replace(String)", result);
     return result;
   }
 }

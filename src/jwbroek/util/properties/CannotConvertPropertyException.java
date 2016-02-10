@@ -18,8 +18,6 @@
  */
 package jwbroek.util.properties;
 
-import java.util.logging.Logger;
-
 /**
  * Method intended to be thrown when a {@link PropertyHandler} cannot convert to or from a
  * property.
@@ -32,20 +30,11 @@ public class CannotConvertPropertyException extends RuntimeException
    */
   private static final long serialVersionUID = -8158507550259008115L;
   /**
-   * The logger for this class.
-   */
-  private final static Logger logger = Logger.getLogger(CannotConvertPropertyException.class.getCanonicalName());
-  
-  /**
    * Create a new CannotConvertPropertyException.
    */
   public CannotConvertPropertyException()
   {
     super();
-    CannotConvertPropertyException.logger.entering
-      (CannotConvertPropertyException.class.getCanonicalName(), "CannotConvertPropertyException()");
-    CannotConvertPropertyException.logger.exiting
-      (CannotConvertPropertyException.class.getCanonicalName(), "CannotConvertPropertyException()");
   }
   
   /**
@@ -55,10 +44,6 @@ public class CannotConvertPropertyException extends RuntimeException
   public CannotConvertPropertyException(final String message)
   {
     super(message);
-    CannotConvertPropertyException.logger.entering
-      (CannotConvertPropertyException.class.getCanonicalName(), "CannotConvertPropertyException(String)", message);
-    CannotConvertPropertyException.logger.exiting
-      (CannotConvertPropertyException.class.getCanonicalName(), "CannotConvertPropertyException(String)");
   }
 
   /**
@@ -69,13 +54,6 @@ public class CannotConvertPropertyException extends RuntimeException
   public CannotConvertPropertyException(final String message, final Throwable cause)
   {
     super(message, cause);
-    CannotConvertPropertyException.logger.entering
-      ( CannotConvertPropertyException.class.getCanonicalName()
-      , "CannotConvertPropertyException(String,Throwable)"
-      , new Object [] {message, cause}
-      );
-    CannotConvertPropertyException.logger.exiting
-      (CannotConvertPropertyException.class.getCanonicalName(), "CannotConvertPropertyException(String,Throwable)");
   }
 
   /**
@@ -85,9 +63,5 @@ public class CannotConvertPropertyException extends RuntimeException
   public CannotConvertPropertyException(final Throwable cause)
   {
     super(cause);
-    CannotConvertPropertyException.logger.entering
-      (CannotConvertPropertyException.class.getCanonicalName(), "CannotConvertPropertyException(Throwable)", cause);
-    CannotConvertPropertyException.logger.exiting
-      (CannotConvertPropertyException.class.getCanonicalName(), "CannotConvertPropertyException(Throwable)");
   }
 }

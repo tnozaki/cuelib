@@ -19,7 +19,6 @@
 package jwbroek.util;
 
 import java.io.File;
-import java.util.logging.Logger;
 
 /**
  * Utility class for helping to deal with some of the more inconvenient aspects of null. Note that this
@@ -31,18 +30,10 @@ import java.util.logging.Logger;
 final public class NullUtil
 {
   /**
-   * The logger for this class.
-   */
-  private final static Logger logger = Logger.getLogger(NullUtil.class.getCanonicalName());
-  
-  /**
    * This class does not need to be instantiated.
    */
   private NullUtil()
   {
-    NullUtil.logger.entering(NullUtil.class.getCanonicalName(), "NullUtil()");
-    NullUtil.logger.warning("NullUtil should not be initialized.");
-    NullUtil.logger.exiting(NullUtil.class.getCanonicalName(), "NullUtil()");
   }
   
   /**
@@ -54,9 +45,7 @@ final public class NullUtil
    */
   public static String toString(final Object o)
   {
-    NullUtil.logger.entering(NullUtil.class.getCanonicalName(), "NullUtil.toString(Object)");
     String result = o==null?null:o.toString();
-    NullUtil.logger.exiting(NullUtil.class.getCanonicalName(), "NullUtil.toString(Object)", result);
     return result;
   }
   
@@ -70,9 +59,7 @@ final public class NullUtil
    */
   public static String toString(final Object o, final String defaultValue)
   {
-    NullUtil.logger.entering(NullUtil.class.getCanonicalName(), "NullUtil.toString(Object,String)");
     String result = o==null?defaultValue:o.toString();
-    NullUtil.logger.exiting(NullUtil.class.getCanonicalName(), "NullUtil.toString(Object,String)", result);
     return result;
   }
   
@@ -85,9 +72,7 @@ final public class NullUtil
    */
   public static String toGuaranteedString(final Object o)
   {
-    NullUtil.logger.entering(NullUtil.class.getCanonicalName(), "NullUtil.toGuaranteedString(Object)");
     String result = o==null?"null":o.toString();
-    NullUtil.logger.exiting(NullUtil.class.getCanonicalName(), "NullUtil.toGuaranteedString(Object)", result);
     return result;
   }
   
@@ -98,9 +83,7 @@ final public class NullUtil
    */
   public static File toFile(final String file)
   {
-    NullUtil.logger.entering(NullUtil.class.getCanonicalName(), "NullUtil.toFile(String)");
     final File result = file==null?null:new File(file);
-    NullUtil.logger.exiting(NullUtil.class.getCanonicalName(), "NullUtil.toFile(String)", result);
     return result;
   }
   
@@ -112,9 +95,7 @@ final public class NullUtil
    */
   public static <T extends Enum<T>> T toEnum(final String value, final Class<T> enumType)
   {
-    NullUtil.logger.entering(NullUtil.class.getCanonicalName(), "NullUtil.toFile(String)");
     final T result = value==null?null:Enum.valueOf(enumType, value);
-    NullUtil.logger.exiting(NullUtil.class.getCanonicalName(), "NullUtil.toFile(String)", result);
     return result;
   }
   
@@ -125,9 +106,7 @@ final public class NullUtil
    */
   public static Long toLong(final String longValue)
   {
-    NullUtil.logger.entering(NullUtil.class.getCanonicalName(), "NullUtil.toLong(String)");
     final Long result = longValue==null?null:Long.getLong(longValue);
-    NullUtil.logger.exiting(NullUtil.class.getCanonicalName(), "NullUtil.toLong(String)", result);
     return result;
   }
   
@@ -139,9 +118,7 @@ final public class NullUtil
    */
   public static <E> E nullValue(final E value, final E defaultValue)
   {
-    NullUtil.logger.entering(NullUtil.class.getCanonicalName(), "NullUtil.nullValue(E,E)");
     final E result = value==null?defaultValue:value;
-    NullUtil.logger.exiting(NullUtil.class.getCanonicalName(), "NullUtil.nullValue(E,E)", result);
     return result;
   }
   
@@ -154,9 +131,7 @@ final public class NullUtil
    */
   public static <E> E nvl(final E value, final E defaultValue)
   {
-    NullUtil.logger.entering(NullUtil.class.getCanonicalName(), "NullUtil.nvl(E,E)");
     final E result = NullUtil.nvl(value, defaultValue);
-    NullUtil.logger.exiting(NullUtil.class.getCanonicalName(), "NullUtil.nvl(E,E)", result);
     return result;
   }
 

@@ -24,8 +24,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -38,7 +36,6 @@ import jwbroek.cuelib.FileData;
 import jwbroek.cuelib.Position;
 import jwbroek.cuelib.TrackData;
 import jwbroek.io.StreamPiper;
-import jwbroek.util.LogUtil;
 
 /**
  * <p>Class that can cut up files into tracks, based on the information provided by a cue sheet.</p>
@@ -50,11 +47,6 @@ import jwbroek.util.LogUtil;
 public class TrackCutter
 {
   /**
-   * The logger for this class.
-   */
-  private final static Logger logger = Logger.getLogger(TrackCutter.class.getCanonicalName());
-  
-  /**
    * Configuation for the TrackCutter.
    */
   private TrackCutterConfiguration configuration;
@@ -65,10 +57,7 @@ public class TrackCutter
    */
   public TrackCutter(final TrackCutterConfiguration configuration)
   {
-    TrackCutter.logger.entering
-      (TrackCutter.class.getCanonicalName(), "TrackCutter(TrackCutterConfiguration)", configuration);
     this.configuration = configuration;
-    TrackCutter.logger.exiting(TrackCutter.class.getCanonicalName(), "TrackCutter(TrackCutterConfiguration)");
   }
   
   /**
@@ -78,35 +67,27 @@ public class TrackCutter
    */
   public void cutTracksInCueSheet(final File cueFile) throws IOException
   {
-    TrackCutter.logger.entering(TrackCutter.class.getCanonicalName(), "cutTracksInCueSheet(File)", cueFile);
-    TrackCutter.logger.info("Cutting tracks in cue sheet from file '" + cueFile.toString() + "'.");
-    
     CueSheet cueSheet = null;
     
     // If no parent directory specified, then set the parent directory of the cue file.
     if (getConfiguration().getParentDirectory()==null)
     {
       getConfiguration().setParentDirectory(cueFile.getParentFile());
-      TrackCutter.logger.fine("Have set base directory to directory of File  '" + cueFile.toString() + "'.");
     }
     
     try
     {
-      TrackCutter.logger.fine("Parsing cue sheet.");
       cueSheet = CueParser.parse(cueFile);
     }
     catch (IOException e)
     {
-      TrackCutter.logger.severe("Was unable to parse the cue sheet in file '" + cueFile.toString() + "'.");
-      LogUtil.logStacktrace(TrackCutter.logger, Level.SEVERE, e);
+      e.printStackTrace();
       IOException resultException = new IOException("Problem parsing cue file.");
       resultException.initCause(e);
-      TrackCutter.logger.throwing(TrackCutter.class.getCanonicalName(), "cutTracksInCueSheet(File)", resultException);
       throw resultException;
     }
     
     cutTracksInCueSheet(cueSheet);
-    TrackCutter.logger.exiting(TrackCutter.class.getCanonicalName(), "cutTracksInCueSheet(File)");
   }
   
   /**
@@ -116,28 +97,21 @@ public class TrackCutter
    */
   public void cutTracksInCueSheet(final InputStream inputStream) throws IOException
   {
-    TrackCutter.logger.entering(TrackCutter.class.getCanonicalName(), "cutTracksInCueSheet(InputStream)", inputStream);
-    TrackCutter.logger.info("Cutting tracks in cue sheet from InputStream.");
-    
     CueSheet cueSheet = null;
     
     try
     {
-      TrackCutter.logger.fine("Parsing cue sheet.");
       cueSheet = CueParser.parse(inputStream);
     }
     catch (IOException e)
     {
-      TrackCutter.logger.severe("Was unable to parse the cue sheet from InputStream.");
-      LogUtil.logStacktrace(TrackCutter.logger, Level.SEVERE, e);
+      e.printStackTrace();
       IOException resultException = new IOException("Problem parsing cue file.");
       resultException.initCause(e);
-      TrackCutter.logger.throwing(TrackCutter.class.getCanonicalName(), "cutTracksInCueSheet(File)", resultException);
       throw resultException;
     }
     
     cutTracksInCueSheet(cueSheet);
-    TrackCutter.logger.exiting(TrackCutter.class.getCanonicalName(), "cutTracksInCueSheet(InputStream)");
   }
   
   /**
@@ -147,9 +121,6 @@ public class TrackCutter
    */
   public void cutTracksInCueSheet(final CueSheet cueSheet) throws IOException
   {
-    TrackCutter.logger.entering(TrackCutter.class.getCanonicalName(), "cutTracksInCueSheet(CueSheet)", cueSheet);
-    TrackCutter.logger.info("Cutting tracks in cue sheet.");
-    
     // We can process each file in the cue sheet independently.
     for (FileData fileData : cueSheet.getFileData())
     {
@@ -159,23 +130,13 @@ public class TrackCutter
       }
       catch (UnsupportedAudioFileException e)
       {
-        TrackCutter.logger.severe
-          ( "Encountered an " + e.getClass().getCanonicalName()
-          + " when processing \"" + fileData.getFile() + "\": " + e.getMessage()
-          );
-        LogUtil.logStacktrace(TrackCutter.logger, Level.FINE, e);
+        e.printStackTrace();
       }
       catch (IOException e)
       {
-        TrackCutter.logger.severe
-          ( "Encountered an " + e.getClass().getCanonicalName()
-          + " when processing \"" + fileData.getFile() + "\": " + e.getMessage()
-          );
-        LogUtil.logStacktrace(TrackCutter.logger, Level.FINE, e);
+        e.printStackTrace();
       }
     }
-    TrackCutter.logger.info("Done cutting tracks in cue sheet.");
-    TrackCutter.logger.exiting(TrackCutter.class.getCanonicalName(), "cutTracksInCueSheet(CueSheet)");
   }
   
   /**
@@ -187,21 +148,17 @@ public class TrackCutter
   private void cutTracksInFileData(final FileData fileData)
     throws IOException, UnsupportedAudioFileException
   {
-    TrackCutter.logger.entering(TrackCutter.class.getCanonicalName(), "cutTracksInCueSheet(FileData)", fileData);
-    TrackCutter.logger.info("Cutting tracks from file: '" + fileData.getFile() + "'.");
     AudioInputStream audioInputStream = null;
     
     try
     {
       // Determine the complete path to the audio file.
-      TrackCutter.logger.fine("Determining complete path to audio file.");
       File audioFile = getConfiguration().getAudioFile(fileData);
       
       // Open the audio file.
       // Sadly, we can't do much with the file type information from the cue sheet, as javax.sound.sampled
       // needs more information before it can process a specific type of sound file. Best then to let it
       // determine all aspects of the audio type by itself.
-      TrackCutter.logger.fine("Opening audio stream.");
       audioInputStream = AudioSystem.getAudioInputStream(audioFile);
       
       // Current position in terms of the frames as per audioInputStream.getFrameLength().
@@ -223,11 +180,9 @@ public class TrackCutter
       if (audioInputStream!=null)
       {
         // Don't handle exceptions, as there's really nothing we can do about them.
-        TrackCutter.logger.fine("Closing audio stream.");
         audioInputStream.close();
       }
     }
-    TrackCutter.logger.exiting(TrackCutter.class.getCanonicalName(), "cutTracksInCueSheet(FileData)");
   }
   
   /**
@@ -237,8 +192,6 @@ public class TrackCutter
    */
   private List<TrackCutterProcessingAction> getProcessActionList(final FileData fileData)
   {
-    TrackCutter.logger.entering(TrackCutter.class.getCanonicalName(), "getProcessActionList(FileData)", fileData);
-    TrackCutter.logger.fine("Determining processing actions for file: '" + fileData.getFile() + "'.");
     List<TrackCutterProcessingAction> result = new ArrayList<TrackCutterProcessingAction>();
     TrackData previousTrackData = null;
     
@@ -265,7 +218,6 @@ public class TrackCutter
       addProcessActions(previousTrackData, null, result);
     }
     
-    TrackCutter.logger.exiting(TrackCutter.class.getCanonicalName(), "getProcessActionList(FileData)", result);
     return result;
   }
   
@@ -283,12 +235,6 @@ public class TrackCutter
     , final List<TrackCutterProcessingAction> processActions
     )
   {
-    TrackCutter.logger.entering
-      ( TrackCutter.class.getCanonicalName()
-      , "addProcessActions(TrackData,Position,List<TrackCutterProcessingAction>)"
-      , new Object[] {trackData, nextPosition, processActions}
-      );
-    TrackCutter.logger.fine("Adding processing action for track #" + trackData.getNumber() + ".");
     if (trackData.getIndex(0) == null)
     {
       // No pregap to handle. Just process this track.
@@ -378,10 +324,6 @@ public class TrackCutter
           break;
       }
     }
-    TrackCutter.logger.exiting
-      ( TrackCutter.class.getCanonicalName()
-      , "addProcessActions(TrackData,Position,List<TrackCutterProcessingAction>)"
-      );
   }
   
   /**
@@ -397,17 +339,6 @@ public class TrackCutter
                                     , final long currentAudioFramePos
                                     ) throws IOException
   {
-    TrackCutter.logger.entering
-      ( TrackCutter.class.getCanonicalName()
-      , "performProcessAction(TrackCutterProcessingAction,AudioInputStream,long)"
-      , new Object[] {processAction, audioInputStream, currentAudioFramePos}
-      );
-    TrackCutter.logger.fine
-      ( "Determining audio substream for processing action for "
-      + (processAction.getIsPregap()?"pregap of ":"") + "track #"
-      + processAction.getTrackData().getNumber() + "."
-      );
-    
     // Skip positions in the audioInputStream until we are at our starting position.
     long fromAudioFramePos = skipToPosition (processAction.getStartPosition(), audioInputStream, currentAudioFramePos);
     
@@ -422,11 +353,6 @@ public class TrackCutter
       ( processAction
       , new AudioInputStream(audioInputStream, audioInputStream.getFormat(), toAudioFramePos - fromAudioFramePos)
       );
-    
-    TrackCutter.logger.exiting
-      ( TrackCutter.class.getCanonicalName()
-      , "performProcessAction(TrackCutterProcessingAction,AudioInputStream,long)"
-      );
     return toAudioFramePos;
   }
   
@@ -440,20 +366,9 @@ public class TrackCutter
                                     , final AudioInputStream audioInputStream
                                     ) throws IOException
   {
-    TrackCutter.logger.entering
-      ( TrackCutter.class.getCanonicalName()
-      , "performProcessAction(TrackCutterProcessingAction,AudioInputStream)"
-      , new Object[] {processAction, audioInputStream}
-      );
-    TrackCutter.logger.info
-      ( "Performing processing action for " + (processAction.getIsPregap()?"pregap of ":"")
-      + "track #" + processAction.getTrackData().getNumber() + "."
-      );
-    
     if (!getConfiguration().getRedirectToPostprocessing())
     {
       // We're going to create target files, so make sure there's a directory for them.
-      TrackCutter.logger.fine("Creating directory for target files.");
       processAction.getCutFile().getParentFile().mkdirs();
     }
     
@@ -463,7 +378,6 @@ public class TrackCutter
       
       try
       {
-        TrackCutter.logger.fine("Writing audio to postprocessor.");
         audioOutputStream = this.createPostProcessingProcess(processAction).getOutputStream();
         AudioSystem.write(audioInputStream, configuration.getTargetType(), audioOutputStream);
       }
@@ -472,27 +386,19 @@ public class TrackCutter
         if (audioOutputStream!=null)
         {
           // We can't do anything about any exceptions here, so we don't catch them.
-          TrackCutter.logger.fine("Closing audio stream.");
           audioOutputStream.close();
         }
       }
     }
     else
     {
-      TrackCutter.logger.fine("Writing audio to file.");
       AudioSystem.write(audioInputStream, configuration.getTargetType(), processAction.getCutFile());
       
       if (configuration.getDoPostProcessing())
       {
-        TrackCutter.logger.fine("Performing postprocessing.");
         this.createPostProcessingProcess(processAction);
       }
     }
-    
-    TrackCutter.logger.exiting
-      ( TrackCutter.class.getCanonicalName()
-      , "performProcessAction(TrackCutterProcessingAction,AudioInputStream)"
-      );
   }
   
   /**
@@ -505,20 +411,12 @@ public class TrackCutter
     ( final TrackCutterProcessingAction processAction
     ) throws IOException
   {
-    TrackCutter.logger.entering
-      ( TrackCutter.class.getCanonicalName()
-      , "performProcessAction(TrackCutterProcessingAction)"
-      , processAction
-      );
-    TrackCutter.logger.fine("Creating post-processing process for command: " + processAction.getPostProcessCommand());
     processAction.getPostProcessFile().getParentFile().mkdirs();
     Process process = Runtime.getRuntime().exec(processAction.getPostProcessCommand());
     
     StreamPiper.pipeStream(process.getInputStream(), processAction.getStdOutRedirectFile());
     StreamPiper.pipeStream(process.getErrorStream(), processAction.getErrRedirectFile());
     
-    TrackCutter.logger.exiting
-      (TrackCutter.class.getCanonicalName(), "performProcessAction(TrackCutterProcessingAction)", process);
     return process;
   }
   
@@ -532,18 +430,8 @@ public class TrackCutter
    */
   private static long getAudioFormatFrames(final Position position, final AudioFormat audioFormat)
   {
-    TrackCutter.logger.entering
-      ( TrackCutter.class.getCanonicalName()
-      , "getAudioFormatFrames(Position,AudioFormat)"
-      , new Object[] {position, audioFormat}
-      );
     // Determine closest frame number.
     long result = (long) Math.round(((double) audioFormat.getFrameRate())/75 * position.getTotalFrames());
-    TrackCutter.logger.exiting
-      ( TrackCutter.class.getCanonicalName()
-      , "getAudioFormatFrames(Position,AudioFormat)"
-      , result
-      );
     return result;
   }
   
@@ -561,15 +449,8 @@ public class TrackCutter
     , long currentAudioFramePos
     ) throws IOException
   {
-    TrackCutter.logger.entering
-      ( TrackCutter.class.getCanonicalName()
-      , "skipToPosition(Position,AudioInputStream,long)"
-      , new Object[] {toPosition, audioInputStream, currentAudioFramePos}
-      );
     long toAudioFramePos = getAudioFormatFrames(toPosition, audioInputStream.getFormat());
     audioInputStream.skip((toAudioFramePos - currentAudioFramePos) * audioInputStream.getFormat().getFrameSize());
-    TrackCutter.logger.exiting
-      (TrackCutter.class.getCanonicalName(), "skipToPosition(Position,AudioInputStream,long)", toAudioFramePos);
     return toAudioFramePos;
   }
   
@@ -579,8 +460,6 @@ public class TrackCutter
    */
   private TrackCutterConfiguration getConfiguration()
   {
-    TrackCutter.logger.entering(TrackCutter.class.getCanonicalName(), "getConfiguration()");
-    TrackCutter.logger.exiting(TrackCutter.class.getCanonicalName(), "getConfiguration()", this.configuration);
     return this.configuration;
   }
 }

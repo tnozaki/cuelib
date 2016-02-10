@@ -20,7 +20,6 @@ package jwbroek.cuelib;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Simple representation of a cue sheet.
@@ -171,17 +170,10 @@ public class CueSheet
   private int discNumber = -1;
 
   /**
-   * The logger for this class.
-   */
-  private final static Logger logger = Logger.getLogger(CueSheet.class.getCanonicalName());
-  
-  /**
    * Create a new CueSheet.
    */
   public CueSheet()
   {
-    CueSheet.logger.entering(CueSheet.class.getCanonicalName(), "CueSheet()");
-    CueSheet.logger.exiting(CueSheet.class.getCanonicalName(), "CueSheet()");
   }
   
   /**
@@ -194,7 +186,6 @@ public class CueSheet
    */
   public String getMetaData(MetaDataField metaDataField) throws IllegalArgumentException
   {
-    CueSheet.logger.entering(CueSheet.class.getCanonicalName(), "getMetaData(MetaDataField)", metaDataField);
     String result;
     
     switch (metaDataField)
@@ -238,11 +229,9 @@ public class CueSheet
       default:
         IllegalArgumentException exception = new IllegalArgumentException
           ("Unsupported field: " + metaDataField.toString());
-        logger.throwing(CueSheet.class.getCanonicalName(), "getMetaData(MetaDataField)", exception);
         throw exception;
     }
     
-    logger.exiting(CueSheet.class.getCanonicalName(), "getMetaData(MetaDataField)", result);
     return result;
   }
 
@@ -253,10 +242,7 @@ public class CueSheet
    */
   public void addError(LineOfInput lineOfInput, String message)
   {
-    logger.entering
-      (CueSheet.class.getCanonicalName(), "addError(LineOfInput,String)", new Object[]{lineOfInput, message});
     this.messages.add(new Error(lineOfInput, message));
-    logger.exiting(CueSheet.class.getCanonicalName(), "addError(LineOfInput,String)");
   }
   
   /**
@@ -266,10 +252,7 @@ public class CueSheet
    */
   public void addWarning(LineOfInput lineOfInput, String message)
   {
-    logger.entering
-      (CueSheet.class.getCanonicalName(), "addWarning(LineOfInput,String)", new Object[]{lineOfInput, message});
     this.messages.add(new Warning(lineOfInput, message));
-    logger.exiting(CueSheet.class.getCanonicalName(), "addWarning(LineOfInput,String)");
   }
   
   /**
@@ -278,16 +261,12 @@ public class CueSheet
    */
   public List<TrackData> getAllTrackData()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getAllTrackData()");
-    
     List<TrackData> allTrackData = new ArrayList<TrackData>();
     
     for (FileData fileData: this.fileData)
     {
       allTrackData.addAll(fileData.getTrackData());
     }
-    
-    logger.exiting(CueSheet.class.getCanonicalName(), "getAllTrackData()", allTrackData);
     
     return allTrackData;
   }
@@ -299,8 +278,6 @@ public class CueSheet
    */
   public String getCatalog()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getCatalog()");
-    logger.exiting(CueSheet.class.getCanonicalName(), "getCatalog()", this.catalog);
     return this.catalog;
   }
   
@@ -311,9 +288,7 @@ public class CueSheet
    */
   public void setCatalog(final String catalog)
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "setCatalog(String)", catalog);
     this.catalog = catalog;
-    logger.exiting(CueSheet.class.getCanonicalName(), "setCatalog(String)");
   }
   
   /**
@@ -322,8 +297,6 @@ public class CueSheet
    */
   public String getCdTextFile()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getCdTextFile()");
-    logger.exiting(CueSheet.class.getCanonicalName(), "getCdTextFile()", this.cdTextFile);
     return this.cdTextFile;
   }
   
@@ -333,9 +306,7 @@ public class CueSheet
    */
   public void setCdTextFile(final String cdTextFile)
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "setCdTextFile(String)", cdTextFile);
     this.cdTextFile = cdTextFile;
-    logger.exiting(CueSheet.class.getCanonicalName(), "setCdTextFile(String)");
   }
   
   /**
@@ -345,8 +316,6 @@ public class CueSheet
    */
   public String getPerformer()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getPerformer()");
-    logger.exiting(CueSheet.class.getCanonicalName(), "getPerformer()", this.performer);
     return this.performer;
   }
   
@@ -357,9 +326,7 @@ public class CueSheet
    */
   public void setPerformer(final String performer)
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "setPerformer(String)", performer);
     this.performer = performer;
-    logger.exiting(CueSheet.class.getCanonicalName(), "setPerformer(String)");
   }
   
   /**
@@ -369,8 +336,6 @@ public class CueSheet
    */
   public String getSongwriter()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getSongwriter()");
-    logger.exiting(CueSheet.class.getCanonicalName(), "getSongwriter()", this.songwriter);
     return this.songwriter;
   }
   
@@ -381,9 +346,7 @@ public class CueSheet
    */
   public void setSongwriter(final String songwriter)
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "setSongwriter(String)", songwriter);
     this.songwriter = songwriter;
-    logger.exiting(CueSheet.class.getCanonicalName(), "setSongwriter(String)");
   }
   
   /**
@@ -393,8 +356,6 @@ public class CueSheet
    */
   public String getTitle()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getTitle()");
-    logger.exiting(CueSheet.class.getCanonicalName(), "getTitle()", this.title);
     return this.title;
   }
   
@@ -405,9 +366,7 @@ public class CueSheet
    */
   public void setTitle(final String title)
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "setTitle(String)", title);
     this.title = title;
-    logger.exiting(CueSheet.class.getCanonicalName(), "setTitle(String)");
   }
   
   /**
@@ -416,8 +375,6 @@ public class CueSheet
    */
   public String getDiscid()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getDiscid()");
-    logger.exiting(CueSheet.class.getCanonicalName(), "getDiscid()", this.discid);
     return this.discid;
   }
 
@@ -427,9 +384,7 @@ public class CueSheet
    */
   public void setDiscid(final String discid)
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "setDiscid(String)", discid);
     this.discid = discid;
-    logger.exiting(CueSheet.class.getCanonicalName(), "setDiscid(String)");
   }
 
   /**
@@ -438,8 +393,6 @@ public class CueSheet
    */
   public String getGenre()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getGenre()");
-    logger.exiting(CueSheet.class.getCanonicalName(), "getGenre()", this.genre);
     return this.genre;
   }
 
@@ -449,9 +402,7 @@ public class CueSheet
    */
   public void setGenre(final String genre)
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "setGenre(String)", genre);
     this.genre = genre;
-    logger.exiting(CueSheet.class.getCanonicalName(), "setGenre(String)");
   }
 
   /**
@@ -460,8 +411,6 @@ public class CueSheet
    */
   public int getYear()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getYear()");
-    logger.exiting(CueSheet.class.getCanonicalName(), "getYear()", this.year);
     return this.year;
   }
 
@@ -471,9 +420,7 @@ public class CueSheet
    */
   public void setYear(final int year)
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "setYear(int)", year);
     this.year = year;
-    logger.exiting(CueSheet.class.getCanonicalName(), "setYear(int)");
   }
 
   /**
@@ -482,8 +429,6 @@ public class CueSheet
    */
   public String getComment()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getComment()");
-    logger.exiting(CueSheet.class.getCanonicalName(), "getComment()", this.comment);
     return this.comment;
   }
 
@@ -493,9 +438,7 @@ public class CueSheet
    */
   public void setComment(final String comment)
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "setComment(String)", comment);
     this.comment = comment;
-    logger.exiting(CueSheet.class.getCanonicalName(), "setComment(String)");
   }
   
   /**
@@ -504,8 +447,6 @@ public class CueSheet
    */
   public List<FileData> getFileData()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getFileData()");
-    logger.exiting(CueSheet.class.getCanonicalName(), "getFileData()", this.fileData);
     return this.fileData;
   }
   
@@ -515,8 +456,6 @@ public class CueSheet
    */
   public List<Message> getMessages()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getMessages()");
-    logger.exiting(CueSheet.class.getCanonicalName(), "getMessages()", this.messages);
     return this.messages;
   }
 
@@ -526,8 +465,6 @@ public class CueSheet
    */
   public int getTotalDiscs()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getTotalDiscs()");
-    logger.exiting(CueSheet.class.getCanonicalName(), "getTotalDiscs()", this.totalDiscs);
     return this.totalDiscs;
   }
 
@@ -537,9 +474,7 @@ public class CueSheet
    */
   public void setTotalDiscs(final int totalDiscs)
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "setTotalDiscs(int)", totalDiscs);
     this.totalDiscs = totalDiscs;
-    logger.exiting(CueSheet.class.getCanonicalName(), "setTotalDiscs(int)");
   }
 
   /**
@@ -548,8 +483,6 @@ public class CueSheet
    */
   public int getDiscNumber()
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "getDiscNumber()");
-    logger.exiting(CueSheet.class.getCanonicalName(), "getDiscNumber()", this.discNumber);
     return this.discNumber;
   }
 
@@ -559,8 +492,6 @@ public class CueSheet
    */
   public void setDiscNumber(final int discNumber)
   {
-    logger.entering(CueSheet.class.getCanonicalName(), "setDiscNumber(int)", discNumber);
      this.discNumber = discNumber;
-    logger.exiting(CueSheet.class.getCanonicalName(), "setDiscNumber(int)");
   }
 }

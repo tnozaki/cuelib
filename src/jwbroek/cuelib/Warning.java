@@ -18,19 +18,12 @@
  */
 package jwbroek.cuelib;
 
-import java.util.logging.Logger;
-
 /**
  * Simple warning for use by a cue sheet.
  * @author jwbroek
  */
 public class Warning extends MessageImplementation
 {
-  /**
-   * The logger for this class.
-   */
-  private final static Logger logger = Logger.getLogger(CueSheetSerializer.class.getCanonicalName());
-  
   /**
    * Create a new Warning message.
    * @param input The input that caused the warning.
@@ -40,8 +33,6 @@ public class Warning extends MessageImplementation
   public Warning(final String input, final int lineNumber, final String message)
   {
     super("Warning", input, lineNumber, message);
-    Warning.logger.entering(Warning.class.getCanonicalName(), "Warning()");
-    Warning.logger.exiting(Warning.class.getCanonicalName(), "Warning()");
   }
 
   /**
@@ -52,7 +43,5 @@ public class Warning extends MessageImplementation
   public Warning(final LineOfInput lineOfInput, final String message)
   {
     super("Warning", lineOfInput, message);
-    Warning.logger.entering(Warning.class.getCanonicalName(), "Warning()");
-    Warning.logger.exiting(Warning.class.getCanonicalName(), "Warning()");
   }
 }

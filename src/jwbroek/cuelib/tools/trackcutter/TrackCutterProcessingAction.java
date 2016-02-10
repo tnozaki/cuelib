@@ -19,7 +19,6 @@
 package jwbroek.cuelib.tools.trackcutter;
 
 import java.io.File;
-import java.util.logging.Logger;
 
 import jwbroek.cuelib.Position;
 import jwbroek.cuelib.TrackData;
@@ -66,11 +65,6 @@ public class TrackCutterProcessingAction
    */
   private String postProcessingCommand = null;
   /**
-   * The logger for this class.
-   */
-  private final static Logger logger = Logger.getLogger(TrackCutterProcessingAction.class.getCanonicalName());
-  
-  /**
    * Construct a processing action for a TrackCutter.
    * @param startPosition Starting position for the track.
    * @param endPosition Ending position for the track.
@@ -87,20 +81,11 @@ public class TrackCutterProcessingAction
     , final TrackCutterConfiguration configuration
     )
   {
-    TrackCutterProcessingAction.logger.entering
-      ( TrackCutterProcessingAction.class.getCanonicalName()
-      , "TrackCutterProcessingAction(Position,Position,TrackData,boolean,TrackCutterConfiguration)"
-      , new Object [] {startPosition, endPosition, trackData, isPregap, configuration}
-      );
     this.startPosition = startPosition;
     this.endPosition = endPosition;
     this.trackData = trackData;
     this.isPregap = isPregap;
     this.configuration = configuration;
-    TrackCutterProcessingAction.logger.exiting
-      ( TrackCutterProcessingAction.class.getCanonicalName()
-      , "TrackCutterProcessingAction(Position,Position,TrackData,boolean,TrackCutterConfiguration)"
-      );
   }
 
   /**
@@ -109,14 +94,10 @@ public class TrackCutterProcessingAction
    */
   public File getCutFile()
   {
-    TrackCutterProcessingAction.logger.entering(TrackCutterProcessingAction.class.getCanonicalName(), "getCutFile()");
     if (this.cutFile == null)
     {
       this.cutFile = this.configuration.getCutFile(this);
     }
-
-    TrackCutterProcessingAction.logger.exiting
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getCutFile()", this.cutFile);
     return this.cutFile;
   }
 
@@ -126,15 +107,10 @@ public class TrackCutterProcessingAction
    */
   public File getPostProcessFile()
   {
-    TrackCutterProcessingAction.logger.entering
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getPostProcessFile()");
     if (this.postProcessFile == null)
     {
       this.postProcessFile = this.configuration.getPostProcessFile(this);
     }
-
-    TrackCutterProcessingAction.logger.exiting
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getPostProcessFile()", this.postProcessFile);
     return this.postProcessFile;
   }
 
@@ -144,16 +120,11 @@ public class TrackCutterProcessingAction
    */
   public String getPostProcessCommand()
   {
-    TrackCutterProcessingAction.logger.entering
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getPostProcessCommand()");
     if (this.postProcessingCommand == null)
     {
       this.postProcessingCommand = this.configuration
           .getPostProcessCommand(this);
     }
-
-    TrackCutterProcessingAction.logger.exiting
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getPostProcessCommand()", this.postProcessingCommand);
     return this.postProcessingCommand;
   }
 
@@ -163,15 +134,11 @@ public class TrackCutterProcessingAction
    */
   public File getStdOutRedirectFile()
   {
-    TrackCutterProcessingAction.logger.entering
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getStdOutRedirectFile()");
     File result = null;
     if (this.configuration.getRedirectStdOut())
     {
       result = new File(this.getPostProcessFile().getPath() + ".out");
     }
-    TrackCutterProcessingAction.logger.exiting
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getStdOutRedirectFile()", result);
     return result;
   }
 
@@ -181,15 +148,11 @@ public class TrackCutterProcessingAction
    */
   public File getErrRedirectFile()
   {
-    TrackCutterProcessingAction.logger.entering
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getErrRedirectFile()");
     File result = null;
     if (this.configuration.getRedirectStdOut())
     {
       result = new File(this.getPostProcessFile().getPath() + ".err");
     }
-    TrackCutterProcessingAction.logger.exiting
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getErrRedirectFile()", result);
     return result;
   }
 
@@ -199,10 +162,6 @@ public class TrackCutterProcessingAction
    */
   public Position getStartPosition()
   {
-    TrackCutterProcessingAction.logger.entering
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getStartPosition()");
-    TrackCutterProcessingAction.logger.exiting
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getStartPosition()", this.startPosition);
     return this.startPosition;
   }
 
@@ -212,9 +171,6 @@ public class TrackCutterProcessingAction
    */
   public Position getEndPosition()
   {
-    TrackCutterProcessingAction.logger.entering(TrackCutterProcessingAction.class.getCanonicalName(), "getEndPosition()");
-    TrackCutterProcessingAction.logger.exiting
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getEndPosition()", this.endPosition);
     return this.endPosition;
   }
 
@@ -224,9 +180,6 @@ public class TrackCutterProcessingAction
    */
   public TrackData getTrackData()
   {
-    TrackCutterProcessingAction.logger.entering(TrackCutterProcessingAction.class.getCanonicalName(), "getTrackData()");
-    TrackCutterProcessingAction.logger.exiting
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getTrackData()", this.trackData);
     return this.trackData;
   }
 
@@ -236,10 +189,6 @@ public class TrackCutterProcessingAction
    */
   public boolean getIsPregap()
   {
-    TrackCutterProcessingAction.logger.entering
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getIsPregap()");
-    TrackCutterProcessingAction.logger.exiting
-      (TrackCutterProcessingAction.class.getCanonicalName(), "getIsPregap()", this.isPregap);
     return this.isPregap;
   }
 }

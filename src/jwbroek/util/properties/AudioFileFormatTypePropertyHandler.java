@@ -19,7 +19,6 @@
 package jwbroek.util.properties;
 
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import javax.sound.sampled.AudioFileFormat;
 
@@ -29,10 +28,6 @@ import javax.sound.sampled.AudioFileFormat;
  */
 final public class AudioFileFormatTypePropertyHandler implements PropertyHandler<AudioFileFormat.Type>
 {
-  /**
-   * The logger for this class.
-   */
-  private final static Logger logger = Logger.getLogger(AudioFileFormatTypePropertyHandler.class.getCanonicalName());
   /**
    * The singleton instance of this class.
    */
@@ -44,10 +39,6 @@ final public class AudioFileFormatTypePropertyHandler implements PropertyHandler
    */
   private AudioFileFormatTypePropertyHandler()
   {
-    AudioFileFormatTypePropertyHandler.logger.entering
-      (AudioFileFormatTypePropertyHandler.class.getCanonicalName(), "AudioFileFormatTypePropertyHandler()");
-    AudioFileFormatTypePropertyHandler.logger.exiting
-      (AudioFileFormatTypePropertyHandler.class.getCanonicalName(), "AudioFileFormatTypePropertyHandler()");
   }
   
   /**
@@ -56,13 +47,6 @@ final public class AudioFileFormatTypePropertyHandler implements PropertyHandler
    */
   public static AudioFileFormatTypePropertyHandler getInstance()
   {
-    AudioFileFormatTypePropertyHandler.logger.entering
-      (AudioFileFormatTypePropertyHandler.class.getCanonicalName(), "getInstance()");
-    AudioFileFormatTypePropertyHandler.logger.exiting
-      ( AudioFileFormatTypePropertyHandler.class.getCanonicalName()
-      , "getInstance()"
-      , AudioFileFormatTypePropertyHandler.instance
-      );
     return AudioFileFormatTypePropertyHandler.instance;
   }
   
@@ -73,10 +57,7 @@ final public class AudioFileFormatTypePropertyHandler implements PropertyHandler
    */
   public String toProperty(final AudioFileFormat.Type value)
   {
-    AudioFileFormatTypePropertyHandler.logger.entering(AudioFileFormatTypePropertyHandler.class.getCanonicalName(), "toProperty(AudioFileFormat.Type)", value);
     final String result = value.toString();
-    AudioFileFormatTypePropertyHandler.logger.exiting
-      (AudioFileFormatTypePropertyHandler.class.getCanonicalName(), "toProperty(AudioFileFormat.Type)", result);
     return result;
   }
 
@@ -88,9 +69,6 @@ final public class AudioFileFormatTypePropertyHandler implements PropertyHandler
    */
   public AudioFileFormat.Type fromProperty(final String value) throws CannotConvertPropertyException
   {
-    AudioFileFormatTypePropertyHandler.logger.entering
-      (AudioFileFormatTypePropertyHandler.class.getCanonicalName(), "fromProperty(String)", value);
-    
     final AudioFileFormat.Type result;
     
     if ("AIFC".equals(value))
@@ -117,14 +95,8 @@ final public class AudioFileFormatTypePropertyHandler implements PropertyHandler
     {
       final CannotConvertPropertyException exception = new CannotConvertPropertyException
         ("Cannot convert to AudioFileFormat.Type: '" + value + "'");
-      AudioFileFormatTypePropertyHandler.logger.throwing
-        (AudioFileFormatTypePropertyHandler.class.getCanonicalName(), "fromProperty(String)", exception);
       throw exception;
     }
-    
-    AudioFileFormatTypePropertyHandler.logger.exiting
-      (AudioFileFormatTypePropertyHandler.class.getCanonicalName(), "fromProperty(String)", result);
-    
     return result;
   }
 }

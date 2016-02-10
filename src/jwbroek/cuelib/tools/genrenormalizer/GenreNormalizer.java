@@ -20,15 +20,9 @@ package jwbroek.cuelib.tools.genrenormalizer;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class GenreNormalizer
 {
-  /**
-   * Logger for this class.
-   */
-  private final static Logger logger = Logger.getLogger(GenreNormalizer.class.getCanonicalName());
-  
   /**
    * Enum for specifying various search modes. 
    */
@@ -91,13 +85,11 @@ public class GenreNormalizer
   
   static
   {
-    GenreNormalizer.logger.entering(GenreNormalizer.class.getCanonicalName(), "static block");
     for (int index = 0; index < GenreNormalizer.genres.length; index++)
     {
       GenreNormalizer.genreSignatureToID3Index.put
         (GenreNormalizer.getGenreSignature(GenreNormalizer.genres[index]), index);
     }
-    GenreNormalizer.logger.exiting(GenreNormalizer.class.getCanonicalName(), "static block");
   }
   
   /**
@@ -105,9 +97,6 @@ public class GenreNormalizer
    */
   private GenreNormalizer()
   {
-    GenreNormalizer.logger.entering(GenreNormalizer.class.getCanonicalName(), "GenreNormalizer()");
-    GenreNormalizer.logger.warning(GenreNormalizer.class.getCanonicalName() + " should not be instantiated.");
-    GenreNormalizer.logger.exiting(GenreNormalizer.class.getCanonicalName(), "GenreNormalizer()");
   }
   
   /**
@@ -120,8 +109,6 @@ public class GenreNormalizer
    */
   private static String getGenreSignature(final String genre)
   {
-    GenreNormalizer.logger.entering
-      (GenreNormalizer.class.getCanonicalName(), "getGenreSignature(String)");
     StringBuilder builder = new StringBuilder(genre.length());
     for (int index = 0; index < genre.length(); index++)
     {
@@ -132,8 +119,6 @@ public class GenreNormalizer
       }
     }
     String result = builder.toString();
-    GenreNormalizer.logger.exiting
-      (GenreNormalizer.class.getCanonicalName(), "getGenreSignature(String)", result);
     return result;
   }
   
@@ -155,8 +140,6 @@ public class GenreNormalizer
     , final SearchMode searchMode
     )
   {
-    GenreNormalizer.logger.entering
-      (GenreNormalizer.class.getCanonicalName(), "getGenreCode(String,boolean,boolean,SearchMode)");
     int result = -1;
     
     final String inputGenreSignature = getGenreSignature(genreDescription);
@@ -227,8 +210,6 @@ public class GenreNormalizer
       result = 12;
     }
     
-    GenreNormalizer.logger.exiting
-      (GenreNormalizer.class.getCanonicalName(), "getGenreCode(String,boolean,boolean,SearchMode)", result);
     return result;
   }
 
@@ -246,8 +227,6 @@ public class GenreNormalizer
     , final boolean allowLameExtensions
     )
   {
-    GenreNormalizer.logger.entering
-      (GenreNormalizer.class.getCanonicalName(), "getGenreDescription(int,boolean,boolean)");
     String result = null;
     
     // Make sure genreCode is a valid array index, and it doesn't go into extension blocks it isn't allowed into.
@@ -259,8 +238,6 @@ public class GenreNormalizer
       result = GenreNormalizer.genres[genreCode];
     }
     
-    GenreNormalizer.logger.exiting
-      (GenreNormalizer.class.getCanonicalName(), "getGenreDescription(int,boolean,boolean)", result);
     return result;
   }
   
@@ -279,16 +256,12 @@ public class GenreNormalizer
     , final boolean allowLameExtensions
     )
   {
-    GenreNormalizer.logger.entering
-      (GenreNormalizer.class.getCanonicalName(), "normalizeGenreDescription(String,boolean,boolean)");
     final String result = GenreNormalizer.normalizeGenreDescription
       ( genreDescription
       , allowWinAmpExtensions
       , allowLameExtensions
       , GenreNormalizer.SearchMode.HEURISTIC
       );
-    GenreNormalizer.logger.exiting
-      (GenreNormalizer.class.getCanonicalName(), "normalizeGenreDescription(String,boolean,boolean)", result);
     return result;
   }
   
@@ -311,8 +284,6 @@ public class GenreNormalizer
     , final SearchMode searchMode
     )
   {
-    GenreNormalizer.logger.entering
-      (GenreNormalizer.class.getCanonicalName(), "normalizeGenreDescription(String,boolean,boolean,SearchMode)");
     final String result = GenreNormalizer.getGenreDescription
       ( GenreNormalizer.getGenreCode
           ( genreDescription
@@ -322,11 +293,6 @@ public class GenreNormalizer
           )
       , allowWinAmpExtensions
       , allowLameExtensions
-      );
-    GenreNormalizer.logger.exiting
-      ( GenreNormalizer.class.getCanonicalName()
-      , "normalizeGenreDescription(String,boolean,boolean,SearchMode)"
-      , result
       );
     return result;
   }
